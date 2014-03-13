@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[LubyRuffy的博客]]></title>
-  <link href="http://LubyRuffy.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: development,rubycategory | LubyRuffy的博客]]></title>
+  <link href="http://LubyRuffy.github.io/blog/categories/development-rubycategory/atom.xml" rel="self"/>
   <link href="http://LubyRuffy.github.io/"/>
   <updated>2014-03-13T18:17:46+08:00</updated>
   <id>http://LubyRuffy.github.io/</id>
