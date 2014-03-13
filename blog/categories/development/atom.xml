@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: development,rubycategory | LubyRuffy的博客]]></title>
-  <link href="http://LubyRuffy.github.io/blog/categories/development-rubycategory/atom.xml" rel="self"/>
+  <title><![CDATA[Category: development | LubyRuffy的博客]]></title>
+  <link href="http://LubyRuffy.github.io/blog/categories/development/atom.xml" rel="self"/>
   <link href="http://LubyRuffy.github.io/"/>
-  <updated>2014-03-13T18:34:01+08:00</updated>
+  <updated>2014-03-13T18:34:38+08:00</updated>
   <id>http://LubyRuffy.github.io/</id>
   <author>
     <name><![CDATA[LubyRuffy]]></name>
