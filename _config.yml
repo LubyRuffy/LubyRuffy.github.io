@@ -4,3 +4,9 @@ pygments: true
 
 #build生成的目标目录
 destination: public
+
+safe: false
+gems: [jekyll-assets, jekyll-categories]
+
+#对应categories插件的配置
+category_title_prefix: 分类
