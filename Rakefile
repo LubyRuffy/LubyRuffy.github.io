@@ -8,6 +8,6 @@ namespace :lubyr do
   task :gitpush do
     puts %x{git add -A}
     puts %x{git commit -m #{ENV} }
-    pust %x{git push}
+    pust %x{ git push }
   end
 end
