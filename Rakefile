@@ -5,7 +5,7 @@ namespace :lubyr do
   end
 
   desc "call git push"
-  task :gitpush do
+  task :gitpush => :b do
     puts %x{git add -A}
     puts %x{git commit -m #{ENV} }
     pust %x{git push}
