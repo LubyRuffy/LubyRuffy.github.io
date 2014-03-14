@@ -1,3 +1,6 @@
-name: Your New Jekyll Site
+name: LubyRuffy的天上人间
 markdown: redcarpet
 pygments: true
+
+#build生成的目标目录
+destination: public
