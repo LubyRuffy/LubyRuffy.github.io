@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>安全扫描工具Nmap引擎理解文档</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>安全扫描工具Nmap引擎理解文档</h2>
+<p class="meta">2014-03-12</p>
+
+<div class="post">
+        <p></p>
+<p style="text-align: center;"><span style="color: rgb(0, 176, 80);"><strong><img data-original="/imgs/22b5034ce00b3afe6639cd4ee6fefba4.png" src="/imgs/22b5034ce00b3afe6639cd4ee6fefba4.png" width="550" height="229"></strong></span></p>
+<noscript><img src="/imgs/22b5034ce00b3afe6639cd4ee6fefba4.png" width="550" height="229"></noscript>
+<p><span style="color: rgb(0, 176, 80);"><strong>本文档介绍了Nmap的系统结构及扫描流程，最后重点介绍了Nmap的NSE扫描脚本。</strong></span></p>
+<p><strong>Nmap简介</strong></p>
+<p>Nmap也就是Network Mapper，是一款网络连接端扫描软件，用来扫描网上电脑开放的网络连接端。确定哪些服务运行在哪些连接端，并且推断计算机运行哪个操作系统。它是网络管理员比用的软件之一，以及用以评估网络系统保安，nmap的核心功能有：</p>
+<p>主机发现：用于发现目标主机是否处于活动状态。Nmap提供多种检测机制，可以更有效地辩识主机。</p>
+<p>端口扫描：用于扫描主机上端口状态。Nmap可以将端口识别为开放（Open）、关闭（Closed）、过滤（Filtered）、未过滤（Unfiltered）、开放|过滤（Open|Filtered）、关闭|过滤（Closed|Filtered）。默认情况下，Nmap会扫描1000个常用端口，可以覆盖大多数基本应用情况。</p>
+<p>版本侦测：用于识别端口上运行的应用程序与应用版本。Nmap目前可以识别数千钟中应用的签名，检测数百种应用协议。而对于不识别的应用，Nmap默认会将应用的指纹打印出来，如果用于确知该应用程序，那么用户可以将信息提交到社区，为社区做贡献。</p>
+<p>操作系统侦测：用于识别目标机的操作系统类型、版本编号及设备类型。Nmap目前提供了上千种操作系统或设备的指纹数据库，可以识别通用PC系统、路由器、交换机等设备类型。</p>
+<p>防火墙/IDS规避：Nmap提供多种机制来规避防火墙、IDS的屏蔽和检查，便于秘密地探查目标机的状况。基本的规避方式包括：分片/IP诱骗/IP伪装/MAC伪装等等。</p>
+<p>NSE脚本引擎：NSE是Nmap最强大最灵活的特性之一，可以用于增强主机发现、端口扫描、版本侦测、操作系统侦测等功能，还可以用来扩展高级的功能如web扫描、漏洞发现。漏洞利用等等。Nmap使用lua语言来作为NSE脚本语言，目前的Nmap脚本库已经支持400多个脚本。</p>
+<p><strong>Nmap的工作流程</strong></p>
+<p>Nmap的执行流程简单清晰，主要分为三个阶段</p>
+<ul class=" list-paddingleft-2">
+<li>
+<p>准备阶段：在其中会执行参数解析、资源分配、基本扫描信息的输出、端口与地址列表的初始化、NSE环境准备及pre_scripts的运行等基本的准备操作。</p>
+</li>
+<li>
+<p>工作阶段：然后进入主循环，每次循环对一组目标地址进行主机发现、端口扫描、服务与版本侦测、OS侦测及脚本扫描等操作，直到所有的目标地址都被扫描完毕才推出主循环</p>
+</li>
+<li>
+<p>善后阶段：在完成所有扫描操作后，调用post-script完成相应处理，然后打印出扫描的最终结果，并释放掉分配的资源。</p>
+</li>
+</ul>
+<p>下图为Nmap的执行流程图</p>
+<p style="text-align: center;"><img data-original="/imgs/b85358e180255fba42cd6d02b20b2f29.jpg!small" src="/imgs/22b5034ce00b3afe6639cd4ee6fefba4.png" title="1.jpg"></p>
+<noscript><img src="/imgs/b85358e180255fba42cd6d02b20b2f29.jpg!small" title="1.jpg"></noscript>
+<p><strong>Nmap脚本引擎</strong></p>
+<p>Nmap提供了强大的脚本引擎（NSE），以支持Lua编程来扩展Nmap的功能。目前脚本库已经包含400多个常用的Lua脚本，辅助完成Nmap的主机发现、端口扫描、服务侦测、操作侦测四个基本功能，并补充了其他扫描能力：如执行HTTP服务详细信息的探测、暴力破解简单密码、检查常见的漏洞信息等等。如果用户需要对特定的应用做更深入的探究，可以按照NSE脚本格式便携Lua脚本来增强Nmap的扫描能力。</p>
+<p><strong>实现原理</strong></p>
+<p>NSE主要分为两大部分：内嵌Lua解释器与NSE library。</p>
+<p>解释器：Nmap采用嵌入的Lua解释器来支持Lua脚本语言。Lua语言小巧简单而且扩展灵活自身的C/C++语言融合。</p>
+<p>NSE library：为Lua脚本与Nmap提供了连接，负责完成基本初始化及提供脚本调度、并发执行、IO框架及异常处理，并提供了默认的实用的脚本程序。</p>
+<p><strong>脚本分类</strong></p>
+<p>NSE中提供的Lua脚本分别为不同的类别，根据官方网站，目前的有14中类别：</p>
+<pre class="prettyprint lang-html">auth：负责处理鉴权证书（绕开鉴权）的脚本
+broadcast：在局域网内探查更多服务开启状况，如dhcp/dns/sqlserver等服务。
+brute：提供暴力破解方式，针对常见的应用如http/snmp等
+default：这是使用-sC或A选项扫描时默认的脚本，提供基本扫描能力
+discovery：对网络进行更多的信息，如SMB枚举、SNMP查询等
+dos：用于进行拒绝服务攻击
+exploit：利用已知的漏洞入侵系统
+external：利用第三方的数据库或资源，例如whois解析
+fuzzer：模糊测试的脚本，发送异常的包的目标机，探测出潜在漏洞
+intrusive：入侵性的脚本，此类脚本可能引发对方的IDS/IPS的记录或屏蔽
+malware：探测目标机是否感染了病毒、开启了后门等信息
+safe：此类与instrusive相反，属于安全性脚本
+version：负责增强服务与版本扫描功能的脚本
+vuln：负责检查目标机是否有常见的漏洞，如是否有MS08_067</pre>
+<p>每种脚本不止属于一种类型的，具体属于哪种类型可进入官网查看 <a href="http://www.nmap.org/">http://www.nmap.org</a></p>
+<p><strong>NSE扫描流程</strong></p>
+<p>Nse脚本扫描属于主循环流程下的一个部分，其代码流程图如下</p>
+<p style="text-align: center;"><img data-original="/imgs/7cdb2b4bfc994c60e0cacdc487bea0fb.png!small" src="/imgs/22b5034ce00b3afe6639cd4ee6fefba4.png" title="2.png"></p>
+<noscript><img src="/imgs/7cdb2b4bfc994c60e0cacdc487bea0fb.png!small" title="2.png"></noscript>
+<p><strong>初始化流程</strong></p>
+<p>在命令行参数中指定脚本（–script/-sC）或指定-A选项或指定-sV选项，都会触发Nmap启动脚本引擎。其中-A选项表示全面扫描，会调用default类别的脚本扫描；而-sV选项表示应用与版本侦测，会调用Version类别的脚本，辅助侦测服务详细信息。</p>
+<p>nmap_main（）函数中，若判断需要启动脚本引擎，这首先需要调用open_nse()函数进行NSE环境的准备，首先要创建luaState（管理Lua解释器的执行的全局变量），然后调用init_main()函数进行详细的初始化过程。</p>
+<p>进入init_main()函数，首先加载Lua标准版库与Nmap的扩展库，随后准备参数环境，然后加载并执行nse_main.lua文件。</p>
+<p>nse_main.lua脚本为后续的脚本执行准备Lua环境，加载用户选择的需要调用的脚本（例如，用户–script discovery，那么会将该类别中所有的脚本加载进来），返回一个main()函数对象给init_main()，该main()是否后续脚本扫描需要的主函数，被保存在Lua的环境的注册表中。</p>
+<p>在nse_main.lua中，定义两个核心的类，Script和Thread，Script用于管理NSE脚本，当新的脚本被加载时，调用Script.new创建脚本对象，该对象被保存下来在后续的扫描过程中使用；Thread用于管理脚本的执行，该类中也包含对脚本健全性的检查（sanitycheck，如是否包含Action函数，4.4会讲到）。在脚本执行时，如果脚本之间存在依赖关系，那么会将基础的无依赖的脚本统一执行完毕，再执行依赖性的脚本。</p>
+<p><strong>脚本扫描流程</strong></p>
+<p>执行脚本扫描时，从nmap_main()中调用script_scan()函数。</p>
+<p>在进入script_scan()后，会标记扫描阶段类型，然后进入到初始化阶段返回的main()函数（来自nse_main.lua脚本中的main）中，在函数中解析具体的扫描类型。</p>
+<p>main()函数负责处理三种类型的脚本扫描：预扫描（SCRIPT_PRE_SCAN）、脚本扫描（SCRIPT_SCAN）、后扫描（SCRIPT_POST_SCAN）。预扫描即在Nmap调用的最前面（没有进行主机发现、端口扫描等操作）执行的脚本扫描，通常该类扫描用于准备基本的信息，例如到第三服务器查询相关的DNS信息。而脚本扫描，是使用NSE脚本来扫描目标主机，这是最核心的扫描方式。后扫描，是整个扫描结束后，做一些善后处理的脚本，比如优化整理某些扫描。</p>
+<p>在main()函数中核心操作由run函数负责。而run()函数的本身设计用于执行所有同一级别的脚本（根据依赖关系划分的级别），直到所有线程执行完毕才退出。</p>
+<p>run()函数中实现三个队列：执行队列（Running Queue）、等待队列（Waiting Queue）、挂起队列（Pending Queue），并管理三个队列中线程的切换，直到全部队列为空或出错而退出。</p>
+<p><strong>NSE脚本结构</strong></p>
+<p>NSE的使用Lua脚本，并且配置固定格式，以减轻用户编程负担，通常的一个脚本氛围几个部分：</p>
+<p>Description 字段：描述脚本功能的字符串，使用双层方括号表示。</p>
+<p>Comment 字段：以__开头的行，描述脚本输出格式</p>
+<p>Author   字段：描述脚本作者</p>
+<p>License    字段：描述脚本使用许可证，通常配置为Nmap相同的license</p>
+<p>Categories 字段：描述脚本所属的类别，以对脚本的调用进行管理。</p>
+<p>Rule      字段：描述脚本执行的规则，也就是确定触发脚本执行的条件。在Nmap中有四种类型的规则。</p>
+<p>A．Prerule()用于在Nmap没有执行扫描之前触发脚本执行，这类脚本脚本并不需要用到任何Nmap扫描的结果；</p>
+<p>B．Hostrule()用在Nmap执行完毕主机发现后触发的脚本，根据主机发现的结果来触发该类脚本</p>
+<p>C．Postrule用于Nmap执行端口扫描或版本侦测时触发的脚本,例如检测到某个端口时触发某个脚本执行以完成更详细的侦查</p>
+<p>D．Postrule用于Nmap执行完毕所有扫描后，通常用于扫描结果的数据提取和整理。</p>
+<p>Action   字段：脚本执行的具体内容。当脚本通过rule字段检查被触发执行时，就会调用action字段定义的函数</p>
+<p>下面以broadcast-db2-discover.nse脚本为例说明</p>
+<p><br></p>
+<pre class="prettyprint lang-plain">local nmap = require "nmap"
+local stdnse = require "stdnse"
+local string = require "string"
+local table = require "table"
+local target = require "target"
+/*本脚本需要调用的库函数，可以在Nmap/nselib/文件下查看相关函数*/
+description = [[
+Attempts to discover DB2 servers on the network by sending abroadcast request to port 523/udp.
+]]
+/*description字段：发送一个广播包，试图在网络中发现DB2服务器*/
+---
+-- @usage
+-- nmap --script db2-discover
+--
+-- @output
+-- Pre-scan script results:
+-- | broadcast-db2-discover:
+-- |   10.0.200.132(UBU804-DB2E) - IBM DB2 v9.07.0
+-- |_  10.0.200.119(EDUSRV011) - IBM DB2 v9.07.0
+-- Version 0.1
+-- Created 07/10/2011 - v0.1 - created by Patrik Karlsson&lt;patrik@cqure.net&gt;
+/*comment字段：描述了输入输出格式*/
+author = "Patrik Karlsson"
+/*author字段*/
+license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
+/*license字段*/
+categories = {"broadcast", "safe"}
+/*categories字段：此脚本的分类类型，输入broadcast和safe两种*/
+prerule = function() return true end
+/*执行脚本规则的条件，预扫描阶段执行*/
+--- Converts the prodrel server string to a version string
+--
+-- @param server_version string containing the product release
+-- @return ver string containing the version information
+/*解释下面函数的输入输出内容*/
+local function parseVersion( server_version )
+       local pfx = string.sub(server_version,1,3)  /*获取server_version字符串的第一到第三个字符*/
+       if pfx =="SQL" then
+              localmajor_version = string.sub(server_version,4,5)    /*如果pfx字符串为SQL，则major_version获取server_version版本的第四到第五个字符*/
+ 
+              -- strip theleading 0 from the major version, for consistency with
+              --nmap-service-probes results
+ 
+              ifstring.sub(major_version,1,1) == "0" then
+                     major_version= string.sub(major_version,2)   /*若major_version字符串首字母为0，则去除*/
+              end
+              localminor_version = string.sub(server_version,6,7) /*minor_version获取server_version字符串的第6到第7个字符*/
+              local hotfix =string.sub(server_version,8)  /*hotfix获取server_version字符串的第8个字符*/ 
+              server_version =major_version .. "." .. minor_version .. "." .. hotfix   /*给server_version字符串附值*/
+       else
+              return"Unknown version"
+       end
+       return ("IBM DB2v%s"):format(server_version)  /*函数返回值*/
+end
+ 
+action = function()   /*脚本执行函数*/ 
+       local DB2GETADDR ="DB2GETADDRSQL09010"
+       local socket =nmap.new_socket("udp")
+       local result = {}
+       local host, port ="255.255.255.255", 523
+/*定义字符类型，并附初始值*/ 
+       socket:set_timeout(5000) /*若超过5s，数据发送不出去，则发送失败*/
+       local status =socket:sendto( host, port, DB2GETADDR ) /*调用socket:sendto函数,可以在nselib/nmap.nsedoc文档下查看其返回值，此处是发送一个广播包，到523端口*/ 
+       if ( not(status) ) thenreturn end    /*若发送失败，则终止操作*/
+       while(true) do
+              local data
+              status, data =socket:receive()
+              if( not(status) )then break end  /*若返回信息错误，则终止操作*/
+             
+              local version,srvname = data:match("DB2RETADDR.(SQL%d+).(.-)")  /*根据返回的信息，提取version和srvname字段*/
+              local _, ip
+              status, _, _, ip,_ = socket:get_info()
+              if ( not(status)) then return end  /*若远程套接字接口返回信息错误，则终止操作*/
+             
+              iftarget.ALLOW_NEW_TARGETS then target.add(ip)      end /*若target.ALLOW_NEW_TARGETS函数为真，则在Nmap扫描队列中添加此IP*/
+              if ( status )then
+                     table.insert(result, ("%s - Host: %s; Version: %s"):format(ip, srvname,parseVersion( version ) )  )    /*在result数组中插入相关信息*/
+              end
+       end
+       socket:close()  
+       returnstdnse.format_output( true, result )  /*输出扫描结果*/
+end</pre>
+<p><strong>参考文献</strong></p>
+<p>官网地址：<a href="http://www.nmap.org/">http://www.nmap.org/</a></p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>
