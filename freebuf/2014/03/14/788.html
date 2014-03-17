@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>APT防御的他山石—思科内部安全团队解读APT</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>APT防御的他山石—思科内部安全团队解读APT</h2>
+<p class="meta">2014-03-14</p>
+
+<div class="post">
+        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    近日FireEye上市大热，360公司也要推出APT防御产品。在APT的战火已经烧到天朝之际，且看看思科自家的安全防御团队CSIRT（response to cyber security incidents for Cisco-owned businesses）在2011年时对APT的认识与理解，其中对APT的防御的总体思路，与当下Mandiant、FireEye等炙手可热的APT公司的策略不谋而合。当时概念时至今日仍然一针见血。</strong></span></p>
+<p>    在久远的那个年代，人们想窃取企业的秘密是需要“物理接触”潜入偷取数据，想想“潜伏”连续剧里头，“余则成”用个迷你的照相机拍下国军的XXX名单。然而，互联网时代已经颠覆了这个久远年代的概念。要曝光组织的敏感秘密，已经不再需要物理接触了。今天，这个战线已经沿及到所有的计算机终端、桌面电脑、移动手机、web服务器和网络设备——所有整个相连的网络。这个互联网时代已经把坏人以及他们的目标以新的方式和不可预见的趋势绑在一起了。而使事情糟糕的是，通常这个网络生态系统并不如以前物理环境那么好的被保护起来。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>无产品可防APT</strong></span></p>
+<p>    谈到APT，首先，这里需要先弄清楚APT的神秘何在。如果任何人想向你的组织推销一个软件或者硬件去解决APT，那么他们根本不懂得APT，或者不真正的懂得计算机是怎么工作的、或者他们在说谎来推销——也很可能三者都是。如果是有一种方法可通过部署个ASIC的硬件、或者软件的signature去识别、检测APT，那不是高级持续威胁（Advanced Persistent Threat），那只是个EDPTD（Easy to Detect Persistent Threat for Dummies）容易被识别的蠢货持续攻击，或者只是个烦人的持续攻击而已。很不幸的是，很多安全销售人员正乘着这种攻击的极端性和复杂性，去销售不奏效的的APT防御产品。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>如何防？</strong></span></p>
+<p>    当时2011年最好的阐述APT的文档莫过于当时的“Google Hack”和“Aurora”，这些APT中使用了多个未知的，无法识别的的0day，并且在企业里，隐藏在众多的传统恶意软件里面。当这些神秘的APT曝光于公众后，众多CSIRT的成员都在议论，可以做点什么。其中有一种声音“我们总是把受感染的机器拿去重装一下，以降低风险和影响。而现在，我们更关心的是此举可能已经销毁了唯一的线索，或者更深入挖掘系统问题的证据。而这个系统问题除非被修复，要不仍然会一次又一次出现。到底一台需要深入调查取证和监控的受APT攻击主机跟一台扔去重装的普通感染机器有什么不同？怎么可以区分出来？”这个答案至关重要，但是可笑的是像很多好的和重要的问题一样，是没有一个简单的答案可以回答的。正如前文所述，是不存在通过一个魔法般的软件可以解决这个难题，而且通常非常难区分普通的恶意软件和更高级的攻击。而APT就像其他很棘手的问题一样，解决方案可能很复杂，但是解决方法论却很简单——识别出你可见的项目，并执行之。（ identify what your available options are and then execute）</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>重点人群，重点跟踪</strong></span></p>
+<p>    为了阐明这个方法论，接下来将有一系列的例子，在思科平均起来有12万台windows机器连接到桌面网络，里面肯定有一定比例的机器饱受恶意软件的折磨。当然CSIRT团队是无法对所有受感染的机器都进行深入的取证分析，网络记录及分析。然而不代表不能对其中一部分做分析。3年前（2008年）CSIRT就定制了一些程序，对一些筛选过的员工进行深入的网络分析和系统取证工作，而这些员工都是被认为可能成为APT攻击目标的。CSIRT团队看到这些人当中有一些访问过更多有趣的数据。对这些人群，CSIRT团队进行完全的跟踪，和更多高级的监控和调查工作。而这已经成功发现和阻止了一些APT性质的活动。但是是否发现和阻止了所有的这些活动？很不幸的答案是“没有”。CSIRT团队有了很有价值的数据，以及记录了这些高级和持续性的威胁。遗憾的是CSIRT团队中断了部分的尝试，但并没有完全阻止到这些攻击。</p>
+<p>    另一个例子，当今很多APT攻击都是用PDF来展开。这个攻击手法有很高的成功率，如果你有能力，可以抓取和储存起所有通过email进入你们公司的PDF文件，当然要连同这些email通信的SMTP头信息。定期的，自动化的进行额外的检查，这种检查需要比常规的防病毒方案更进一步，以帮助检查恶意PDF。（例如PDF是adobe的零日漏洞利用，内含恶意链接自动访问恶意链接）。即使常规的防病毒无法检测盒阻止这些威胁，这些“威胁”往往可以在漏洞利用的关键字作修改，或者运行多个杀毒引擎进行扫描免杀。而这里只是两个简单的例子。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>大绝招</strong></span></p>
+<p>    其实，大多数公司能够检测发现和响应这些或者其他一些高深的攻击，是全凭有效的部署了一系列很好被理解的计算机安全事件响应“柱子”。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    首先，</strong></span>你必须要有能力“生产”、收集和查询日志，越多越好，起码要包括从安全角度认为重要的那些日志。例如，主机日志、proxy日志、认证日志、属性日志等。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    其次，</strong></span>你需要DPI（deep packet inspection)深度包检测来覆盖你网络中重要的关键节点。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    第三，</strong></span>你需要有能力快速的查询你网络的中的连接或者流量情况，可以通过netflow或者类似netflow之类的服务来覆盖所有网络的关键节点。</p>
+<p style="text-align:center"><img data-original="/imgs/29c0c7185ccc32b20f618fe86334c1bf.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="1.jpg"></p>
+<noscript><img src="/imgs/29c0c7185ccc32b20f618fe86334c1bf.jpg!small" title="1.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>    第四，</strong></span>分析人员。对于这三个重要的防御工具（日志、DPI、连接记录），你要保证有查询历史记录，查询实时记录，以及在未来事件中进行告警的能力。而把这些都运作起来，你需要分析人员和调查人员进行大量的监控和深入的调查工作。这个团队以及他们的监控基础设施必须要有快速的应变能力适应当今的威胁。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    第五，</strong></span>情报共享。在尽可能的完成以上所有的工作，你还需要和其他组织发展起可靠可信的关系，来共享安全事件情报。这是个很长的过程，需要你主动的投入资源和用心经营。一个比较好的开始就是加入像FIRST.org这样的组织。FIRST的宣言是帮助减少这种类型的信息共享过程中的障碍。当所有以上这些“柱子”能够以有意义（meanningful）的方式聚合到一起。一旦你在潜在的共享消息当中获得了情报，必须强调你需要立即快速、敏捷的组织起这些情报。并确保你已经完成，百分之一百的覆盖了上面提到的工具，来进行调查、行动。而这些就是你能够为组织对抗APT所能做最重要的事情。</p>
+<p style="text-align:center"><img data-original="/imgs/2ebd7987f0c7ae063b75d4b21db191ab.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="2.jpg"></p>
+<noscript><img src="/imgs/2ebd7987f0c7ae063b75d4b21db191ab.jpg!small" title="2.jpg"></noscript>
+<p>    最后，你需要在组织内或者雇佣一些外部的专家进行恶意软件分析。例如前面提到的那些PDF样本，一旦你发现了其中的一些恶意样本，你需要对它进行解剖、分析，了解它打算做什么，谁是被攻击的目标，它曾经连接到哪里。这些分析都提供了最有价值的情报，展示了你的公司今天如何被攻击的。你就可以把这些相关的情报，立即传回到上面所说的监控基础设施中。这些一直部署在你的企业网络中的防御监控设施将可以让你完整的理解这个攻击历史的影响，以及立即知道其他可能类似的感染情况。并且可以对即将发生的攻击敲响警钟。但是，不得不说的是由于APT的天然特性总是会努力保持攻击的唯一性，下次可能就是不一样的攻击特征了，因此任何的情报都会有个有效期。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>你会是APT的目标吗？</strong></span></p>
+<p>    关于APT，另一个我经常听到的问题是“我怎么知道我的企业组织是否受APT影响？”去证明那些有宏厚资金支持的攻击入侵行为的证据往往很难发现，如果要说出根源的攻击者，那就更加难了。那个连到未知网站的连接？它是我们看到恶意软件最开始的连接。还有那些常见的垃圾邮件证据和其他犯罪集团的僵尸网络，又或者是更一个更严重的——公司数据成为了目标被瞄准？这个问题的答案同样是个很不幸的答案。正由于前面所说的现在社会已经不是“余则成”的年代了，网络无处不在的连接着，其中恶意软件盛行，软件/硬件漏洞众多，如果你的企业有一些电子形式的东西可以被卖掉，又或者任何经济利益，那么很不幸的告诉你，你正被瞄准成为目标了。那些精准和持续的攻击直接的指向有价值的数据。在这里举个例子，埃克森多年来勘探石油和天然气的及其昂贵的数据被公开讨论，这个例子就是高级持续攻击窃取的宝贵一棵，这样的数据，无论是谁拿到都是无价之宝。</p>
+<p>    另一个经常听到的问题是，“谁要为这些APT的攻击负责？”很不幸的对于企业来说，这个问题的答案是，如果没有更多真实的资源，那么承担APT法律责任的后果将比想象中要轻微。但愿这种形势会改变，但愿日后这种类型的攻击者最终会得到惩罚。准确的提取出攻击者往往很难。侵略者的名单已经越来越长（这种情况从这几年来已被公开的为大众所知的攻击组织数量可见一斑）。从HBGary的email被泄露事件看，出现了专业的APT攻击服务已经不以为奇了。</p>
+<p>    综上所述，APT攻击不容易被察觉，而且比想象中要普遍和严重。公司、组织都面临着极高的风险，需要高级的监测能力。通过这个文章想表达的是如果你看不到你的组织受APT攻击，那并不是因为它没有发生或者你很安全。而且你应该好好重新评估一下你的监测能力，目前应对APT的工艺水平还不涉及到那些神奇的软件和硬件解决方案，（当然这是2011年时候的观点，那时候防御APT的产品还没有现在这么成熟，但另一方面看，比照起国内目前状况，大宋国的2013年的APT产品等于大辽国的2011年的形势其实也不为过。）而是更多的有赖于提出正确的问题和有能力有效的利用现有的监测工具（例如logging、netflow、IDS、DPI等）。同时事件响应无法去解决APT的问题，但是非常重要和必须。你能有更好的架构去控制好你数据，你将减少你被入侵暴露的风险。这个问题的当务之急是当前的战线都是在公司层面的，但是只有结合公开的和私人的合作关系，拉通到国家层面的影响后果，才能真正解决APT的长远的防御问题。</p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

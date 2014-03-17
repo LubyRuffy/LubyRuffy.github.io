@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Linux下由于子进程继承引起的安全问题分析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>Linux下由于子进程继承引起的安全问题分析</h2>
+<p class="meta">2014-03-17</p>
+
+<div class="post">
+        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>最近我在Linux上利用</strong></span><a href="http://www.cert.org/vuls/discovery/bff.html" target="_blank" title="" data_ue_src="http://www.cert.org/vuls/discovery/bff.html" textvalue="CERT BFF" style="color: rgb(38, 38, 38); text-decoration: underline;"><span style="color: rgb(38, 38, 38);"><strong>CERT BFF</strong></span></a><span style="color: rgb(38, 38, 38);"><strong>研究一个PoC。我之前有大量在Windows上写PoC的经验，所以认为将这种技能扩展到不同平台上是个不错的想法。可是，当我获得指令指针的控制权后，却发现几乎可以毫无障碍地使代码执行。</strong></span></p>
+<p>除了对<a href="https://www.cert.org/blogs/certcc/2013/09/one_weird_trick_for_finding_mo.html" target="_blank" title="" data_ue_src="https://www.cert.org/blogs/certcc/2013/09/one_weird_trick_for_finding_mo.html" textvalue="Metasploit字符串做一个BFF最小化">Metasploit字符串做一个BFF最小化</a>之外，不需要额外的工作，就可以很容易知道哪些字节在我的控制之下，以及怎么执行到那里：</p>
+<p style="text-align:center"><img data-original="/imgs/df8f5ded7a65973cda8e5a49b8c72071.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" title="1.png"></p>
+<noscript><img src="/imgs/df8f5ded7a65973cda8e5a49b8c72071.png!small" title="1.png"></noscript>
+<p>运行起来之后，就控制了EIP(0×61626364 = "abcd")，得到一个Metasploit字符串模式，以及指向那里（EAX）的寄存器。下面我们看看这个位置的内存保护情况：</p>
+<p style="text-align:center"><img data-original="/imgs/89863aa433e60291e6d9576cd6752ac9.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" title="2.png"></p>
+<noscript><img src="/imgs/89863aa433e60291e6d9576cd6752ac9.png!small" title="2.png"></noscript>
+<p>不会是真的吧，这部分堆内存居然有读、写和执行权限！任意一块内存既有可写权限又有可执行权限都是一件非常危险的事情。为什么呢？以上述这种情况为例，其允许攻击者将代码跳转到这里，并执行这些被系统认为是数据的字节。如果一块内存区域被标记为可执行，<a href="http://en.wikipedia.org/wiki/NX_bit#Linux" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/NX_bit#Linux" textvalue="NX">NX</a>是不会起作用的。（参考OpenBSD的<a href="http://en.wikipedia.org/wiki/W%5EX" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/W%5EX" textvalue="W^X">W^X</a>策略。）</p>
+<p>我们需要花点时间找出为什么这块堆内存是可执行的。我使用的平台是UbuFuzz，基于Ubuntu 12.04.01，内核是x86 3.2.0。该平台上，如果指定一块可执行栈，例如用gcc编译时指定-z execstack选项，进程的<a href="http://lxr.free-electrons.com/source/fs/binfmt_elf.c?v=3.2&amp;a=x86#L718" target="_blank" title="" data_ue_src="http://lxr.free-electrons.com/source/fs/binfmt_elf.c?v=3.2&amp;a=x86#L718" textvalue="READ_IMPLIES_EXEC">READ_IMPLIES_EXEC</a>属性就会被设置。正如其名，如果该位被设置，那么可读的内存区域默认也同时变成可写的了，包括堆内存（heap）。</p>
+<p>问题是在崩溃进程的ELF头部并没有指定可执行栈：</p>
+<pre class="prettyprint lang-html">  GNU_STACK     0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x4</pre>
+<p>如果进程在编译时没有指定，默认是不会包含可执行栈的，但要是指定了READ_IMPLIES_EXEC特性会怎么样呢？而且它也没有显式调用<a href="http://man7.org/linux/man-pages/man2/personality.2.html" target="_blank" title="" data_ue_src="http://man7.org/linux/man-pages/man2/personality.2.html" textvalue="personality()">personality()</a>函数。这就是比较奇怪的地方。如果崩溃的进程不是从终端直接调用的，而是由另一个不同的应用程序生成的，会怎么样呢？下面我们看看其继承自父进程的栈属性：</p>
+<pre class="prettyprint lang-html">  GNU_STACK     0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4</pre>
+<p>罪魁祸首找到了！其同时也证明了在x86 Linux平台，READ_IMPLIES_EXEC属性位会从父进程传递给子进程。这种行为是架构决定的，因为在amd64架构的平台上，子进程就不会继承READ_IMPLIES_EXEC特性。但在所有架构的平台上，用来禁止ASLR的ADDR_NO_RANDOMIZE标记都会被子进程继承。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>总结</strong></span></p>
+<p>在vanilla Linux平台，对于任意给定的进程，很难静态地确定其启用了哪些漏洞防护措施。在目前流行的X86平台的Linux上，任何正在运行的进程都可能没有启用NX保护，只是因为其父进程没有启用相应的保护。</p>
+<p>[via <a href="https://www.cert.org/blogs/certcc/post.cfm?EntryID=190" target="_blank" title="" data_ue_src="https://www.cert.org/blogs/certcc/post.cfm?EntryID=190">cert</a>]</p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>说一道简单的BCTF题 – 分分钟而已</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>说一道简单的BCTF题 – 分分钟而已</h2>
+<p class="meta">2014-03-13</p>
+
+<div class="post">
+        <p></p>
+<p>今天闲的没事，刚好看到FB有两三篇讲BCTF的，也来说一道题目，就是WEB100的那道。如图所示：</p>
+<p style="text-align:center"><img data-original="/imgs/8fb3c4bb22dd6d62edeb496090b24054.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="题目.jpg"></p>
+<noscript><img src="/imgs/8fb3c4bb22dd6d62edeb496090b24054.jpg!small" title="题目.jpg"></noscript>
+<p>首先跳转到链接看一看，嗯。。。貌似进不去了。。。那就只能文字性的描述一下了，进去之后是4个人名，点击之后会有跳转，显示当前人名，分别是H.shao，Angelia，Lamos，Ray。可惜没咱们需要的Alice。</p>
+<p>开始分析，首先F12看了看源码、Resources、Network那些，没什么发现。。。不过也很正常，然后看到了url里面的id，感觉是md5加密的：</p>
+<pre class="prettyprint lang-html">e958c26cb69fb763faeb2849076d78f4
+20e8c6b8771ed6f565e6c251b319519a
+07b5511fb9e036990211eff978b1ee16
+8d44a8f03ab5f71ce78ae14509a03453</pre>
+<p>然后放搜md5里面查了查，还真解出来了：</p>
+<pre class="prettyprint lang-html">H.shao545
+Angelia689
+Lamos508
+Ray300</pre>
+<p>根据经验，咱们要找的Alice的id应该也是Alice加上3位数字的md5机密值。那就爆破呗。写了一小脚本：</p>
+<pre class="prettyprint lang-php">&lt;?php
+for($num=0;$num&lt;10;$num++)
+{
+$string1="Alice00".$num;
+echo md5($string1)."&lt;br&gt;";
+}
+for($num1=1;$num1&lt;10;$num1++)
+{
+for($num=0;$num&lt;10;$num++)
+{
+$string1="Alice0".$num1.$num;
+echo md5($string1)."&lt;br&gt;";
+}
+}
+for($num=100;$num&lt;1000;$num++)
+{
+$string1="Alice".$num;
+echo md5($string1)."&lt;br&gt;";
+}
+//echo md5("Alice000");
+?&gt;(代码略丑，大牛轻喷。。。括弧笑)</pre>
+<p>跑出来大概就是这样的：<br></p>
+<p style="text-align:center"><img data-original="/imgs/132081f511aa018c5335e8b2ad15823f.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="字典.jpg"></p>
+<noscript><img src="/imgs/132081f511aa018c5335e8b2ad15823f.jpg!small" title="字典.jpg"></noscript>
+<p>然后放burp里面就开始爆破了，当时没截图，现在也进不去，所以没图了。好像跑出来就是Alice475还是478，不太记得了。。。也可能两个都是错的，但思路就是这样。</p>
+<p>然后提交呗，结果这还只是开始。。。进到Alice页面后，又给一个id，再跳转，然后是一个BT5的界面，看了看源代码，里面有一行&lt;!– key= OUR MOTTON–&gt;。翻译过来大概就是我们的口号/宣言吧，难道是没有蛀牙？呵呵，开个玩笑。。。google了一下BT5的宣言，进官网，title就是：</p>
+<p style="text-align:center"><img data-original="/imgs/727697713644b178fae682b47e218379.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="BT5.jpg"></p>
+<noscript><img src="/imgs/727697713644b178fae682b47e218379.jpg!small" title="BT5.jpg"></noscript>
+<p>The quieter you beconme，the more you are able to hear…</p>
+<p>看似找到了答案，实则才是最痛苦的开始，期间的辛苦不足为外人道，只能告诉大家。最后提交的Key形式为：</p>
+<p>THE QUIETER YOU BECOME THE MORE YOU ARE ABLE TO HEAR。没有那个逗号！！！</p>
+<p>还是burp或者Fiddler提交之后，页面刷新到了百度(不愧是百度赞助的)，发现刷新的时候有一个跳转，用火狐抓抓包，然后找到了一个flag-in-config.php.bak。改url提交，下载了一个config.php.bak文件，打开一看，很熟悉嘛，js加密：</p>
+<p style="text-align:center"><img data-original="/imgs/847d60ed1053ac15a4aa4523e8c4dca5.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="JS.jpg"></p>
+<noscript><img src="/imgs/847d60ed1053ac15a4aa4523e8c4dca5.jpg!small" title="JS.jpg"></noscript>
+<p>直接chrome控制台，解出来了：</p>
+<p style="text-align:center"><img data-original="/imgs/392287b171dda3c2aa29a9972eb90cd8.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="js2.jpg"></p>
+<noscript><img src="/imgs/392287b171dda3c2aa29a9972eb90cd8.jpg!small" title="js2.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>BCTF{fuck_the_guys_who_are_exchanging_fl4g_you_are_destroying_this_game}</strong></span></p>
+<p>两小时就搞了一道题。。。心碎。。。<br></p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

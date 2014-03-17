@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Facebook存在中间人攻击隐患</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>Facebook存在中间人攻击隐患</h2>
+<p class="meta">2014-03-17</p>
+
+<div class="post">
+        <p></p>
+<p><strong>写在前面</strong></p>
+<p>这次的漏洞其实和前一阵爆出的，<a href="http://securityaffairs.co/wordpress/19749/hacking/facebook-open-url-redirection.html" target="_self" title="">Open URL Redirection</a>漏洞相似，并不能直接对Facebook的用户造成危害。这次攻击的描述主要针对于盗取用户access token，可见移动端的安全也越来越被研究者和黑可关注。</p>
+<p><strong>正文</strong></p>
+<p>埃及渗透测试工程师Ahmed Elsobky发现facebook存在一个严重漏洞，这个漏洞可以造成用户的access token被泄露。黑客使用中间人攻击的手法利用这个漏洞。</p>
+<p>Facebook的安全团队声称：“我们在不久前也收到过关于这个漏洞的其他安全团队的报告，之后，在我们的官方应用上我们修正了这个漏洞，而其他应用想要避免这个漏洞，必须使用HTTPS来进行连接。不过能做到这样非常困难。</p>
+<p>与之前我们在Facebook发现的Open URL Redirection url 漏洞类似，这个漏洞影响到facebook的一些第三方APP,使用这些应用的用户的access token都会受到威胁，利用这个漏洞黑客可以获取到access token以及一些关于access token的信息（比如，过期时间，由哪个APP生成）。取得access token之后，黑客可以得到受害者数据的访问权限，并可以在受害者不知情的情况下模拟用户操作。<strong>Ahmed Elsobky 在2013年9月5号报告了这个漏洞，这个漏洞的利用前提如下。</strong></p>
+<p>	（1）受害者必须使用了Fackbook的APP，而且这个APP是预授权的。</p>
+<p>	（2）受害者必须已经登陆，且攻击者有条件发动中间人攻击。</p>
+<p>我们假设受害者在使用Skype，攻击者在受害者浏览的页面中插入如下代码。就可以获取到受害者的access token。</p>
+<pre class="prettyprint lang-html">&lt;iframe src=https://www.facebook.com/dialog/oauth?redirect_uri=http%3A%2F%2Flogin.skype.com%2Flogin%2Foauth%3Fapplication%3Daccount&amp;client_id=260273468396&amp;response_type=token width=0 height=0&gt;</pre>
+<p>facebook URL中的redirect_uri参数会根据它的值来进行一个302转跳，只要把access token附带到url中一起传输即可。</p>
+<p>	一般情况下攻击者可以使用这条语句作为redirect_uri的参数</p>
+<pre class="prettyprint lang-html">http%3A%2F%2Fwww.facebook.com%2Fconnect%2Flogin_success.html&amp;response_type=token&amp;client_id=[app_id]</pre>
+<p>这样的话虽然前面使用了HTTPS但是，后面参数构成的转跳地址却是HTTP。</p>
+<p style="text-align: center;"><img data-original="/imgs/478e4fba3afa568dd1a26cf4ae86174c.jpg!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" title="hacking-facebook-access-token.jpg"></p>
+<noscript><img src="/imgs/478e4fba3afa568dd1a26cf4ae86174c.jpg!small" title="hacking-facebook-access-token.jpg"></noscript>
+<p>用户可以使用HTTPS来预防中间人攻击。Ahmed Elsobky也给用户提了几条建议</p>
+<p>	（1）使用“HTTPS Everywhere” 浏览器插件。(https://www.eff.org/https-everywhere)</p>
+<p>	（2）不要使用不支持SSL的应用，因为HTTPs基于SSL。</p>
+<p><a href="http://securityaffairs.co/wordpress/22970/hacking/facebook-access-token-mitm.html" target="_blank" title="" data_ue_src="http://securityaffairs.co/wordpress/22970/hacking/facebook-access-token-mitm.html">原文链接</a></p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

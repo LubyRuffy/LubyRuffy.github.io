@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>记BCTF之旅—真假难辨</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>记BCTF之旅—真假难辨</h2>
+<p class="meta">2014-03-14</p>
+
+<div class="post">
+        <p></p>
+<p>我也来凑个热闹，解析一道BCTF——真假难辨。</p>
+<p style="text-align:center"><img data-original="/imgs/5c6151ab76aa7e928c9a54b58745a65f.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="_X{D5H2W`1VM6}5{ZC}T8[8 (2).jpg"></p>
+<noscript><img src="/imgs/5c6151ab76aa7e928c9a54b58745a65f.jpg!small" title="_X{D5H2W`1VM6}5{ZC}T8[8 (2).jpg"></noscript>
+<p>首当其冲的便是一个偌大的you must login at host computer，看来得想办法绕过了。</p>
+<p>抓包！上burp suite神器。</p>
+<p style="text-align:center"><img data-original="/imgs/1dee6ea6721c79049daf0ff87e0f520d.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="O{HB~105I([I9}YONO_3FH3.jpg"></p>
+<noscript><img src="/imgs/1dee6ea6721c79049daf0ff87e0f520d.jpg!small" title="O{HB~105I([I9}YONO_3FH3.jpg"></noscript>
+<p>出题者故意很明显的给了我们一个“ip=。。。”，看来这里是突破口，恩。试试，果然127.0.0.1是正解。</p>
+<p>有一个偌大的对话框，这里笔者卡了很久，还是不够敏锐啊，最后竟然是admin admin。</p>
+<p>同时仍然不要忘了，抓包，改ip。注意！！</p>
+<p>接下来，映入眼帘的还真如题目所说，是一个游戏，不过这是笔者玩过的最无节操的僵尸游戏了~僵尸这也太牛了，明显者不是给人玩的，是给僵尸玩的:)</p>
+<p style="text-align:center"><img data-original="/imgs/fc84ae0584e42303a26a00b23fa846a3.jpg!small" src="http://www.freebuf.com/buf/themes/freebuf/images/grey.gif" title="_$_4H(J]`FTN63$%`~EYQ`K.jpg"></p>
+<noscript><img src="/imgs/fc84ae0584e42303a26a00b23fa846a3.jpg!small" title="_$_4H(J]`FTN63$%`~EYQ`K.jpg"></noscript>
+<p>出题者不给咱玩游戏，那就一竿子捅到底，直接上源码，源码搜了下“BCTF”，直接定位flag，然后顺藤摸瓜，理清脉络 ，flag也就自然算出来了嘛~</p>
+<p>笔者这里去掉了大部分无关的代码，只留下了flag部分核心的代码。</p>
+<pre class="prettyprint lang-js">var player = function(options) {
+	this.moveSpeed = 5;
+	this.life=5;
+	var authp = function(a, b) {
+		var c = 0xfff;
+		var d = 0xfff;
+		var e = a - b;
+		var f = a + b;
+		var g = a * b;
+		c = c * d;
+		c += c * d;
+		d = d * e + f * g;
+		g = f | d;
+		g = g ^ f;
+		f = g * f;
+		return f;
+	}
+	this.pe = authp(this.moveSpeed, this.life);}var createGhost=function(x,y){
+	var newGhost=new ghost({width: 115, height: 136, x:x, y:y });
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostRunLeft",srcObj.ghostRunLeft,{width:1265,height:136,frameSize:[115,136],loop:true}));
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostRunRight",srcObj.ghostRunRight,{width:1265,height:136,frameSize:[115,136],loop:true}));
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostDieRight",srcObj.ghostDieRight,{width:4320,height:176,frameSize:[240,176],frameDuration:150}));
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostDieLeft",srcObj.ghostDieLeft,{width:1800,height:254,frameSize:[225,254],frameDuration:150}));
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostHurtLeft",srcObj.ghostHurtLeft,{width:816,height:157,frameSize:[204,157],frameDuration:150,onFinish:function(){this.relatedSprite.recover();}}));
+	newGhost.addAnimation(new cnGame.SpriteSheet("ghostHurtRight",srcObj.ghostHurtRight,{width:816,height:157,frameSize:[204,157],frameDuration:150,onFinish:function(){this.relatedSprite.recover();}}));
+	return newGhost；	
+	}var authnum = function(key, num){
+	var list = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g');
+	key = "BCTF{" + key + "|";
+	for(var i = 0; i &lt; num; i++)
+	{
+		key += list[i%7];
+	}
+	key = key + "}";
+	return key}var ghost = function(options) {    this.init(options);
+	this.moveSpeed=20;
+	this.life=20;
+	var auth = function(a, b) {
+		var d = a;
+		var e = b;
+		var a = 0xfff;
+		var b = 0xff;
+		var c = 1024;
+		a = a &lt;&lt; 2;
+		a = a &lt;&lt; 6;
+		b = a + b;
+		c = a + b + c + d + e;
+		return c;
+	}
+	this.gh = auth(this.moveSpeed, this.life);}var gameObj = {
+	initialize:function(){
+		this.key = ""
+		this.deadghost = 0;
+
+
+		var newGhost=createGhost(740,1064);
+		this.key += newGhost.gh;
+		this.key += "%"+this.player.pe;
+
+	update:function(duration){
+		if(cnGame.collision.col_Between_Rects(this.player.getRect(),this.end.getRect())){
+			if(this.deadghost == 10){
+				this.key = authnum(this.key, this.deadghost);
+				alert("The Key is:" + this.key);
+			}</pre>
+<p>大概说下脉络：</p>
+<p>首先可以看到flag分了两部分，一部分是key，它是传进来的，另一部分是authnum这个函数算出来的。所以重点在key，</p>
+<p>顺着函数的调用，我们会发现key有两次更新，第一次更新是在this.key += newGhost.gh;第二次是在this.key += "%"+this.player.pe。脉络理清了，剩下的就是算了。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>BCTF{2097959%2400|abcdefgabc}</strong></span></p>
+<p>over~</p>
+<p>大牛勿喷！</p>
+<p>感谢BCTF团队提供的平台！</p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

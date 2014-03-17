@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>汽车黑客：没有Security就没有Safety</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
+            <a class="extra" href="/">首页</a>
+            <a class="extra" href="/category.html">分类列表</a>
+          </div>
+
+          <h2>汽车黑客：没有Security就没有Safety</h2>
+<p class="meta">2014-03-13</p>
+
+<div class="post">
+        <p></p>
+<h2><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>简介</strong></span></h2>
+<p><span style="color: rgb(38, 38, 38);"><strong>“汽车黑客”（car hacking） 的话题正越来越多地在媒体和安全公司之间讨论。曾几何时，黑客利用手中的工具黑掉一辆汽车的画面还只是出现在电影中，现如今已经在现实中成为可能，且成为了人们开始担忧的问题，这正是本文要讨论的话题。</strong></span></p>
+<p>对车辆进行大规模技术引进的影响之一就是汽车黑客的出现。汽车黑客（car hacking）这一术语特指可以破坏汽车中的某些高科技组件（technological components）的黑客。</p>
+<p>现代汽车（译者注：这里的现代指当今的、现在这个时代的，不是特指某品牌，下同）通常包含超过50个电子控制单元（electronic control units, ECUs），用来与内部网络交换数据。汽车的安全依赖于不同ECU之间的实时交互，如撞击预警，防抱死制动等等。</p>
+<p>前不久，著名黑客Charlie Miller与IOActive安全情报总监Chris Valasek证实了通过黑进车辆控制系统从而达到对汽车的某些控制已经成为可能。</p>
+<p>现代汽车多是由控制车辆不同功能的大量智能组件组成的复杂系统，大规模的电子产品引进，也对汽车的整体安全产生了一些影响。</p>
+<p>“在1970年代初，车载计算机或称电子控制单元（Electronic Control Units，ECU）的引入，帮助解决了一些燃料效率与排放等问题，进而进化成车内娱乐系统、安全控制与增强汽车功能等方方面面不可或缺的部分。</p>
+<p>本文从一名安全研究人员的角度，测试两款汽车的控制系统。首先介绍一些分析控制区域总线（Controller Area Network bus，CAN bus）的必要工具和软件。其次，我们会用软件演示如何对CAN总线读写数据。</p>
+<p>之后，我们会演示如何通过连接到ODB-II的设备，重放一些专有消息来执行汽车上一些危险的功能，如刹车和转向。最后，我们会讨论读取和修改安装在现代汽车上的ECU的固件，“摘自2013年8月在BlackHat安全会议上的相关演示。</p>
+<p>安全专家的目的是以一名黑客的角度去探索汽车的安全问题，并证明能够利用多种缺陷与车辆的主要组件直接交互，包括制动系统与方向控制系统。</p>
+<p>视频地址：<a href="https://www.youtube.com/watch?feature=player_embedded&amp;v=ws8lSobe-sk" target="_blank" title="" data_ue_src="https://www.youtube.com/watch?feature=player_embedded&amp;v=ws8lSobe-sk" textvalue="https://www.youtube.com/watch?feature=player_embedded&amp;v=ws8lSobe-sk">https://www.youtube.com/watch?feature=player_embedded&amp;v=ws8lSobe-sk</a></p>
+<p>作为一名负责任的译者，当然要帮大家把视频搬回墙内：<a href="http://v.youku.com/v_show/id_XNjg0MzcwNDY0.html" target="_blank" title="" data_ue_src="http://v.youku.com/v_show/id_XNjg0MzcwNDY0.html" textvalue="http://v.youku.com/v_show/id_XNjg0MzcwNDY0.html">http://v.youku.com/v_show/id_XNjg0MzcwNDY0.html</a> </p>
+<p style="text-align: center;"><img data-original="/imgs/34a117d1f71abb1d742302367842e609.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" style="float:none" title="1.png"></p>
+<noscript><img src="/imgs/34a117d1f71abb1d742302367842e609.png!small" style="float:none" title="1.png"></noscript>
+<p style="text-align: center;">图1<br>
+Charlie Miller演示控制汽车方向盘的PoC的视频</p>
+<h2><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>电子控制单元（ECU）与控制区域网络（CAN）</strong></span></h2>
+<p>电子控制单元基于控制区域网络（CAN）标准，与一条或多条总线交互。</p>
+<p>CAN总线作为汽车业界标准，是专门为ECU与车辆中没有主机控制的设备进行数据交换而设计的。同时CAN总线也被用在其它领域，包括航空航天与工业自动化。</p>
+<p>在汽车中，ECU之间的交互数据为CAN数据包，每个包都会广播到同一总线上的其它所有部件，就是说每个节点都能对其进行译码。但主要问题是包中缺少发送者的ID，发送/接收协议无法完成有效的身份验证。这意味着由于ECU不会检测发送者ID，攻击者也可以捕获到所有的数据包，伪造发送者ID，并将自己认证给其它ECU。</p>
+<p>CAN协议实现了两个不同的消息帧格式：基础帧格式与扩展帧格式。两者唯一的不同是，前者支持长度为11位的标识符，而扩展帧支持长度为29位的标识符，由11位识别（即“基础标识符”）和18位扩展（“扩展标识符”）组成。</p>
+<p>CAN标准实现了四种帧：</p>
+<pre class="prettyprint lang-html">数据帧：包含传输的节点数据
+远程帧：用来请求指定标识符的传输
+错误帧：任意节点检测出错误的帧
+过载帧：在数据帧和/或远程帧之间注入一个延时</pre>
+<p><br></p>
+<p style="text-align: center;"><img data-original="/imgs/b357c3796ac9877b0f72b905b81958e8.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" style="float:none" title="2.png"></p>
+<noscript><img src="/imgs/b357c3796ac9877b0f72b905b81958e8.png!small" style="float:none" title="2.png"></noscript>
+<p style="text-align: center;">图2<br>
+CAN帧格式（Wikipedia）</p>
+<p><br></p>
+<p>CAN是一个简单的底层协议，没有实现任何安全特性，因此其安全必须在上层得以保障，由应用程序负责实现安全机制。</p>
+<p>可以修改控制单元的软件使其在数据传输中使用密码机制，像软件下载或点火钥匙编码，但通常标准的交互不会这么做。</p>
+<p>黑客通过向CAN总线上的ECU发送自己特别构造的数据包，可以修改这些组件的行为，甚至可以对整个单元组件重新编码。</p>
+<pre class="prettyprint lang-html">黑掉汽车的艺术</pre>
+<p>当今，装配了车载电脑的汽车可能因各种目的被攻击者攻击。为了防止类似犯罪，美国汽车安全监管机构设立了一个新办公室，专门关注这种网络犯罪。</p>
+<p>“这些相互关联的电子系统提高了车辆安全（safety）与可靠性，但同时也带来了新的、不同的安全（security）风险。”国家公路交通安全管理局负责人David Strickland表示。</p>
+<p>汽车黑客甚至可以利用新一代汽车联接到互联网络或无线网络。我们不得不考虑这样的事实：许多公司已经开始考虑将汽车作为一种新型巨大网络中的结点，可以从周围环境中获取信息，用获得到的各种数据为智慧城市中的人们提供各种服务。现在汽车都配备了先进的控制器，可以实时管理大量信息。某些豪华汽车的控制器由多达1亿行代码编译而成，车内软件和电子产品占去了车辆几乎40%的成本。而车中的每个高科技组件和通信通道都有可能受到骇客的恶意攻击。</p>
+<pre class="prettyprint lang-html">黑掉一辆汽车都有哪些方法？</pre>
+<p>目前广泛认可的攻击方法有：</p>
+<pre class="prettyprint lang-html">远程信息系统攻击。有些汽车配备的系统允许其与远程服务中心通信，传输其当前所在的位置。相信在不久的未来，会有越来越多的汽车制造商可以提供遥感勘测服务作为远程诊断服务，以防止出现意外事故和电子故障。当今，黑客理论上已经可以攻破汽车上安装的类似系统，例如远程追踪被盗车辆的汽车防盗系统。一旦获得汽车的访问权，攻击者就可以通过CAN总线与车上的每个组件进行数据交互，修改它们的参数。
+
+恶意软件攻击。攻击者可以利用恶意软件感染某些汽车部件，修改它们的行为。恶意软件可以通过不同的方式感染，例如可以通过U盘插到MP3读取器上进行传播或利用无线技术传播（WiFi或蓝牙）。
+
+未经授权的应用程序。配备了车载电脑的汽车可以执行或下载应用程序。与普通PC类似，对于汽车来说，这些程序很有可能是恶意的非授权第三方提供的。可以想像车载电脑中任意软件在升级时，攻击者可以将恶意代码假装成更新程序，通过这种方式使未授权的软件获取其所需的权限。
+
+OBD：专门的写入软件可以通过攻击OBD-II（车载诊断系统）端口安装恶意软件。一旦连接器通过CAN总线连接到汽车，就有可能监控每个连接到该总线的组件。
+
+车门锁与钥匙：攻击者可以模拟这两种系统的访问码，通过这种方式控制汽车锁，并启动/停止汽车引擎。</pre>
+<p style="margin-top: 15px;"><span style="font-size: 20px; color: rgb(38, 38, 38);"><strong>黑掉汽车的PoC</strong></span></p>
+<p>既然明白了黑客黑掉汽车的基本原理，那么攻击向量是什么样的呢？以及车中的“智能”部件之间如何“对话”呢？下面我们看一下黑客社区给出的概念证明。我们汽车的内部总线像计算机网络一样以一种不安全的方式通信，因此很容易受到攻击。正如之前预期的那样，著名黑客Charlie Miller与安全研究员Chris Valasek已经证明了其完全有可能取得其演示所用的汽车中部分组件的控制权。</p>
+<p>汽车黑客（Car hacking）并不是一个新的概念，从过去到现在，一直有一群研究人员在探索电子控制单元（ECU）的弱点，但Miller和Valasek发表了一份关于汽车架构的研究报告称，他们可以在某些汽车的行驶过程中控制这些汽车的制动系统、转向系统和其它功能。</p>
+<p>安全专家通过向系统发送大量控制区域网络数据包来控制车辆的行为，简单地说，他们发送的数据包在合法数据包之前到达ECU，使其接受这些恶意数据包中的指令。</p>
+<p>研究人员发表的论文演示了如何黑掉一辆汽车，即通过CAN总线发送的正常数据包和诊断数据包。由于某些显而易见的（法律）原因，本文只提供了一个示例来讲解，请读者来证明这项研究的有效性。</p>
+<p>研究人员对福特翼虎（Ford Escape）和丰田普锐斯（Toyota Prius）进行了“安全测试”。一般情况下，攻击者通过正常数据包可以操作以下组件：</p>
+<pre class="prettyprint lang-html">车速仪
+里程表
+车载导航
+转向系统
+制动系统——丰田
+加速</pre>
+<p>正常数据包通过CAN总线操纵车速仪（福特 普锐斯）</p>
+<p>两位研究者解释，如果CAN数据包通过注入的方式操纵显示给驾驶员的转速值（RPM）和车速，还是很容易检测到的。在福特汽车中，信息是通过高速CAN网络中ID为0201的数据包管理的。</p>
+<p>包的格式为：</p>
+<pre class="prettyprint lang-plain">[AA BB 00 00 CC DD 00 00]</pre>
+<p>AABB是显示的转速（rpm），CCDD是车速。系统开发团队通过以下公式计算这些值：</p>
+<pre class="prettyprint lang-plain">Speed(mph) = 0.0065 * (CC DD) – 67
+RPM = .25 * (AA BB) – 24</pre>
+<p>例如，如果CAN数据包中为以下数据，那么：</p>
+<pre class="prettyprint lang-plain">[23 45 00 00 34 56 00 00]</pre>
+<p>以下代码用来设置转速和车速：</p>
+<pre class="prettyprint lang-plain">y = pointer(SFFMessage())
+mydll.DbgLineToSFF(“IDH:02, IDL: 01, Len: 08, Data: 23 45 00 00 34 56 00 00″, y)
+mydll.write_message_cont(handle,y, 2000)</pre>
+<p>代码计算得到车速为0×3456 * .0065 – 67 = 20.1mph，转速为0,25* 0×2345-24= 2233 rpm，十六进制的3456为十进制的13398，十六进制的2345为十进制的9029。</p>
+<p style="text-align: center;"><img data-original="/imgs/b85c7bc9a3fd6c2df4662b91661e7c8f.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" style="float:none" title="3.png"></p>
+<noscript><img src="/imgs/b85c7bc9a3fd6c2df4662b91661e7c8f.png!small" style="float:none" title="3.png"></noscript>
+<p style="text-align: center;">图3通过PoC操纵车速</p>
+<p>关掉引擎——通过CAN总线的诊断数据包控制福特汽车（福特 普锐斯）</p>
+<p>通过前面的描述，我们知道可以通过数据包修改汽车内的许多组件。研究人员证明可以对这这两种车进行多种操作，包括：</p>
+<pre class="prettyprint lang-plain">安全访问（Security Access）
+制动管理（Brakes management）
+关掉引擎（Kill engine）
+暴闪灯（Lights flashing）
+喇叭开/关（Horn On/Off）
+安全带电机动作（Seat Belt Motor Engage）
+车门开锁/上锁（Doors Lock/Unlock）
+修改燃油量计（Modification Fuel Gauge）</pre>
+<p>与正常操作不同，对ECU的诊断需要认证，但通过下文我们可以看到，其验证过程的脆弱性会将用户暴露于风险之中。</p>
+<p>下面我们考虑停车辅助模块(PAM)ECU。福特与普锐斯中对PAM组件的认证其实很脆弱，因为其请求/响应过程总是基于该单元发送的同一个seed，这意味着响应总是相同的，所以对攻击者来说这就是一个笑话，PAM模块进行嗅探、安全访问，或者在最坏情况下进行暴力破解，简直在容易了。</p>
+<p>通过分析验证握手过程，可以发现其总是使用同一个seed，即11 22 33，对汽车黑客来说这简直是理想的解决方案，但在其它的情况下会变得更复杂一些。不管怎么说攻击者获得了对固件进行逆向工程的key，也就相当于拿下了目标组件。</p>
+<pre class="prettyprint lang-plain">IDH:07, IDL: 36, Len: 08, Data: 02 27 01 00 00 00 00 00
+IDH:07, IDL: 3E, Len: 08, Data: 05 67 01 11 22 33 00 00
+IDH:07, IDL: 36, Len: 08, Data: 05 27 02 CB BF 91 00 00
+IDH:07, IDL: 3E, Len: 08, Data: 02 67 02 00 00 00 00 00</pre>
+<p>研究人员发现其中一项最有趣的攻击是与操纵引擎有关，即可以调节gas<br>
+/ air比例水平，在这种特殊情况下，其用来测试的福特汽车，在某些异常情况下可以通过常规控制指令4044关掉引擎。</p>
+<p>攻击数据包为：</p>
+<pre class="prettyprint lang-plain">IDH:07, IDL: E0, Len: 08, Data: 05 31 01 40 44 FF 00 00</pre>
+<p>加粗部分的参数所在的bit位表示要关掉的汽缸的掩码，发送FF表示关掉所有汽缸。</p>
+<p>重复发送以上数据包，就可以通过这种阻止汽车重新启动的方式关掉引擎，直到攻击停止。</p>
+<p>令人不安的是这种攻击不需要建立诊断会话，而且可以在任何车速情况下进行。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>远程CANHacking Tools，并没有那么贵</strong></span></p>
+<p>远程黑掉一辆汽车是完全可能实现的。最近安全研究人员Javier Vazquez-Vidal和Alberto Garcia Illera已经设计了一套工具，用这种比普通智能手机还小的设备来控制一辆汽车，两位研究员为其命名为CAN Hacking Tool（CHT），并将会在新加坡举行的黑帽亚洲安全大会上向大家展示。至此我们了解了CAN总线以及汽车中各个组件交互数据的方式。</p>
+<p style="text-align: center;"><img data-original="/imgs/ae8b169960f7bba0111792a54c35b980.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" style="float:none" title="4.png"></p>
+<noscript><img src="/imgs/ae8b169960f7bba0111792a54c35b980.png!small" style="float:none" title="4.png"></noscript>
+<p style="text-align: center;">图4<br>
+CAN Hacking Tools (CHT)</p>
+<p>黑掉一辆车从来没有这么容易与便宜。研究人员将要展示的工具不足20美元，利用它，攻击者可以完全控制一辆车，包括转向系统与制动系统（即方向盘与刹车）等。</p>
+<p>有文章<a href="http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html" target="_blank" title="" data_ue_src="http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html" textvalue="曾经指出">曾经指出</a>，通过控制区域网络（CAN）总线，可以访问汽车的所有功能，包括控制锁、方向盘和刹车，在这种情况下完全由研究人员决定如何使用它们。</p>
+<p>“这个不足20美元的小设备，可以物理连接到汽车的内部网络并注入恶意命令，其影响范围从车窗、车头灯到方向盘与刹车”，<a href="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/" target="_blank" title="" data_ue_src="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/" textvalue="Forbes">Forbes</a><a href="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/">报道</a>。</p>
+<p>CAN Hacking Tool的设计是从CAN端口注入恶意代码，并通过附近的PC发送无线命令。</p>
+<p>“只需要花五分钟或更就就可以把它破解并开走……我们可以等一分钟或一年，只为了将其触发，执行任意我们事先编辑好的指令”，Vazquez Vidal说。</p>
+<p>Javier Vazquez-Vidal和Alberto Garcia Illera已经证实了使用他们的CAN Hacking Tool设备黑掉一辆汽车的可行性，并针对四种不同的汽车进行了测试，“其技术涵盖像关掉车头灯、引发警报、摇动车窗等这种单纯的恶作剧，到防抱死制动或紧急制动系统等使行驶的汽车突然停止。”</p>
+<p>研究人员测试使用的CHT只支持蓝牙，但专家们已经准备将其升级，使其可以使用GSM蜂窝无线电，可以在千里之外控制汽车内的设备。</p>
+<p>“曾几何时，攻击者在很多情况需要获得汽车底层的访问权限，或需要打开汽车车箱才能实施攻击，即使是最简单的情况他们也需要爬到汽车下面将设备装上。而现在，只需要通过与蓝牙设备交互，在几英尺的范围内即可完成攻击。但在两位研究人员在新加坡的安全会议上展示了他们的工具之后，他们说将会将该工具升级，使其支持GSM蜂窝无线电，届时就可以在千里之外对设备进行控制了。”</p>
+<p>研究人员表示，现代汽车网络没有任何安全机制。</p>
+<p>“所有的破解工具都是用现成的部件，所以即使发现什么攻击设备，也没办法作为举证的线索，基本上是完全无法追踪的。一辆汽车就是一个小型网络，并且没有任何安全防护。”</p>
+<h2><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>攻击检测</strong></span></h2>
+<p>根据Miller与Valasek的分析，对攻击的检测也很容易做到。他们提到了一种实现异常检测机制的可行方法。</p>
+<p>首先定义车内所有组件的系统<br>
+“正常”行为，那么就有可能检测到任意可疑行为并激活相应的对策。一种可能的实现方式为，基于不同时段对不同CAN数据包的分析，如Miller与Valasek给出的下图所示：</p>
+<p style="text-align: center;"><img data-original="/imgs/b2b46d41e793fc340e8f98bda7f53b32.png!small" src="/imgs/c43b185fb29250a9c0b2bb0bf9573ed9.gif" title="5.png"></p>
+<noscript><img src="/imgs/b2b46d41e793fc340e8f98bda7f53b32.png!small" title="5.png"></noscript>
+<p style="text-align: center;">图5<br>
+CAN id 0201的频率分布图</p>
+<p>“只要处于网络之中，就可以很容易检测到这些恶意指令，并将其截获。你知道什么样的汽车应该执行什么样的操作。”IOActive安全情报主管Valasek说。</p>
+<p>例如，如果检测到有大量数据包传输时就触发警报，同样，如果诊断数据包中包含正常模式之外的信息，也将其标记出来。</p>
+<p>对汽车制造商来说，添加这些额外的安全特性就会提高额外成本，经济危机以及相对微薄的利润是引入这些安全特性的主要阻碍。</p>
+<p>“汽车制造商不喜欢提高汽车的复杂性。如果你尝试告诉他们修改架构，肯定会受到很强的排斥。”Miller在卡巴斯基安全分析峰会的演示结束后，Valasek表示。</p>
+<p>尽管这个话题已经在黑客讨论了很长时间，但目前仍没有任何文档或记录显示有汽车制造商表示会实施安全措施来防止黑客的攻击。</p>
+<p>“我们不知道他们在做什么。他们可能会（在安全措施方面）有些作为，但很可能将计划排到几年后了……汽车在设计时已经考虑到其安全性（safety）了。但是，没有security就没有safety。”Miller说。</p>
+<p>本文的分析源自黑客的自发行为，向大众演示了汽车工业的脆弱性。我们希望在不久的将来，security会成会汽车的一项基本需求。</p>
+<p>也许有一天，我们启动汽车之前要做的第一件事不是启动发动机，而是更新汽车的防火墙或杀毒软件。</p>
+<h2><span style="color: rgb(38, 38, 38);"><strong><span style="font-size: 20px;">参考</span></strong></span></h2>
+<p><a href="http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html" target="_blank" title="" data_ue_src="http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html" textvalue="http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html">http://securityaffairs.co/wordpress/15569/hacking/car-hacking-cinematographic-fiction-reality.html</a></p>
+<p><a href="http://securityaffairs.co/wordpress/22070/hacking/can-hacking-tools.html" target="_blank" title="" data_ue_src="http://securityaffairs.co/wordpress/22070/hacking/can-hacking-tools.html" textvalue="http://securityaffairs.co/wordpress/22070/hacking/can-hacking-tools.html">http://securityaffairs.co/wordpress/22070/hacking/can-hacking-tools.html</a></p>
+<p><a href="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/" target="_blank" title="" data_ue_src="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/" textvalue="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/">http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/</a></p>
+<p><a href="http://illmatics.com/car_hacking.pdf" target="_blank" title="" data_ue_src="http://illmatics.com/car_hacking.pdf" textvalue="http://illmatics.com/car_hacking.pdf">http://illmatics.com/car_hacking.pdf</a></p>
+<p><a href="http://usblog.kaspersky.com/podcast-protecting-cars-with-av-style-detection/" target="_blank" title="" data_ue_src="http://usblog.kaspersky.com/podcast-protecting-cars-with-av-style-detection/" textvalue="http://usblog.kaspersky.com/podcast-protecting-cars-with-av-style-detection/">http://usblog.kaspersky.com/podcast-protecting-cars-with-av-style-detection/</a></p>
+<p><a href="http://www.zdnet.com/italians-love-of-car-and-home-turning-internet-of-things-into-900m-market-7000026141/" target="_blank" title="" data_ue_src="http://www.zdnet.com/italians-love-of-car-and-home-turning-internet-of-things-into-900m-market-7000026141/" textvalue="http://www.zdnet.com/italians-love-of-car-and-home-turning-internet-of-things-into-900m-market-7000026141/">http://www.zdnet.com/italians-love-of-car-and-home-turning-internet-of-things-into-900m-market-7000026141/</a></p>
+<p><a href="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/" target="_blank" title="" data_ue_src="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/" textvalue="http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/">http://www.forbes.com/sites/andygreenberg/2013/07/24/hackers-reveal-nasty-new-car-attacks-with-me-behind-the-wheel-video/</a></p>
+<p><a href="http://threatpost.com/detecting-car-hacks/104190" target="_blank" title="" data_ue_src="http://threatpost.com/detecting-car-hacks/104190" textvalue="http://threatpost.com/detecting-car-hacks/104190">http://threatpost.com/detecting-car-hacks/104190</a></p>
+<p><a href="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/" target="_blank" title="" data_ue_src="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/" textvalue="http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/">http://www.forbes.com/sites/andygreenberg/2014/02/05/this-iphone-sized-device-can-hack-a-car-researchers-plan-to-demonstrate/</a></p>
+<p><a href="http://en.wikipedia.org/wiki/CAN_bus" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/CAN_bus" textvalue="http://en.wikipedia.org/wiki/CAN_bus">http://en.wikipedia.org/wiki/CAN_bus</a></p>
+<p>原文地址：<a href="http://resources.infosecinstitute.com/car-hacking-safety-without-security/" target="_blank" title="" data_ue_src="http://resources.infosecinstitute.com/car-hacking-safety-without-security/" textvalue="http://resources.infosecinstitute.com/car-hacking-safety-without-security/">http://resources.infosecinstitute.com/car-hacking-safety-without-security/</a><br></p>
+
+        <p class="statement">
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Your Name<br />
+                What You Are<br />
+                LubyRuffy@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>
