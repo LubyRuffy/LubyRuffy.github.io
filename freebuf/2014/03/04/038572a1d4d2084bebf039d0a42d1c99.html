@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>玩转无线 — GNURADIO 简单运用</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>玩转无线 — GNURADIO 简单运用</h2>
+	<p class="meta">2014-03-04</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: justify">大家好, 我是<a href="http://insight-labs.org" target="_blank" title="" data_ue_src="http://insight-labs.org">Insight-labs</a>的旺财，这里放出个旺财在<a href="http://www.bsidesto.ca/" target="_blank" title="" data_ue_src="http://www.bsidesto.ca/">Bsides Toronto 2013</a> 会上RF-Ninjia Hacking议题中的一个案例，随着物联网越来越火热，而物联网又离不开无线。(RF，这里旺财把这个简单RF无线分析案例放出来跟大家娱乐下，因为本文意在介绍RF hacking的具体运用,本文所涉及到的开源的工具;软件如USRP、Gnuradio-toolkit、gnuradio-companion..等推荐去<a href="http://www.freebuf.com/articles/wireless/13655.html" target="_blank" title="" data_ue_src="http://www.freebuf.com/articles/wireless/13655.html">http://www.freebuf.com/articles/wireless/13655.html</a>围观，个别好学的小伙伴们有啥问题,推荐去“专注研究无线类安全方面的团队”膜拜，比如熊猫阿Bo大神。。) </p>
+<p style="text-align:center"><img style="width: 350px;height: 289px" data-original="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF8.png" height="289" border="0" hspace="0" vspace="0" width="350"></p>
+<noscript><img style="width: 350px;height: 289px" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF8.png" height="289" border="0" hspace="0" vspace="0" width="350"></noscript>
+<p>言归正传.. 本文的目标是这款 "无线PC安全锁". 此款安全锁号称用了"安全稳定"的无线技术和密码. 同时在无线解锁器不在身边时, 还可以用自设密码解锁. </p>
+<p style="text-align:center"><img data-original="/imgs/505ba0617b8d8d799b24116be7ef103f.jpeg!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF1.jpeg"></p>
+<noscript><img src="/imgs/505ba0617b8d8d799b24116be7ef103f.jpeg!small" title="RF1.jpeg"></noscript>
+<p><br>呵呵, 很快我们就可以其文件目录里找到配置文件…打开一看.. 哈… </p>
+<p style="text-align:center"><img style="width: 400px;height: 258px" data-original="/imgs/426c05111d6e84443dca3dc6ee64d4d3.jpeg!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF2.jpeg" height="258" border="0" hspace="0" vspace="0" width="400"></p>
+<noscript><img style="width: 400px;height: 258px" src="/imgs/426c05111d6e84443dca3dc6ee64d4d3.jpeg!small" title="RF2.jpeg" height="258" border="0" hspace="0" vspace="0" width="400"></noscript>
+<p style="text-align: justify">不过本文是关于 RF hacking..所以这个就此不表…还是让我们来看看关键的无线解锁器吧..通常我们 hacking 一个无线设备的第一步就是找到目标的工作频率. 我们可以通过每个无线设备自带的FCC ID 来查找无线设备数据库 or 我们可以用无线频谱设备来查找. 这里旺财用的是USRP 和 gnuradio-toolkit 来充当频谱分析的角色…如图我们可以看到其工作频率为非常普遍的433Mhz..</p>
+<p style="text-align:center"><img data-original="/imgs/90f13299a72a37ade9f764f56b75f88f.jpeg!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF3.jpeg"></p>
+<noscript><img src="/imgs/90f13299a72a37ade9f764f56b75f88f.jpeg!small" title="RF3.jpeg"></noscript>
+<p style="text-align: justify">而且每次发送解锁信号时都只有一个signal peak..我们可以大胆假设这是用的ASK/OOK modulation..跟下图用的FSK modulation 的2个signal peaks 比起来有着明显不同.</p>
+<p style="text-align:center"><img data-original="/imgs/959e29eac4119f25cbf5dc34324038c1.jpeg!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" title="RF4.jpeg"></p>
+<noscript><img src="/imgs/959e29eac4119f25cbf5dc34324038c1.jpeg!small" title="RF4.jpeg"></noscript>
+<p style="text-align: justify">在判断出工作频率后,我们可以用软件无线电接收软件GQRX 和 信号分析软件Audacity 来接收和分析此无线解锁器所发出的信号如图. 小伙伴们看出规律了吗? 0000 1101…而且每次都一样哦..貌似没有任何加密 <img data-original="/imgs/dfedd5da271a0d1243efca9f0ee7edf4.gif" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" alt=";)" class="wp-smiley"><br></p>
+<noscript>
+<img src="/imgs/dfedd5da271a0d1243efca9f0ee7edf4.gif" alt=";)" class="wp-smiley"><br>
+</noscript>
+<p style="text-align:center"><img data-original="/imgs/fd25753ccc22b7edbe82f9c49f5e473c.jpeg!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" style="width: 350px;height: 321px" title="RF5.jpeg" height="321" border="0" hspace="0" vspace="0" width="350"></p>
+<noscript><img src="/imgs/fd25753ccc22b7edbe82f9c49f5e473c.jpeg!small" style="width: 350px;height: 321px" title="RF5.jpeg" height="321" border="0" hspace="0" vspace="0" width="350"></noscript>
+<p style="text-align:center"><img data-original="/imgs/86dc0895d4d3d0f4aa192145f4c0cbb9.png!small" src="/imgs/abad7d86ea7e56ca482e15a94c0d2fe3.png%21small" style="width: 500px;height: 112px" title="RF6.png" height="112" border="0" hspace="0" vspace="0" width="500"></p>
+<noscript><img src="/imgs/86dc0895d4d3d0f4aa192145f4c0cbb9.png!small" style="width: 500px;height: 112px" title="RF6.png" height="112" border="0" hspace="0" vspace="0" width="500"></noscript>
+<p>在分析出其信号规律后, 我们可以用gnuradio和gnuradio-companion来捕捉并回放解锁信号…具体效果请看视频..最后的总结.. 有的小伙伴们也许手头上没有这款"安全锁". 不过不用着急,仔细看看四周? 也许你已经拥有了无线空遥控器 or 女神的的车库门禁? </p>
+<p><embed type="application/x-shockwave-flash" class="edui-faked-video" pluginspage="http://www.macromedia.com/go/getflashplayer" src="http://player.youku.com/player.php/sid/XNjc5MTczMTEy/v.swf" width="690" height="480" wmode="transparent" play="true" loop="false" menu="false" allowscriptaccess="never" allowfullscreen="true"></embed></p>
+<p>视频地址: <a href="http://v.youku.com/v_show/id_XNjc5MTczMTEy.html">http://v.youku.com/v_show/id_XNjc5MTczMTEy.html</a> </p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

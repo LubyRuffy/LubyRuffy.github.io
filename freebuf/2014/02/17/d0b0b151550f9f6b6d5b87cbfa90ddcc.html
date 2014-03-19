@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>SPIP漏洞扫描工具 – SPIPScan</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>SPIP漏洞扫描工具 – SPIPScan</h2>
+	<p class="meta">2014-02-17</p>
+
+	<div class="post">
+	        <p></p>
+<p><a href="http://www.spip.net" target="_blank" title="" data_ue_src="http://www.spip.net">SPIP</a>是一基于Web的内容发布系统，SPIPScan是一款基于python编写的SPIP漏洞扫描程序，该版本支持探测服务器所安装的SPIP插件版本、暴力破解、检测主题版本、敏感文件夹识别等。</p>
+<p>使用方法如下：</p>
+<pre class="prettyprint lang-python">python spipscan.py Usage: spipscan.py [options]Options:
+  -h, --help            show this help message and exit
+  --website=WEBSITE     Website to pentest
+  --path=PATH           Path for webapp (default : "/")
+  --plugins             Detect plugins installed
+  --themes              Detect themes installed
+  --users               Bruteforce user logins
+  --sensitive_folders   Detect sensitive folders
+  --version             Detect version
+  --vulns               Detect possible vulns
+  --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE
+                        Bruteforce plugin file (eg. plugins_name.db)
+  --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE
+                        Bruteforce theme file (eg. themes_name.db)
+  --bruteforce_logins_file=BRUTEFORCE_LOGINS_FILE
+                        Bruteforce login file (eg. user_logins.db)
+  --verbose             Verbose mode</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>版本检测：</strong></span><br></p>
+<pre class="prettyprint lang-python">$ python spipscan.py --website=http://127.0.0.1 --version</pre>
+<p>返回结果：</p>
+<pre class="prettyprint lang-python">Application is located here : http://127.0.0.1/
+[!] Version is : 3.0.13
+[!] Plugin folder is : plugins-dist/</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>插件检测：</strong></span><br></p>
+<pre class="prettyprint lang-python">python spipscan.py --website=http://127.0.0.1 --plugins</pre>
+<p>返回结果：</p>
+<pre class="prettyprint lang-python">[!] Plugin folder is : plugins-dist/
+[!] folder plugins-dist/ is accessible
+[!] Plugin breves detected. Version : 1.3.5
+[!] Plugin compagnon detected. Version : 1.4.1
+[!] Plugin compresseur detected. Version : 1.8.6
+[!] Plugin dump detected. Version : 1.6.7
+[!] Plugin filtres_images detected. Version : 1.1.7
+[!] Plugin forum detected. Version : 1.8.29
+[!] Plugin jquery_ui detected. Version : 1.8.21
+[!] Plugin mediabox detected. Version : 0.8.4
+[!] Plugin medias detected. Version : 2.7.51
+[!] Plugin mots detected. Version : 2.4.10
+[!] Plugin msie_compat detected. Versoin : 1.2.0
+[!] Plugin organiseur detected. Version : 0.8.10
+[!] Plugin petitions detected. Version : 1.4.4
+[!] Plugin porte_plume detected. Version : 1.12.4
+[!] Plugin revisions detected. Version : 1.7.6
+[!] Plugin safehtml detected. Version : 1.4.0
+[!] Plugin sites detected. Version : 1.7.10
+[!] Plugin squelettes_par_rubrique detected. Version : 1.1.1
+[!] Plugin statistiques detected. Version : 0.4.19
+[!] Plugin svp detected. Version : 0.80.18
+[!] Plugin textwheel detected. Version : 0.8.17
+[!] Plugin urls_etendues detected. Version : 1.4.15
+[!] Plugin vertebres detected. Version : 1.2.2</pre>
+<p>更多及下载<a href="https://github.com/PaulSec/SPIPScan" target="_blank" title="" data_ue_src="https://github.com/PaulSec/SPIPScan">点击这里</a>。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

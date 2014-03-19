@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Facebook推出用于android数据加密的开源API</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Facebook推出用于android数据加密的开源API</h2>
+	<p class="meta">2014-02-13</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>小编吐槽</strong></span></p>
+<p>    <span style="color: rgb(38, 38, 38);"><strong>恶意应用和android手机的续航能力一样是令android用户格外头疼的一个问题（至少我就这么觉得 – -！），Facebook把它使用的用于数据加密的API开源了，的确是一件不错的事情。</strong></span></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>正文</strong></span></p>
+<p>    现如今很多的智能手机，都支持把应用安装到SD卡中，这会帮用户节省很多空间，但是许多黑客也会利用这一点窃取用户的隐私。一般情况下，应用都有SD卡的读写权限，当然他也可以读取到其他应用，存储在SD卡上的数据。这意味着如果你安装了恶意的应用，他就可以轻易的获取SD卡上的所有数据。</p>
+<p>    当然，为了数据的安全，可以给SD卡上的数据加密，但这多多少少会影响到手机的性能。</p>
+<p>    不过，facebook开放了一个名叫，“Conceal”的安全工具的源代码，它提供了密码学的Java API接口，这些简单易用的接口可以让应用程序以最优的方式加密数据，</p>
+<p>    Conceal专门为速度设计，它小巧并且高速。facebook软件工程师在<a textvalue="blog" data_ue_src="https://code.facebook.com/posts/1419122541659395/introducing-conceal-efficient-storage-encryption-for-android/" title="" target="_blank" href="https://code.facebook.com/posts/1419122541659395/introducing-conceal-efficient-storage-encryption-for-android/">blog</a>上说：“这是我们的一个机会，通过加密的方式保护SD卡上的数据，把用户安全做得更好。”</p>
+<p>    这款工具使用，基于OpenSSL的加密算法。<br></p>
+<pre class="prettyprint lang-html">    “Conceal的加密算法基于OpenSSL，但是在arm7下的OpenSSL库大小有1MB，我们缩减了OpenSLL库的内容，经过编译现在他只有85KB。一个更小的库，有益于兼容更多的android版本，以及减少后期的维护成本。”</pre>
+<p>    Conceal比目前的任何一个java加密库都轻巧快捷，同时它使用AES-GCM算法，来防止对数据进行的恶意篡改。</p>
+<p>    这个库还提供了存储和管理秘钥的资源来提高android脆弱的随机数生成器的安全性。目前正式支持，2.3以及更高版本。不过也可以在2.2版本运行。</p>
+<p>    Facebook的应用都已经使用了这款工具保护自己的数据。开发者可以从<a textvalue="GitHub" data_ue_src="http://facebook.github.io/conceal/" title="" target="_blank" href="http://facebook.github.io/conceal/">GitHub</a>上了解到这个项目的详细信息。</p>
+<p>[<a textvalue="原文地址" data_ue_src="http://thehackernews.com/2014/02/facebook-releases-conceal-api-for.html#" title="" target="_blank" href="http://thehackernews.com/2014/02/facebook-releases-conceal-api-for.html#">原文地址</a>，译/FreeBuf小编wyl]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

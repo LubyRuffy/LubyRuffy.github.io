@@ -13,19 +13,16 @@
 html, body { height: 100%; }
 
 body {
-  background-color: #FFF;
+  background-color: #fff;
   font: 13.34px Helvetica, Arial, sans-serif;
   font-size: small;
-  text-align: center;
   line-height: 1.5;
-  background: white
+  background: #f0f0f0;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-size: 100%; }
+h1 {font-size: 150%; }
 
-h1 { margin-bottom: 1em; }
-p { margin: 1em 0; }
+p { margin: 0; }
 
 a:link, a:visited {
     color: #000
@@ -85,15 +82,14 @@ a:visited {
 
 .title {
   display: inline-block;
-  margin-bottom: 2em;
 }
 
 .title a {
-  color: #a00;
+  color: #fff;
 }
 
 .title a:hover {
-  color: #000;
+  color: #a00;
 }
 
 .header a.extra {
@@ -233,7 +229,7 @@ a:visited {
 
 .feeds-item h3 {
     padding-top: 20px;
-    border-top: 1px solid #e6e6e6;
+    border-top: 0px solid #e6e6e6;
     padding-bottom: 12px
 }
 
@@ -334,3 +330,288 @@ h3 {
     line-height: 24px;
     text-indent: 28px
 }
+
+#header,#body,#footer{width: 984px; margin: 0 auto;}
+
+#header {
+    width: 100%;
+    height: 60px;
+    background: #2c5f8e
+}
+
+#header .header-content {
+    position: relative;
+    height: 60px;
+    width: 984px;
+    margin: 0 auto
+}
+
+#header .top-main {
+    padding-top: 8px
+}
+
+#header #usrbar {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #2b5885
+}
+
+#header #usrbar a, #header #usrbar span {
+    padding: 0 8px;
+    margin: 0;
+    color: #d5dfe8;
+    font-size: 12px;
+    text-decoration: none
+}
+
+#menu {
+    position: absolute;
+    left: 220px;
+    top: 0;
+    height: 60px;
+    border-right: 1px solid #26517e
+}
+
+#menu a {
+    float: left;
+    width: 140px;
+    text-align: center;
+    font: normal 20px/60px "微软雅黑", tahoma;
+    border-left: 1px solid #26517e;
+    color: #fff
+}
+
+#menu a:hover, #menu a.current {
+    background: #26517e;
+    text-decoration: none
+}
+
+.clearfix:after {
+    clear: both;
+    content: '.';
+    display: block;
+    font-size: 0;
+    line-height: 0;
+    visibility: hidden;
+    height: 0
+}
+
+.clearfix {
+    zoom: 1
+}
+
+#body {
+    margin-top: 20px;
+    margin-bottom: 35px;
+    width: 982px;
+    border: 1px solid #ebebeb;
+    background: #fefefe
+}
+
+.l-main-col {
+    float: left;
+    width: 678px;
+    border-right: 1px solid #ececec;
+    background: #fff;
+    overflow: hidden
+}
+
+#page, .article-publish, .account-manage {
+    padding: 0 20px
+}
+
+#page {
+    padding-bottom: 25px
+}
+
+#page h1 {
+    font: normal 28px/46px "微软雅黑";
+    color: #369;
+    padding-left: 20px;
+    border-left: 5px solid #369;
+    margin: 20px 0;
+    text-align: left
+}
+
+.article-publish h1, .account-manage h1, .article-manage h1 {
+    font: normal 28px/46px "微软雅黑";
+    margin: 20px 10px;
+    color: #333
+}
+
+#page blockquote {
+    padding: 15px 20px;
+    margin: 20px 0;
+    border: 1px dashed #eaeaea;
+    background: #fbfbfb;
+    font-size: 12px;
+    text-indent: 24px;
+    color: #999;
+    line-height: 22px
+}
+
+#page h3 {
+    margin: 30px 0;
+    font-size: 14px
+}
+
+#page .text {
+    margin: 25px 0;
+    font-size: 14px;
+    line-height: 24px;
+    text-indent: 28px
+}
+
+#page .image {
+    text-align: center;
+    margin: 25px 0
+}
+
+#page .quote {
+    margin: 20px 0;
+    padding: 14px 18px;
+    border-left: 6px solid #b8a59b;
+    color: #666;
+    background: #f6f6f6
+}
+
+#page .quote p {
+    font-size: 12px;
+    color: #666;
+    line-height: 20px
+}
+
+#page h2 {
+    font-family: "微软雅黑";
+    margin: 25px 0 20px;
+    color: #930;
+    font-size: 16px;
+    font-weight: bold;
+    text-indent: 28px
+}
+
+#page .artical-tip-top {
+    padding: 0 5px;
+    color: #666;
+    white-space: nowrap
+}
+
+#page .artical-tip-btm {
+    text-align: left;
+    margin: 40px 0
+}
+
+#page .artical-tip-btm a:link, #page .artical-tip-btm a:visited {
+    font-size: 14px;
+    color: #3a82b8
+}
+
+
+.l-right-col {
+    float: right;
+    width: 263px;
+    padding: 20px;
+    margin-left: -1px;
+    border-left: 1px solid #ececec;
+    background: #fefefe;
+    overflow: hidden
+}
+
+#footer {
+    border-top: 1px solid #ebebeb;
+    padding: 15px 0;
+    margin-top: 25px
+}
+
+#footer p {
+    padding: 5px 0;
+    text-align: center
+}
+
+#footer .site-nav {
+    padding-bottom: 30px;
+    font-size: 14px;
+    color: #dedede
+}
+
+#footer .site-nav a {
+    display: inline-block;
+    border: 1px solid #ececec;
+    padding: 0 22px;
+    margin: 0 5px;
+    height: 30px;
+    line-height: 30px;
+    color: #666;
+    vertical-align: bottom
+}
+
+#footer .site-nav a:hover {
+    color: #369;
+    text-decoration: none
+}
+
+#footer .site-nav a.bottom-logo {
+    border: 0;
+    height: 38px
+}
+
+#footer .site-nav a.bottom-logo img {
+    vertical-align: top
+}
+
+#footer .top-nav {
+    color: #d6d6d6;
+    font-size: 12px
+}
+
+#footer .top-nav a, #footer .top-nav strong {
+    font-weight: normal;
+    color: #858585
+}
+
+#footer .site-info {
+    font-size: 12px;
+    color: #999
+}
+
+#footer .site-info a, #footer .site-info span {
+    padding: 0 3px;
+    color: #369
+}
+
+.pull-right {
+    float: right
+}
+
+.pages {padding:20px 0 10px;}
+.pages span,
+.pages b,
+.pages em,
+.pages a {width:28px;height:28px;line-height:28px;display:inline-block;background-color:#999;text-align:center;float:left;margin-right:5px;color:#fff;cursor:pointer;}
+.pages em,
+.pages a,
+.pages .btn {font-size:12px;}
+.pages .input-append .btn {background:#999;color:#fff;text-shadow:none;border-radius:0;padding:4px 5px 3px;box-shadow:none;}
+.pages .pages-ipt {border:1px solid #999;border-radius:0;padding-bottom:3px;}
+.pages-ipt {width:32px;padding:0 2px;}
+
+.pages .first a,
+.pages .pre a,
+.pages .next a,
+.pages .end a {background-image:url(../img/glyphicons-halflings.png);background-repeat:no-repeat;text-indent:-9999px;}
+.pages .first a {background-position:-15px -160px;}
+.pages .pre a {background-position:-39px -160px;}
+.pages .next a {background-position:-63px -160px;}
+.pages .end a {background-position:-87px -160px;}
+.pages .input-append {float:left;}
+.pages b {background-color:#333;}
+
+.pages-nav {overflow:hidden;padding:0 0 10px}
+.pages-nav h4 {font-size:14px;}
+.pages-nav ul {font-size:12px;}
+.pages-nav li {width:49%;float:left;margin:2px 0;}
+.pages-nav li.active a,
+.pages-nav li.active {color:#39f}

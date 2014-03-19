@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>简单抓取FreeBuf工具列表</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>简单抓取FreeBuf工具列表</h2>
+	<p class="meta">2014-02-14</p>
+
+	<div class="post">
+	        <p></p>
+<p style="margin-bottom: 10px"><span style="color: rgb(0, 176, 80);">想把FreeBuf上介绍的所有工具整理一个列表，然后找出那些自己感兴趣而又没有了解过的工具，本来想着用BurpSuite简单的抓取下，但是操作发现Burp的正则匹配存在问题。于是花了点时间配置notepad++用python写个脚本抓取下，分享出来,给有需要的人，并通晓此类的问题的简单处理方法。</span></p>
+<h3><strong>具体如下:</strong></h3>
+<p style="text-align: center;"><img data-original="/imgs/761eed192a833b2f8a54c9a032343525.png!small" src="/imgs/761eed192a833b2f8a54c9a032343525.png!small" title="ToolList.png"></p>
+<noscript><img src="/imgs/761eed192a833b2f8a54c9a032343525.png!small" title="ToolList.png"></noscript>
+<p style="text-align: center;"><img data-original="/imgs/63b41b0ed2f2b1c062c01312de7e0786.png!small" src="/imgs/761eed192a833b2f8a54c9a032343525.png!small" style="float:none" title="FreebufTool2.png"></p>
+<noscript><img src="/imgs/63b41b0ed2f2b1c062c01312de7e0786.png!small" style="float:none" title="FreebufTool2.png"></noscript>
+<p><br></p>
+<p style="text-align: center;"><img data-original="/imgs/e45b9f0bca204c32566354f168082f01.png!small" src="/imgs/761eed192a833b2f8a54c9a032343525.png!small" style="float:none" title="py.png"></p>
+<noscript><img src="/imgs/e45b9f0bca204c32566354f168082f01.png!small" style="float:none" title="py.png"></noscript>
+<h3><strong>python脚本:</strong></h3>
+<pre class="prettyprint lang-python">#coding=utf-8
+
+'''
+Freebuf工具抓取脚本
+
+http://hi.baidu.com/l34rn
+
+'''
+
+import re,sys
+from urllib     import urlopen
+from Queue      import Queue
+from threading  import Thread
+from time       import strftime
+
+
+baseUrl='http://www.freebuf.com/tools/page/'
+outPut='FreebufToolsListX.html'
+pageNum=32+1
+threadNum=10
+urlList=[]
+threadList=[]
+urlNum=0
+    
+def spiderIndex(url):
+    '''
+    spider function
+    '''
+    global urlNum
+    try:
+        res=urlopen(url)
+    except Exception,e:
+        print '[-] [%s] [Error] [%s]'
+    if res.getcode()==200:
+        html=res.read()
+        lines=html.split('\n')
+        for line in lines:
+            rex=re.search(r'(&lt;dt&gt;&lt;a href=\")(http://www.freebuf.com/tools/\d*\.html)(\" target=\"_blank\"&gt;).*',line)
+            if rex!=None:
+                urlNum+=1
+                urlList.append(rex.group())
+                sys.stdout.write('\r[*] [%s] [Working] [%s]'%(str(strftime('%X')) ,str(urlNum)))
+    
+class WorkThread(Thread):
+    '''
+    work thread
+    '''
+    def __init__(self,q):
+        Thread.__init__(self)
+        self.q=q
+    def run(self):
+        while True:
+            if self.q.empty()==True:
+                break
+            _url=baseUrl+str(self.q.get())
+            spiderIndex(_url)
+            
+def main():
+    '''
+    main function
+    '''
+    q=Queue(maxsize=0)
+    for i in xrange(1,pageNum,1):
+        q.put(i)
+            
+    print '[+] [%s] [Start]'%strftime('%X')
+    print '[*] [%s] [http://hi.baidu.com/l34rn]'%strftime('%X')
+                        
+    spiderIndex('http://www.freebuf.com/tools')
+            
+    for i in xrange(threadNum):
+        t=WorkThread(q)
+        threadList.append(t)
+    
+    for i in threadList:
+        i.start()
+    
+    for i in threadList:
+        i.join()
+    
+    f=open(outPut,'ab')
+    f.write('&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;\n')
+    f.write('&lt;title&gt;Freebuf Tools List&lt;/title&gt;\n')
+    f.write('&lt;center&gt;&lt;h1&gt;&lt;b&gt;Freebuf Tools List&lt;/b&gt;&lt;/h1&gt;\n'+'Time:'+str(strftime("%Y-%b-%d %X"))+'  Count:'+str(len(urlList))+'&lt;/center&gt;&lt;hr/&gt;\n&lt;h5&gt;\n')
+    for line in urlList:
+        f.write(line+'&lt;/br&gt;\n')
+    f.write('&lt;/h5&gt;&lt;hr/&gt;&lt;center&gt;&lt;a href="http://hi.baidu.com/l34rn"&gt;Powered By L34Rn&lt;/a&gt;&lt;/center&gt;')
+    f.close()
+
+    print '\n[+] [%s] [End] [All Done!]'%strftime('%X')
+    print '[+] [%s] [Save As] [%s]'%(strftime('%X'),outPut)
+    
+if __name__=='__main__':
+    main()</pre>
+<h4><strong><br></strong></h4>
+<h4>
+<strong>抓取去结果: <br></strong><strong><a href="http://down.1337xss.org/data/txt/FreebufToolsListX.html">http://down.1337xss.org/data/txt/FreebufToolsListX.html</a></strong>
+</h4>
+<h3>
+<strong>python脚本下载:<br></strong><a href="http://down.1337xss.org/data/txt/FreeBufToolList.py" style="font-size: 16px;"><strong>http://down.1337xss.org/data/txt/FreeBufToolList.py</strong></a>
+</h3>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

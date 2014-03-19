@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Drozer – Android APP安全评估工具（附测试案例）</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Drozer – Android APP安全评估工具（附测试案例）</h2>
+	<p class="meta">2014-02-21</p>
+
+	<div class="post">
+	        <p></p>
+<p>Drozer原名mercury，是一款不错的Android APP安全评估工具。现在有社区版/专业版两个版本。<br></p>
+<p>
+	具体的使用说明可以参考<a href="https://www.mwrinfosecurity.com/system/assets/559/original/mwri_drozer-users-guide_2013-09-11.pdf">https://www.mwrinfosecurity.com/system/assets/559/original/mwri_drozer-users-guide_2013-09-11.pdf</a> </p>
+<p><strong>测试案例</strong></p>
+<p>某Android APP由于Content Provider的控制不严，导致可读写APP私有的数据库，具体的步骤和思路：</p>
+<p>1、查找APP完整的包名字（某些命令只能输入完整的包名才能执行）：</p>
+<pre class="prettyprint lang-html">dz&gt;
+run app.package.list -f
+younicom.snda.youni</pre>
+<p>
+		 	</p>
+<p>
+	2、列举出APP的详细信息</p>
+<pre class="prettyprint lang-bsh">run app.package.info -a  com.snda.youni</pre>
+<p><a rel="lightbox" href="/imgs/d62d82531fc468db5036214950986142.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-299" alt="1" data-original="/imgs/d62d82531fc468db5036214950986142.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="433" width="550"></a></p>
+<noscript><img class="aligncenter size-full wp-image-299" alt="1" src="/imgs/d62d82531fc468db5036214950986142.png" height="433" width="550"></noscript>
+<p>
+	3、APP攻击面分析，分析Activity/Broadcast Receiver/Content Provider/Service是否能被其他的的应用程序调用</p>
+<pre class="prettyprint">run app.package.attacksurface com.snda.youni</pre>
+<p><a rel="lightbox" href="/imgs/73c6bf2c95d7844b4afd83f2a5cf1ac0.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-300" alt="2" data-original="/imgs/73c6bf2c95d7844b4afd83f2a5cf1ac0.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="102" width="397"></a></p>
+<noscript><img class="aligncenter size-full wp-image-300" alt="2" src="/imgs/73c6bf2c95d7844b4afd83f2a5cf1ac0.png" height="102" width="397"></noscript>
+<p>
+	4、列举Content Provider的信息（可以看到Read/Write的Permission都是null）</p>
+<pre class="prettyprint">run app.provider.info -a com.snda.youni</pre>
+<p><span style="font-size:12px"></span></p>
+<p> (第一次测试的APP版本可以修改数据库) </p>
+<p><a rel="lightbox" href="/imgs/b39d5087865d087553fbcef54d45ad0b.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-301" alt="3" data-original="/imgs/b39d5087865d087553fbcef54d45ad0b.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="330" width="553"></a></p>
+<noscript><img class="aligncenter size-full wp-image-301" alt="3" src="/imgs/b39d5087865d087553fbcef54d45ad0b.png" height="330" width="553"></noscript>
+<p><span style="color:#000000">(修复之后再查看)</span></p>
+<p><a rel="lightbox" href="/imgs/48e8cd774ceea193e10c51cabb28c907.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-302" alt="4" data-original="/imgs/48e8cd774ceea193e10c51cabb28c907.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="328" width="555"></a></p>
+<noscript><img class="aligncenter size-full wp-image-302" alt="4" src="/imgs/48e8cd774ceea193e10c51cabb28c907.png" height="328" width="555"></noscript>
+<p>
+	5、有暴露的Provider，可以用drozer扫描可用的URI（drozer是否是通过源码静态扫描的方式发现这些URI？通过反编译dex-&gt;jar-&gt;class可以查找到这些URI）</p>
+<pre class="prettyprint">run app.provider.finduri com.snda.youni</pre>
+<p><a rel="lightbox" href="/imgs/3617ad7a9a66fc8ab067025cafc3543c.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-303" alt="5" data-original="/imgs/3617ad7a9a66fc8ab067025cafc3543c.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="669" width="640"></a></p>
+<noscript><img class="aligncenter size-full wp-image-303" alt="5" src="/imgs/3617ad7a9a66fc8ab067025cafc3543c.png" height="669" width="640"></noscript>
+<p>6、通过分析源代码可知DataStructs对应的是本地数据库，URI的结构：</p>
+<pre class="prettyprint">content://包名.数据库/表名</pre>
+<p>（URI不一定指向数据库，也可能是xml文件）</p>
+<p>
+	可以先在PC上用sqlite broswer分析.db文件，例如contacts表中有一个phone_number字段；有了这些信息搜集，就可以利用drozer命令+参数查看数据库内容。可以看到该APP默认的几条内容：</p>
+<p><a rel="lightbox" href="/imgs/8433253d242cc6820b93b8d086677267.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-304" alt="6" data-original="/imgs/8433253d242cc6820b93b8d086677267.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="130" width="642"></a></p>
+<noscript><img class="aligncenter size-full wp-image-304" alt="6" src="/imgs/8433253d242cc6820b93b8d086677267.png" height="130" width="642"></noscript>
+<p>
+	7、preferences表存储的是当前用户的一些基本信息，查询当前手机号: </p>
+<p><a rel="lightbox" href="/imgs/c8fa607b71638c8ce3af60aba5951b4f.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-305" alt="7" data-original="/imgs/c8fa607b71638c8ce3af60aba5951b4f.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="65" width="610"></a></p>
+<noscript><img class="aligncenter size-full wp-image-305" alt="7" src="/imgs/c8fa607b71638c8ce3af60aba5951b4f.png" height="65" width="610"></noscript>
+<p><span style="color:#000000">8、可以利用drozer直接修改数据库</span> </p>
+<p><a rel="lightbox" href="/imgs/1da25ab57140b9fe59ebc87ba664b7d9.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-306" alt="8" data-original="/imgs/1da25ab57140b9fe59ebc87ba664b7d9.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="66" width="608"></a></p>
+<noscript><img class="aligncenter size-full wp-image-306" alt="8" src="/imgs/1da25ab57140b9fe59ebc87ba664b7d9.png" height="66" width="608"></noscript>
+<p>
+	9、漏洞利用。结合该APP的一个功能：通过手机号转账给他人。假设Max安卓手机里装了该APP，Coco也申请了这个APP的账号并且在Max的联系<br>
+人名单中，ID就是Coco的手机号，APP显示给Max是昵称。Max的手机不小心中了木马，木马通过上述漏洞修改了APP私有数据库<br>
+（Contacts表）中Coco的手机号，改为攻击者的手机号。Max通过APP的转账功能给Coco转账，就转到攻击者的账户中。实际测试通过。</p>
+<p>
+	10、以上漏洞利用只是一个攻击思路，Content Provider的暴露应该可以带来更大的危害。 </p>
+<p>
+	11、Content Provider也可能造成本地SQL注入漏洞，通过在参数中提交特殊字符，触发数据库引擎的报错： </p>
+<p><a rel="lightbox" href="/imgs/d4ab63909a41143abbd7e22d241305bb.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-307" alt="10" src="/imgs/d4ab63909a41143abbd7e22d241305bb.png" height="78" width="644"></a><a rel="lightbox" href="/imgs/d4ab63909a41143abbd7e22d241305bb.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-307" alt="10" data-original="/imgs/d4ab63909a41143abbd7e22d241305bb.png" src="/imgs/d62d82531fc468db5036214950986142.png" height="78" width="644"></a></p>
+<noscript>
+<img class="aligncenter size-full wp-image-307" alt="10" src="/imgs/d4ab63909a41143abbd7e22d241305bb.png" height="78" width="644"><a rel="lightbox" href="/imgs/d4ab63909a41143abbd7e22d241305bb.png" class="highslide-image" onclick="return hs.expand(this);"><img class="aligncenter size-full wp-image-307" alt="10" src="/imgs/d4ab63909a41143abbd7e22d241305bb.png" height="78" width="644"></a>
+</noscript>
+<p>[via <a data_ue_src="http://www.maxwithcoco.com/notes/mobile-sec/apk-drozer-contentprovider" title="" target="_blank" href="http://www.maxwithcoco.com/notes/mobile-sec/apk-drozer-contentprovider">maxwithcoco</a>]<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

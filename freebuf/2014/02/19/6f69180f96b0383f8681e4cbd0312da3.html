@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>恶意软件模式匹配利器 – YARA</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>恶意软件模式匹配利器 – YARA</h2>
+	<p class="meta">2014-02-19</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>YARA是一款旨在帮助恶意软件研究人员识别和分类恶意软件样本的开源工具（由virustotal的软件工程师Victor M. Alvarezk开发），使用YARA可以基于文本或二进制模式创建恶意软件家族描述信息，当然也可以是其他匹配信息。</strong></span>YARA的每一条描述或规则都由一系列字符串和一个布尔型表达式构成，并阐述其逻辑。YARA规则可以提交给文件或在运行进程，以帮助研究人员识别其是否属于某个已进行规则描述的恶意软件家族。比如下面这个例子：</p>
+<pre class="prettyprint lang-html">rule silent_banker : banker
+{
+    meta:
+        description = "This is just an example"
+        thread_level = 3
+        in_the_wild = true
+    strings:
+        $a = {6A 40 68 00 30 00 00 6A 14 8D 91}
+        $b = {8D 4D B0 2B C1 83 C0 27 99 6A 4E 59 F7 F9}
+        $c = "UVODFRYSIHLNWPEJXQZAKCBGMT"
+    condition:
+        $a or $b or $c
+}</pre>
+<p>以上规则告诉YARA任何包含有$a、$b、$c字符串的文件都被标识为slient_banker。这仅仅是一个简单的例子，YARA的规则可以复杂和强大到支持通配符、大小写敏感字符串、正则表达式、特殊符号以及其他特性。</p>
+<p><span style="font-size: 20px;"><strong><span style="color: rgb(38, 38, 38);">一、YARA规则编写</span></strong></span></p>
+<p>YARA规则的标识符类似于C语言结构，其规则声明以rule标识，在规则描述中可以包括字母、数字甚至下划线字符，但字符串第一个字符不能是数字，且单条描述不能超过128个字符。和C语言一样，YARA规则也有关键字：</p>
+<table align="center" cellpadding="1" cellspacing="1" width="677"><tbody style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>all</p>
+</td>
+<td style="">
+<p>in</p>
+</td>
+<td style="">
+<p>private</p>
+</td>
+<td style="">
+<p>and</p>
+</td>
+<td style="">
+<p>include</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>rule</p>
+</td>
+<td style="">
+<p>any</p>
+</td>
+<td style="">
+<p>index</p>
+</td>
+<td style="">
+<p>rva</p>
+</td>
+<td style="">
+<p>ascii</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>indexes</p>
+</td>
+<td style="">
+<p>section</p>
+</td>
+<td style="">
+<p>at</p>
+</td>
+<td style="">
+<p>int8</p>
+</td>
+<td style="">
+<p>strings</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>condition</p>
+</td>
+<td style="">
+<p>int16</p>
+</td>
+<td style="">
+<p>them</p>
+</td>
+<td style="">
+<p>contains</p>
+</td>
+<td style="">
+<p>int32</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>true</p>
+</td>
+<td style="">
+<p>entrypoint</p>
+</td>
+<td style="">
+<p>matches</p>
+</td>
+<td style="">
+<p>uint8</p>
+</td>
+<td style="">
+<p>false</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>meta</p>
+</td>
+<td style="">
+<p>uint16</p>
+</td>
+<td style="">
+<p>filesize</p>
+</td>
+<td style="">
+<p>nocase</p>
+</td>
+<td style="">
+<p>uint32</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>fullword</p>
+</td>
+<td style="">
+<p>not</p>
+</td>
+<td style="">
+<p>wide</p>
+</td>
+<td style="">
+<p>for</p>
+</td>
+<td style="">
+<p>or</p>
+</td>
+</tr>
+<tr style="border: 0px;font-family: inherit;font-style: inherit;font-weight: inherit;margin: 0px;padding: 0px;vertical-align: baseline">
+<td style="">
+<p>global</p>
+</td>
+<td style="">
+<p>of</p>
+</td>
+<td style=""><br></td>
+<td style=""><br></td>
+<td style=""><br></td>
+</tr>
+</tbody></table>
+<p>YARA规则由字符串区域和条件区域两部分组成，其中条件区域必须存在，字符串区域则可有可无，比如不依赖任何字符串的规则：</p>
+<pre class="prettyprint lang-html">rule Dummy
+｛
+    condition:
+        false
+}</pre>
+<p>字符串区域中的每条规则都由$开头的字符串定义，其规则内容可以是字符形式或十六进制形式，所定义的字符串由条件区域引用：</p>
+<pre class="prettyprint lang-html">rule ExampleRule
+{
+    strings:
+        $my_text_string = "text here"
+        $my_hex_string = {E2 34 A1 C8 23 FB}
+    
+    condition:
+        $my_text_string or $my_hex_string
+}</pre>
+<p>与C语言一样，字符串规则使用双引号，而十六进制规则使用大括号引用，每个十六进制数字之间用空格间隔，且十进制数字不允许出现在十六进制规则中。</p>
+<p>条件区域决定YARA规则的逻辑，因此该区域的描述必须包含布尔型表达式，以判别目标文件或进程是否满足该规则。通常条件内容都会引用字符串区域中的字符串定义，比如上例中的$my_text_string和$my_hex_string。条件区域的字符串表述方式为布尔型变量，若文件或进程内存符合字符串表达式则其结果为True，否则即为False。</p>
+<p>注释方式</p>
+<p>YARA规则的注释方式和类C语言一样，可以用//进行单行注释，也可以用/**/进行多行注释。</p>
+<pre class="prettyprint lang-html">/*
+This is a multi-line comment …
+*/
+rule CommentExample // … and this is single-line comment
+{
+    condition:
+        false // just an dummy rule, don&amp;#039;t do this
+}</pre>
+<p>字符串区域</p>
+<p>YARA规则的字符串有三种类型：文本字符串、十六进制字符串、正则表达式。文本字符串用来定义文件或进程内存中可读型内容，十六进制字符串用来定义字节内容，正则表达式可用在文本字符串和十六进制字符串中。比如：</p>
+<pre class="prettyprint lang-html">rule HexExample
+{
+    strings:
+        $hex_string = { F4 23 ( 62 B4 | 56 | 45 ?? 67 ) 45 }
+    condition:
+        $hex_string
+}</pre>
+<p>文本字符串在YARA规则中是大小写敏感的，但可以使用nocase关键字来取消大小写敏感，字符串中的特殊字符亦可以使用转义符表达，比如：</p>
+<pre class="prettyprint lang-html">rule NocaseTextExample
+{
+    strings:
+        $text_string = "\\\"foobar\"\\" nocase
+    condition:
+        $text_string
+}</pre>
+<p>以上规则中所表示的字符串内容是\"foobar"\，由于使用nocase关键词，故亦可以表达\"FoObAr"\、\"FOOBAR"\等等大小写形式。</p>
+<p>如果在目标文件中一个字符由两个字节表示，即宽字符形式，则可以使用wide关键词来表示文本字符串。如果既想表示宽字符，也想表示ASCII码，则可以再使用ascii关键词。比如：</p>
+<pre class="prettyprint lang-html">rule WideAsciiTextExample
+{
+    strings:
+        $text_string = "\\\"foobar\"\\" nocase wide ascii
+    condition:
+        $text_string
+}</pre>
+<p>如果想匹配单个词组文本字符串，可以使用fullword关键词。比如：</p>
+<pre class="prettyprint lang-html">rule FullwordTextExample
+{
+    strings:
+        $text_string = "foobar" fullword
+    condition:
+        $text_string
+}</pre>
+<p>条件区域</p>
+<p>条件区域的内容为布尔类型表达式，因此该区域可以使用的符号可以是布尔操作符and、or和not，关系操作符&gt;、&lt;、==、&lt;=、&gt;=和!=，算数操作符+、-、*、/、%和按位操作符&amp;、|、&gt;&gt;、&lt;&lt;、^、~。比如：</p>
+<pre class="prettyprint lang-html">rule Example
+{
+    strings:
+        $a = "text1"
+        $b = "text2"
+        $c = "text3"
+    condition:
+        ($a or $b) and $c
+}</pre>
+<p>如果想表达字符串描述在文件或进程内存中出现的次数，则在条件表达式中将字符串定义中的$替换为#。比如：</p>
+<pre class="prettyprint lang-html">rule CountExample
+{
+    strings:
+        $a = "text1"
+        $b = "text2"
+        $c = "text3"
+    condition:
+        #a == 1 or #b &gt; 4 and #c &lt; 6
+}</pre>
+<p>如果想表达字符串在文件中的偏移量条件或虚拟地址的条件，则使用at关键词表示,且表达式中的数字类型可以是十进制或十六进制。比如：</p>
+<pre class="prettyprint lang-html">rule CountExample
+{
+    strings:
+        $a = "text1"
+        $b = "text2"
+        $c = "text3"
+    condition:
+        $a at 100 and $b at 0x004C0000 and $c at 300
+}</pre>
+<p>与at不同，使用in关键词可以表示文件偏移范围，比如：$a in (1..100)、$b in (100..filesize)。这里的filesize亦为关键词，表示文件的大小（单位字节），但该关键词仅适用于分析对象是文件形式。比如：</p>
+<pre class="prettyprint lang-html">rule FileSizeExample
+{
+    condition:
+        filesize &gt; 200KB
+}</pre>
+<p>另外一个特殊的关键词是entrypoint，表示文件入口点，适用于PE文件和ELF文件，当然也可以用于在运行进程。比如：</p>
+<pre class="prettyprint lang-html">rule FileSizeExample
+{
+    string:
+        $a = {E8 00 00 00}
+    condition:
+        $a at entrypoint
+}</pre>
+<p>在指定的文件位置表达可访问数据也是条件表达式可以做到的，需要用到uintXX或intXX关键词以及以下函数：</p>
+<pre class="prettyprint lang-html">int8(&lt;offset or virtual address&gt;)
+int16(&lt;offset or virtual address&gt;)
+int32(&lt;offset or virtual address&gt;)
+uint8(&lt;offset or virtual address&gt;)
+uint16(&lt;offset or virtual address&gt;)
+uint32(&lt;offset or virtual address&gt;)</pre>
+<p>利用以上关键词和函数，若想判断目标文件是否为PE文件，相应的规则可写为：</p>
+<pre class="prettyprint lang-html">rule IsPE
+{
+    condition:
+        // MZ signature at offset 0
+        uint16(0) == 0x5A4D and
+        // PE signature at offset stored in MZ header at 0x3C
+        uint32(uint32(0x3C)) == 0×00004550
+}</pre>
+<p>此外，还可以使用of、for…of等关键词表达字符串集合，使用them关键词表示隐式字符串定义。比如：</p>
+<pre class="prettyprint lang-html">rule AnonymousStrings
+{
+    strings:
+        $ = "dummy1"
+        $ = "dummy2"
+     condition:
+        1 of them
+}</pre>
+<p>其他规则</p>
+<p>除字符串区域和条件区域外，YARA还支持其他类型规则和形式，比如全局规则、私有规则、规则标签、元数据、额外变量。</p>
+<p>全局规则（global rule）旨在进行规则匹配前进行全局筛选，因此比其他规则匹配优先级要高，比如在匹配目标文件之前需要先筛选出小于2MB的文件：</p>
+<pre class="prettyprint lang-html">global rule SizeLimit
+{
+    condition:
+        filesize &lt; 2MB
+}</pre>
+<p>私有规则（private rule）的使用可以避免规则匹配结果的混乱，即若使用私有规则进行匹配则YARA不会输出任何匹配信息。比如在规则文件Rule2引用规则文件Rule1时不希望Rule1的匹配信息输出：</p>
+<pre class="prettyprint lang-html">private rule Rule1
+{
+    strings:
+        $a = "dummy1"
+        $b = "dummy2"
+     condition:
+        $a and $b
+}
+rule Rule2
+{
+    strings:
+        $a = "dummy3"
+     condition:
+        $a and Rule1
+}</pre>
+<p>规则标签（Tag Rule）的目的在于对规则匹配结果进行筛选，仅输出用户感兴趣的匹配结果。比如：</p>
+<pre class="prettyprint lang-html">rule TagRule : dummy1 dummy 2
+{
+    strings:
+        $a = "dummy1"
+        $b = "dummy2"
+     condition:
+        $a and $b
+}</pre>
+<p>元数据（MetaData）的目的在于对规则描述进行额外的描述存储，其构成方式和字符串区域一致，但不可用于条件区域引用。比如本文开头的例子。</p>
+<p>额外变量（External Variable）允许规则文件中存在YARA匹配时手动添加的变量内容（见下文YARA命令行参数），比如：</p>
+<pre class="prettyprint lang-html">rule ExternalVariableExample
+{
+    condition:
+        ext_var == 10
+}</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>二、YARA命令行参数</strong></span></p>
+<p>使用YARA进行规则匹配时需要两样东西：规则文件和目标文件，目标文件可以是文件、文件夹或进程。</p>
+<pre class="prettyprint lang-html">usage: yara [OPTION]… RULES_FILE FILE | PID
+options:
+-t &lt;tag&gt; print rules tagged as &lt;tag&gt; and ignore the rest. 
+-i &lt;identifier&gt; print rules named &lt;identifier&gt; and ignore the rest.
+-n print only not satisfied rules (negate).
+-g print tags.
+-m print metadata.
+-s print matching strings.
+-p &lt;number&gt; use the specified &lt;number&gt; of threads to scan a directory.
+-l &lt;number&gt; abort scanning after matching a number of rules.
+-a &lt;seconds&gt; abort scanning after a number of seconds has elapsed.
+-d &lt;identifier&gt;=&lt;value&gt; define external variable.
+-r recursively search directories.
+-f fast matching mode.
+-w disable warnings.
+-v show version information.</pre>
+<p>规则文件可以直接传递给YARA，也可以在规则匹配前通过YARAC进行编译，特别是在相同的规则文件需要进行多次调用进行模式匹配时，后者可以节省许多时间。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>三、平台支持</strong></span></p>
+<p>YARA支持多平台，可以运行在Windows、Linux、Mac OS X，并通过命令行界面或yara-python扩展的Python脚本使用。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>四、YARA使用者</strong></span></p>
+<ul class=" list-paddingleft-2">
+<li>
+<p><a textvalue="VirusTotal Intelligence" data_ue_src="https://www.virustotal.com/intelligence/" title="" target="_blank" href="https://www.virustotal.com/intelligence/">VirusTotal Intelligence</a></p>
+</li>
+<li>
+<p><a textvalue="jsunpack-n" data_ue_src="http://jsunpack.jeek.org/" title="" target="_blank" href="http://jsunpack.jeek.org/">jsunpack-n</a></p>
+</li>
+<li>
+<p><a textvalue="We Watch Your Website" data_ue_src="http://www.wewatchyourwebsite.com/" title="" target="_blank" href="http://www.wewatchyourwebsite.com/">We Watch Your Website</a></p>
+</li>
+<li>
+<p><a textvalue="FireEye, Inc." data_ue_src="http://www.fireeye.com/" title="" target="_blank" href="http://www.fireeye.com/">FireEye, Inc.</a></p>
+</li>
+<li>
+<p><a textvalue="Fidelis XPS" data_ue_src="http://www.fidelissecurity.com/network-security-appliance/Fidelis-XPS" title="" target="_blank" href="http://www.fidelissecurity.com/network-security-appliance/Fidelis-XPS">Fidelis XPS</a></p>
+</li>
+<li>
+<p><a textvalue="RSA ECAT" data_ue_src="http://www.emc.com/security/rsa-ecat.htm" title="" target="_blank" href="http://www.emc.com/security/rsa-ecat.htm">RSA ECAT</a></p>
+</li>
+<li>
+<p><a textvalue="CrowdStrike FMS" data_ue_src="https://github.com/CrowdStrike/CrowdFMS" title="" target="_blank" href="https://github.com/CrowdStrike/CrowdFMS">CrowdStrike FMS</a></p>
+</li>
+<li>
+<p><a textvalue="ThreatConnect" data_ue_src="http://www.threatconnect.com/" title="" target="_blank" href="http://www.threatconnect.com/">ThreatConnect</a></p>
+</li>
+</ul>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>五、下载链接</strong></span></p>
+<p>YARA 2.0.0：<a textvalue="https://github.com/plusvic/yara/releases/tag/v2.0.0" data_ue_src="https://github.com/plusvic/yara/releases/tag/v2.0.0" title="" target="_blank" href="https://github.com/plusvic/yara/releases/tag/v2.0.0">https://github.com/plusvic/yara/releases/tag/v2.0.0</a></p>
+<hr>
+<p>漏网之余</p>
+<p>在编写YARA规则时可以使用任何一款文本编译器，且文件后缀无要求，但如果使用记事本编写，则需要在使用YARA规则匹配前去除BOM（用vi编辑并使用“set nobomb”可以去除BOM），否则会提示“error：non-ascii character”。</p>
+<p>在命令行下使用YARA进行规则匹配后，若目标文件或进程符合规则，则输出“&lt;规则文件名&gt; &lt;目标文件名&gt;”，否则无任何输出，而使用YARA命令参数“-n”可以反转输出提示，即匹配时无输出，不匹配时有输出。</p>
+<p>关于YARA的使用可以参考<a textvalue="《关于KeyBoy针对越南和印度的攻击分析》" data_ue_src="http://blog.idf.cn/2014/02/yara-the-pattern-matching-swiss-knife-of-malware/" title="" target="_blank" href="http://blog.idf.cn/2014/02/yara-the-pattern-matching-swiss-knife-of-malware/">《关于KeyBoy针对越南和印度的攻击分析》</a>、《<a textvalue="巴基斯坦遭受诱惑性文档+Office 0day漏洞的APT攻击" data_ue_src="http://www.freebuf.com/news/21632.html" title="" target="_blank" href="http://www.freebuf.com/news/21632.html">巴基斯坦遭受诱惑性文档+Office 0day漏洞的APT攻击</a>》以及《<a textvalue="详细分析韩国网络攻击（Trojan.Hastati）" data_ue_src="http://www.freebuf.com/news/7926.html" title="" target="_blank" href="http://www.freebuf.com/news/7926.html">详细分析韩国网络攻击（Trojan.Hastati）</a>》。</p>
+<p>（全文完）</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

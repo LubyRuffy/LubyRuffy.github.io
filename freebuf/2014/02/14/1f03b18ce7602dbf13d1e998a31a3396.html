@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>移动支付安全评测：微信支付篇</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>移动支付安全评测：微信支付篇</h2>
+	<p class="meta">2014-02-14</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 18px;"><strong><span style="color: rgb(38, 38, 38);">前言：</span></strong></span></p>
+<p><strong>    2013年绝对是移动支付领域快速发展的一年，短短一年之间，各种伴随移动设备出现的支付工具纷至沓来，无论是靠电子商务起家，互联网支付领域的巨头阿里，还是后发制人协微信推出微信支付的腾讯，无一不在向消费者暗示着一个信息，<span style="color: rgb(0, 176, 80);">看好你的钱包，移动支付时代就要来了。</span></strong></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    <span style="font-size: 14px; color: rgb(0, 176, 80);">声明：</span>我们尽量将测试的所有内容做到客观中立，并且所有测试中的测试项都可以在相同版本中进行验证，感兴趣的朋友可以自己尝试。<strong>本次测试分为腾讯篇和阿里篇，测试产品版本分别为：</strong></span></p>
+<pre class="prettyprint lang-html"><p style="line-height: 1.5em"><span style="font-size: 14px">微信：5.1版本<br>支付宝钱包：8.0版本<br></span></p></pre>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    前一段时间很多微博、论坛都在讨论支付宝钱包的安全性和所谓的“手机丢失实验”测试。在我们的测试过程中，也有涉及到“手机丢失”的测试，支付宝钱包真的有像新闻里写的那么脆弱吗，别着急，这个就留在下一篇阿里篇去讨论。</span></p>
+<p style="text-align: left; line-height: 1.5em; margin-top: 15px;"><span style="font-size: 18px; color: rgb(38, 38, 38);"><strong>移动支付介绍</strong></span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    移动支付从应用情景层面来说，可以分为远景支付和近景支付。远景支付顾名思义就是，用户以远程的手段进行支付，远景支付我们大家都已经很熟悉了，常见的远景支付包括网银支付、银联支付、网络交话费、水电费等等。而近景支付则是一个相对陌生，并且市场相对空白，有待市场挖掘和用户教育，常见的近景支付有：NFC、手机钱包、声波支付、扫码支付等。</span></p>
+<p style="text-align: left; line-height: 1.5em; margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>微信支付介绍</strong></span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    2013年8月5日，腾讯发布微信5.0版本，正式加入了支付、游戏、二维码扫描条形码报价、扫描英文翻译、封面、街景等功能。从5.0版本开始，腾讯协微信正式进军移动支付领域。</span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    用户在微信中关联一张银行卡，并完成身份认证，即可将装有微信app的智能手机变成一个全能钱包，之后即可购买合作商户的商品及服务，用户在支付时只需在自己的智能手机上输入密码，无需任何刷卡步骤即可完成支付。</span></p>
+<p style="text-align: left; line-height: 1.5em; margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>微信支付与支付宝</strong></span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    微信支付和支付宝确切来说不是一个层面上的竞争。支付宝是一个支付工具，而微信支付，只是以微信产品为基础，为支付提供应用场景的生态体系，微信确切的说是一个底层架构，支付是微信产品基础之上衍生出来的一个服务，当然，如果腾讯愿意，微信也可以搭载更多的支付工具，甚至包括支付宝，也可以在微信上实现有效应用。</span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    微信支付最特别的地方在于，虽然它用了财付通的牌照和后台，但是微信支付的账户和财付通却没有任何关系。也就是说，你在微信支付里绑定的信用卡和消费账单，在用QQ账户登录的财付通上压根看不到，财付通也没有一个可以让你用微信账户登录的地方。这意味着微信支付根本没有网页端和电脑客户端，是一个纯粹内置在微信里的移动支付手段而已。</span></p>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px">    在微信支付的过程中，支付变成使用者用信用卡付款，而不是通过第三方支付用信用卡付款，除了一条确</span><span style="font-size: 14px;line-height: 1.5em">认短信之外根本不关财付通什么事。这样的支付流程和亚马逊有点像，你想买东西，掏出信用卡就够了，不用在买卖双方之间再加个第三方支付。</span></p>
+<p style="text-align: left; margin-top: 15px;"><span style="font-size: 18px; color: rgb(38, 38, 38);"><strong><span style="color: rgb(38, 38, 38); line-height: 21px;">潜在风险</span></strong></span></p>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px">    不同微信号对相同银行卡的多重绑定</span></p>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px">    用一张图片说明：</span></p>
+<p style="text-align: center"><span style="font-size: 14px;line-height: 21px"><img data-original="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" src="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" title="c.jpg"></span></p>
+<noscript><img src="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" title="c.jpg"></noscript>
+<p style="text-align: left;line-height: 1.5em"><span style="font-size: 14px;line-height: 21px">    产生的本质原因：注册微信时，微信未对注册人的真实身份（身份证、手机号码等）进行认证。</span></p>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px">    而在后期的测试中，也验证了这个问题，我们用两个手机的两个不同微信账户，可以绑定同一身份人的同一张银行卡，并且可以设置不同的支付密码。</span></p>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px"></span></p>
+<p style="text-align: center"><img src="/imgs/cb43b27e24cb1f15bd846e7d89ab1150.jpg!small" style="float:none" title="手机A"> <img data-original="/imgs/25dc8f98c4596dcf1b9afd5e2189b19f.jpg!small" src="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" title="手机B" style="float: none"></p>
+<noscript>
+<img src="/imgs/cb43b27e24cb1f15bd846e7d89ab1150.jpg!small" style="float:none" title="手机A"> <img src="/imgs/25dc8f98c4596dcf1b9afd5e2189b19f.jpg!small" title="手机B" style="float: none">
+</noscript>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px"></span></p>
+<p style="text-align: center"><img src="/imgs/00406dba8c6e1337b5320979dc5d42c2.png!small" style="float:none" title="a.png">  <img data-original="/imgs/bfee84b35e39d9edfdd8941d9fdbe1e9.png!small" src="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" title="SSS.png" style="float: none"></p>
+<noscript>
+<img src="/imgs/00406dba8c6e1337b5320979dc5d42c2.png!small" style="float:none" title="a.png">  <img src="/imgs/bfee84b35e39d9edfdd8941d9fdbe1e9.png!small" title="SSS.png" style="float: none">
+</noscript>
+<p style="line-height: 1.5em"><span style="font-size: 14px"></span><span style="font-size: 14px;line-height: 1.5em">    这个潜在风险在于，理论上我拿到你的手机，知道你的银行卡号（前提是办理该张银行所预留的手机号就是当前所使用的），就可以完全使用任意微信账号（未开通过微信支付的微信账号）绑定你的银行卡从而进行消费。</span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px">    腾讯现在的做法是默认微信账号与第一次开通微信支付时绑定的银行卡用户名进行关联绑定。简单点的说就是，假设我现在开通微信支付，但却绑定另一个人的银行卡，那么此后我就只能绑定与这个人相关的银行卡,不能绑定其他人的银行卡。之后我们通过和腾讯微信的人工客服沟通，了解到暂时不支持解绑定操作。</span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px">    对比一下阿里的做法，阿里在支付宝注册时就对注册人进行真实身份验证（并且一个真实身份只能对应一个支付宝账户），当其他用户想要绑定该银行卡时，支付宝会同时比对银行卡预留信息和支付宝身份绑定信息，若不相同是无法绑定银行卡的。整个过程如图所示：</span></p>
+<p style="line-height: 1.5em;text-align: center"><span style="font-size: 14px"><img data-original="/imgs/8c8a3ae2e150b58617fb903848f3d15d.jpg!small" src="/imgs/35fd7e92852d9591ae8a798dfc572a1d.jpg!small" title="alipay"></span></p>
+<noscript><img src="/imgs/8c8a3ae2e150b58617fb903848f3d15d.jpg!small" title="alipay"></noscript>
+<p style="line-height: 1.5em"><span style="font-size: 14px">    根据现有的信息，我们不难看出，由于支付宝前期定位就是一款便捷的支付工具，因此对账户信息和真实身份的验证计划执行的相对比较周密；而微信则不太相同，由于<span style="font-size: 14px;line-height: 24px">微信最初的核心定位在于其强大便捷的社交属性。</span>这里大胆猜测，微信支付在最初的微信产品计划里是不存在的，<span style="font-size: 14px;line-height: 24px">是初代产品发布后，中途加进去的想法</span>，当<span style="font-size: 14px;line-height: 24px">后期用户增长到一定数量</span>，才计划开始做支付这个模块的。否则应该在微信最初上线时就对用户进行真实身份认证的。</span></p>
+<p style="line-height: 1.5em; margin-top: 15px;"><span style="font-size: 18px; color: rgb(38, 38, 38);"><strong>解决办法：</strong></span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px">    增加对微信用户的真实身份验证。鉴于微信用户已经是一个很庞大的群体，让用户自助式实名制认证明显是不可取的，这里可以借鉴使用财付通的数据，由于财付通拥有第三方支付牌照，可以将财付通的实名制数据与微信账户关联，从而解决这个问题。</span></p>
+<p style="text-align: left; margin-top: 15px;"><span style="font-size: 18px; color: rgb(38, 38, 38);"><strong><span style="color: rgb(38, 38, 38); line-height: 21px;">总结</span></strong></span></p>
+<p style="text-align: left"><span style="font-size: 14px;line-height: 21px">    在对微信支付进行测试的过程中，除去<span style="font-size: 14px;line-height: 21px">多重绑定这个在逻辑设计上存在的一些问题，其他诸如数据加密传输、证书替换和中间人截断等测试，微信支付表现的还是很不错的，总体安全性还是比较可靠。</span></span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px">    另外，移动支付领域从最初的电话、短信、网银到现在的手机支付、NFC支付等方式，未来也许还会出现类似苹果Touch ID指纹识别技术的生理特征支付方式。</span><span style="font-size: 14px;line-height: 1.5em">但无论哪种支付方式。敏感数据的加密、存储、传输永远是核心问题，敏感信息问题一天不解决，移动支付的普及就没有基础。扫码支付也好、声波支付也好、NFC支付也好，它们提供的只是一个更加简捷的支付方式，是最表象的东西，底层仍然是安全。</span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px;line-height: 1.5em">——微信支付篇 <span style="font-size: 14px;line-height: 1.5em">THE EN</span>D——</span></p>
+<p style="line-height: 1.5em"><span style="font-size: 14px;line-height: 1.5em">注：文章内容仅供交流学习使用，拒绝任何不负责任的夸大传播。</span></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

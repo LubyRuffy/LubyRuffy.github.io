@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Paypal的一个Dom型XSS漏洞分析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Paypal的一个Dom型XSS漏洞分析</h2>
+	<p class="meta">2014-03-18</p>
+
+	<div class="post">
+	        <p></p>
+<ul class="tag_box inline list-paddingleft-2" style="list-style-type: none;"></ul>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>前言</strong></span><br></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>DOM xss也称为第三种类型的xss或者类型0。现在DOM型的xss越来越多了，除了因为各种JS库比如YUI，Jquery，Jquery mobile等的使用，还有很多编程语言，比如php更多的支持了HTML5的特性。</strong></span></p>
+<h3 style="margin-top: 15px;" id="w3school"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>W3school的缺陷代码样例</strong></span></h3>
+<p>很多学习的资料的样例代码都不够安全，比如下面是来自于w3school的Jquery教程中的一段代码。</p>
+<p style="text-align:center"><img data-original="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="4.png" style="white-space: normal;"></p>
+<noscript><img src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="4.png" style="white-space: normal;"></noscript>
+<p>这段代码使用html()方法输出html，但是html()并不是一个安全的输出html的方式。可以参考<a textvalue="DOM Based XSS Wiki" data_ue_src="https://code.google.com/p/domxsswiki/wiki/jQuery" title="" target="_blank" href="https://code.google.com/p/domxsswiki/wiki/jQuery">DOM Based XSS Wiki</a>。如果用户可控的输入经过html()输出之前没有合适的过滤，就会导致DOM xss。Jquery的html()相当于javascript的innerHTML。</p>
+<h3 style="margin-top: 15px;" id="paypaldom_xss"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>Paypal的DOM xss</strong></span></h3>
+<p>子域名financing.paypal.com上有一个功能引起了我的兴趣，它允许用户创建一个不同大小的广告。广告的大小是在客户端，使用jquery控制的。</p>
+<p>比如</p>
+<pre class="prettyprint lang-html">https://financing.paypal.com/ppfinportal/adGenerator/webCopy?460 * 80</pre>
+<p>上面是展示”460*80”大小的广告。修改460*80成别的字符串，也会输出在网页里。所以现尝试修改成一个xss payload</p>
+<pre class="prettyprint lang-html">&lt;svg/onload=prompt(1)&gt;
+https://financing.paypal.com/ppfinportal/adGenerator/webCopy?&lt;svg/onload=prompt(1)&gt;</pre>
+<p style="text-align:center"><img data-original="/imgs/1fb5c85d761c92702185a21c1501cb16.png!small" src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="rafay2.png" style="white-space: normal;"></p>
+<noscript><img src="/imgs/1fb5c85d761c92702185a21c1501cb16.png!small" title="rafay2.png" style="white-space: normal;"></noscript>
+<p>很不幸，输出的结果经过了URL编码。当然这有两个可能，一个是javascript对我们的输入进行了编码，也可能是通用的浏览器行为,Google Chrome 和Firefox会对问号之后的所有数据进行URL编码。当使用IE测试的时候，成功的执行了我们的脚本。</p>
+<p style="text-align:center"><img data-original="/imgs/a4cb25611325e2eeeae760caf570d101.png!small" src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="5.png" style="white-space: normal;"></p>
+<noscript><img src="/imgs/a4cb25611325e2eeeae760caf570d101.png!small" title="5.png" style="white-space: normal;"></noscript>
+<p>我们也可以使用一些技巧在Chrome上弹窗。Chrome对#号之后的内容不会进行URL编码。所以可以通过以下payload在chrome上执行代码。</p>
+<pre class="prettyprint lang-html">https://financing.paypal.com/ppfinportal/adGenerator/webCopy?#&lt;svg/onload=prompt(1)&gt;</pre>
+<p style="text-align:center"><img data-original="/imgs/27dcf2e0c418688c3c18c43417789a91.png!small" src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="domxss.png" style="white-space: normal;"></p>
+<noscript><img src="/imgs/27dcf2e0c418688c3c18c43417789a91.png!small" title="domxss.png" style="white-space: normal;"></noscript>
+<h3 style="margin-top: 15px;" id="_2"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>代码分析</strong></span></h3>
+<p>通过一些调试，我们找到了引起漏洞的代码。</p>
+<p style="text-align:center"><img data-original="/imgs/fdf6c21650b0c0a96389f61b5fb46c21.png!small" src="/imgs/1b79fe03c2afa493e8e57edc0c2bb04b.png!small" title="rafay3.png" style="white-space: normal;"></p>
+<noscript><img src="/imgs/fdf6c21650b0c0a96389f61b5fb46c21.png!small" title="rafay3.png" style="white-space: normal;"></noscript>
+<p>517行document.url通过split函数取了？号的部分，存到了变量url里。然后通过html()进行了输出。</p>
+<h3 style="margin-top: 15px;" id="_3"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>结论</strong></span></h3>
+<p>随着各种动态js库的使用，DOM xss也会越来越普遍。本文希望告诉读者，除了在服务端对用户的输入进行过滤，在客户端同样要对用户的输入进行恰当的过滤。</p>
+<p>[via <a textvalue="rafayhackingarticles.net" data_ue_src="http://www.rafayhackingarticles.net/2014/03/a-tale-of-dom-based-xss-in-paypal.html" title="" target="_blank" href="http://www.rafayhackingarticles.net/2014/03/a-tale-of-dom-based-xss-in-paypal.html">rafayhackingarticles.net</a> 翻译整理 by litdg@freebuf]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

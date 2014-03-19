@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Android平台下的第一个Tor木马</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Android平台下的第一个Tor木马</h2>
+	<p class="meta">2014-03-03</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-indent: 28px"><span style="font-family:宋体"></span></p>
+<p><span style="text-indent: 28px"></span>    <span style="color: rgb(38, 38, 38);"><strong>通常来说，Android木马作者一般都是以Windows下的恶意软件功能作为模板对Android木马进行功能开发。近期，另一个Windows下的木马技术也在Android平台实现了</strong></span>：这是我们第一次检测到一款将<span style="color: rgb(192, 0, 0);"><strong>.onion伪区域（pseudo zone）</strong></span>的域名作为C&amp;C服务器的Android木马。该木马使用由代理服务器构成的匿名Tor网络进行通信，这样就是使木马操纵者也变成匿名的了，因为Tor允许被访问的站点在.onion域名中“匿名”显示，而只有Tor可以访问这种网站。</p>
+<p style="text-align:center"><img data-original="/imgs/d0a898a059fddb59d6bd283e27c42698.png!small" src="/imgs/d0a898a059fddb59d6bd283e27c42698.png!small" title="1.png"></p>
+<noscript><img src="/imgs/d0a898a059fddb59d6bd283e27c42698.png!small" title="1.png"></noscript>
+<p>    该木马名为Backdoor.AndroidOS.Torec.a，是被广泛使用的Tor客户端Orbot的一个变种，木马作者将其自己的代码添加到这款客户端中，但并没有冒充这款客户端，只是为了使用客户端中的部分功能。</p>
+<p style="text-align:center"><img data-original="/imgs/fa779476795ee901028bbc4a76022e37.png!small" src="/imgs/d0a898a059fddb59d6bd283e27c42698.png!small" title="2.png"></p>
+<noscript><img src="/imgs/fa779476795ee901028bbc4a76022e37.png!small" title="2.png"></noscript>
+<p>该木马可以从C&amp;C服务器接收以下命令：</p>
+<p style="text-align:center"><img data-original="/imgs/381441a21f3d8552e84cc4a2bbb31bd5.png!small" src="/imgs/d0a898a059fddb59d6bd283e27c42698.png!small" title="3.png"></p>
+<noscript><img src="/imgs/381441a21f3d8552e84cc4a2bbb31bd5.png!small" title="3.png"></noscript>
+<p>即：<br></p>
+<pre class="prettyprint lang-html">  - 开始/停止拦截接收到的SMS短信
+  - 开始/停止偷取发出去的SMS短信
+  - 执行一次USSD请求
+  - 将电话数据发往C&amp;C服务器（电话号、国藉、IMEI、手机model，系统版本等）
+  - 将电话中安装的app列表发往C&amp;C服务器
+  - 向命令中指定的号码发送一条SMS短信</pre>
+<p>    使用Tor网络有利有弊。有利的方面是几乎没有可能使C&amp;C服务器关闭，但最主要的弊端是需要编写额外的代码，也就是说Backdoor.AndroidOS.Torec.a要想使用Tor，比起只实现它自己的功能，需要编写的代码要多得多。</p>
+<p>[译<a href="http://www.securelist.com/en/blog/8184/The_first_Tor_Trojan_for_Android" target="_blank" title="" data_ue_src="http://www.securelist.com/en/blog/8184/The_first_Tor_Trojan_for_Android" textvalue="securelist">securelist</a>]<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

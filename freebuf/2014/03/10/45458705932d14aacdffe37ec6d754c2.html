@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>BCTF Write-up：他乡遇故知</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>BCTF Write-up：他乡遇故知</h2>
+	<p class="meta">2014-03-10</p>
+
+	<div class="post">
+	        <p></p>
+<p>BCTF线上选拔赛终于结束了，小菜只是来过个场。扯淡结束，说一下flag比较有趣的题目-《他乡遇故知》</p>
+<p>原题如下：</p>
+<p style="text-align: center;"><img data-original="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="他乡遇故知.jpg"></p>
+<noscript><img src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="他乡遇故知.jpg"></noscript>
+<p>地址：<a href="http://bctf.cn/files/downloads/meeting-tupper_baaa58809f2a0435cb5f282ce4249fdf.txt">http://bctf.cn/files/downloads/meeting-tupper_baaa58809f2a0435cb5f282ce4249fdf.txt</a><br></p>
+<p style="text-align: center;"><img data-original="/imgs/34120508151279e079cb9023c5b82040.jpg!small" src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="他乡遇故知2.jpg"></p>
+<noscript><img src="/imgs/34120508151279e079cb9023c5b82040.jpg!small" title="他乡遇故知2.jpg"></noscript>
+<p>这是这么坑人的题目，当然，我们被坑主要还是在后面，看官请耐心。什么？就给这么一大串让我们凭空想象，还有这么多队伍解出，还有没有天理了！本来没什么队伍解出，后来放了提示，说论文很重要，论文在哪呢？好吧，下面开始Google：Tupper's paper真找到了，激动啊，看看介绍，下面这个对我们了解什么是tupper应该有帮助。</p>
+<p><a href="http://www.petervis.com/mathematics/tuppers_self-referential_formula/how_to_graph_tuppers_self_referential_formula.html">http://www.petervis.com/mathematics/tuppers_self-referential_formula/how_to_graph_tuppers_self_referential_formula.html</a></p>
+<p>接下来继续了解：</p>
+<p><a href="http://www.pypedia.com/index.php/Tupper_self_referential_formula">http://www.pypedia.com/index.php/Tupper_self_referential_formula</a><br></p>
+<p>Python程序都帮我们弄好了，我们把@换成*，方便看得清楚，开解。</p>
+<p>放上第一句：</p>
+<p style="text-align: center;"><img data-original="/imgs/ffdd2557cda015c6068176d67ec07cd6.jpg!small" src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="lol.jpg"></p>
+<noscript><img src="/imgs/ffdd2557cda015c6068176d67ec07cd6.jpg!small" title="lol.jpg"></noscript>
+<p>需要拉宽，我就不截全了，原文是：LOL,I think they hastard knows nothing about math.（嘲讽的一句，可以自行翻译意思）</p>
+<p>重磅的第二句来了，我们被这个搞了一天</p>
+<p style="text-align: center;"><img data-original="/imgs/314b8546efc59eaae1921f66eed2c45f.jpg!small" src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="61.jpg"></p>
+<noscript><img src="/imgs/314b8546efc59eaae1921f66eed2c45f.jpg!small" title="61.jpg"></noscript>
+<p>原文是：Tt's not safe!You should use 61,17 is to weak.</p>
+<p>第三句不截图了，原文是：Fine,here is your flag is 61.</p>
+<p>重磅在哪呢？那个61，我们几个人围在一起看，最终认为它是E1，然后又是各种字符转换，E1=225等等…无果，我们快被搞死了，第二天才知道那是61，我们恍然大悟，坑爹啊！</p>
+<p>好的，按照他们的意思，从第四句开始，将公式的17换为61，相应的，16换成60，继续。</p>
+<p>搞出第四句：</p>
+<p style="text-align: center;"><img data-original="/imgs/e4eeca014e0eafe66c1b4f54d4fec9a3.jpg!small" src="/imgs/5e4c3b038906eda91bfe07f91440102b.jpg!small" title="please.jpg"></p>
+<noscript><img src="/imgs/e4eeca014e0eafe66c1b4f54d4fec9a3.jpg!small" title="please.jpg"></noscript>
+<p>这是答案的部分，答案的图像多清楚，你要是把61写的这么清楚，我们至于那样么。</p>
+<p>最终答案是：p1e4se d0nt g1ve up cur1ng   (请不要放弃治疗)</p>
+<p>我想说，命题组，药不能停啊！至于第五句，什么内容都没有，几个椭圆形。</p>
+<p>&lt;&lt;EOF</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

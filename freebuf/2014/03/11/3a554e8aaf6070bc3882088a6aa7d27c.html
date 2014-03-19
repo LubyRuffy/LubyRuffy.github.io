@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>卡巴斯基安全研究员解析狡猾的APT攻击 “The Mask”</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>卡巴斯基安全研究员解析狡猾的APT攻击 “The Mask”</h2>
+	<p class="meta">2014-03-11</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><img title="001.jpg" data-original="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small" src="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small"></p>
+<noscript><img title="001.jpg" src="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>【Careto /“The mask”究竟是什么?】</strong></span></p>
+<p>    “The mask”是一个起始于2007年甚至可能更早，并一直活跃着的网络间谍行动。</p>
+<p>    “The mask”的独特魅力在于攻击者所使用的工具集的复杂性。这套工具集包括一个极其复杂的恶意攻击软件,一个rootkit，一个bootkit、Mac OS X和Linux版本,可能还有Android和iPad / iPhone(iOS)版本。</p>
+<p>    “The mask”为了更有效的隐秘性使用了一个定制的攻击，这个特定的攻击模块专门针对旧版的卡巴斯基实验室产品，复杂性甚至超过了Duqu木马,“The mask”堪称目前最先进的威胁之一。鉴于此以及考虑其他一些因素，有理由相信这可能是一个由国家资助的操作。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【2、为什么称之为“The mask”?】</strong></span></p>
+<p>    “The mask”这个名字来自西班牙俚语词“Careto”("Mask" or "Ugly Face"–可译为“面具”或“丑陋的脸”)，研究员在病毒模块中发现该字符串（如下图所示），故而以此命名。</p>
+<p style="text-align: center;"><img title="002.png" data-original="/imgs/b86ab8984a5defd1b54326b0d8a79be9.png!small" src="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small"></p>
+<noscript><img title="002.png" src="/imgs/b86ab8984a5defd1b54326b0d8a79be9.png!small"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>【3、谁是受害者?/攻击目标是什么呢?】</strong></span></p>
+<p>Careto的主要目标分为以下几种类别:</p>
+<p>–政府机构</p>
+<p>–外交办公室和大使馆</p>
+<p>–能源,石油和天然气公司</p>
+<p>–研究机构</p>
+<p>–私人股本公司</p>
+<p>–社会积极分子</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【4、目前可知受害者的总数吗?】</strong></span></p>
+<p>    尽管受害者的具体数量未知,但我们已经观察到分布在31个国家的超过了1000个IP地址被感染，已观察到被感染的国家包括:阿尔及利亚、阿根廷、比利时、玻利维亚、巴西、中国、哥伦比亚、哥斯达黎加、古巴、埃及、法国、德国、直布罗陀、危地马拉、伊朗、伊拉克、利比亚、马来西亚、墨西哥、摩洛哥、挪威、巴基斯坦、波兰、南非、西班牙、瑞士、突尼斯、土耳其、英国、美国和委内瑞拉。</p>
+<p>    基于卡巴斯基实验室开发的识别算法,估算出受害人数目在380个以上。</p>
+<p style="text-align: center;"><img title="003.png" data-original="/imgs/96384e3da71ed73cc0edf95ce1cd2856.png!small" src="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small"></p>
+<noscript><img title="003.png" src="/imgs/96384e3da71ed73cc0edf95ce1cd2856.png!small"></noscript>
+<p>    然而,考虑到收集这些受害者信息依据只是一些C&amp;C服务器和已记录在案的主机,所以可能受影响的国家和受害者的真实总数会更高。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【5、Careto是做什么的?目标机器被感染后会发生什么?】</strong></span></p>
+<p>    对于一个受害者而言,感染了Careto的危害是灾难性的。该款恶意软件能够拦截所有的沟通渠道,从受感染的系统中收集最重要的信息。因为其具有隐形rootkit功能，非常不易检测到。除了内置功能,Careto可以上传可以执行任何恶意的任务的其他模块。考虑到已知受害者的性质,Careto的影响可能非常高。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【6、Careto如何感染电脑?】</strong></span></p>
+<p>    我们发现"The mask"活动主要依赖附带恶意网站链接的网络钓鱼电子邮件。设计好的恶意网站包含了很多可利用的漏洞，根据系统配置的不同，可以感染很多游客,这取决于他的系统配置。成功感染后恶意网站会将用户重定向到电子邮件中引用的一个良性网站上,比如一个YouTube电影或新闻门户网站。</p>
+<p>    需要特别注意的是，这些包含可利用漏洞的网站不自动感染游客;相反,袭击者主机网站上的可利用漏洞存放在特定的文件夹,他们除了恶意邮件之外，并不与其他任何事物有直接关联。有时,攻击者在恶意网站上使用子域,使他们看起来更合法。这些子域名主要模拟一些西班牙的主要报纸或者一些国际上有名的报纸（如《卫报》和《华盛顿邮报》）。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【7、攻击者利用零日漏洞吗?】</strong></span></p>
+<p>    到目前为止,我们观察到的"Themask"攻击使用到了多个攻击手段，其中包含至少一个Adobe FlashPlayer可利用漏洞(cve – 2012 – 0773)，该漏洞主要针对Flash播放器的10.3和11.2版本。</p>
+<p>    “cve – 2012 – 0773”最初是由VUPEN黑客团体发现的，这中间还有一个有趣的故事，2012年在加拿大CansecWest举行的Pwn20wn黑客大会上由VUPEN黑客团体首次攻破了Google公司Chrome浏览器，发现其存在一个安全绕过漏洞和一个内存释放后可利用漏洞。这个可利用漏洞引起了很大的争议,因为VUPEN团队拒绝透露他们如何躲过了沙箱,并声称他们计划将该可利用漏洞卖给他们的客户。有可能是Careto操作者从VUPEN手中购买了此漏洞。(参见RyanNaraine故事)</p>
+<p>    其他攻击手段使用包括社会工程,比如要求用户下载并执行一个JavaUpdate。jar文件或安装一个Chrome浏览器插件。我们怀疑存在其他的可利用漏洞,但我们的研究员没有能够从攻击服务器检索到它们。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【8、这是一个仅适用于windows的威胁吗?哪些Windows 版本是攻击目标?有针对MacOS X和Linux系统的变体吗?】</strong></span></p>
+<p>    到目前为止,我们观察到该木马可以感染MicrosoftWindows和Mac OS x系统。发现其中有一些利用服务器路径包含模块,似乎是为感染Linux系统的计算机而设计的,但我们还没有找到Linux后门。此外,从C&amp;C服务器的日志显示,可能存在Android和苹果iOS系统的后门。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【9、是否有一个移动组件的任何证据——iOS、Android或黑莓?】</strong></span></p>
+<p>    我们怀疑存在一个iOS后门,但我们没能找到它。怀疑是基于一个服务器的调试日志，日志显示了一个标识为阿根廷的受害者，并记录了该用户的代理信息是"Mozilla/5.0(iPad; CPU OS 6_1_3 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko)Mobile/10B329"。这似乎表明这是一个iPad,尽管没有一个确定的示例。</p>
+<p>    除此之外,我们还怀疑存在一个Android的植入物。这是基于发送到C&amp;C服务器上的一个独特的版本标识符“AND1.0.0.0”。使用到这种独特标识符的通信已在3 g连接上被观察到,表示可能是一个移动设备。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【10、它与其他的APT攻击有何不同?】</strong></span></p>
+<p>    “The mask”的独特魅力是攻击者所使用的工具集的复杂性。它的武器库包括了极其复杂的恶意软件,rootkit,bootkit,Mac和Linux版本,可能存在Android和iPad/ iPhone(苹果iOS)版本。</p>
+<p>    同时, “The mask”为增强其隐秘性而使用了一个定制的攻击，这个特定的攻击模块专门针对旧版的卡巴斯基实验室产品，复杂性甚至超过了Duqu木马,“The mask”堪称目前最先进的威胁之一。鉴于此以及考虑其他一些因素，有理由相信这可能是一个由国家资助的操作。（回答与第一个问题雷同……）</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【11、如何认知到这个威胁的存在?谁报告的?】</strong></span></p>
+<p>    我们最初意识到Careto是观察到有恶意软件试图利用卡巴斯基安全产品的漏洞，从而更加隐秘的入侵系统。这种手段增加了我们的兴趣,研究团队决定进一步调查。换句话说,因为攻击者对卡巴斯基实验室产品的攻击，成功的吸引了我们的注意力。</p>
+<p>    虽然这个产品的漏洞在五年前已经被发现并得到了修补，但是在用户没有更新产品的情况下，尽管可以删除恶意软件并清查系统，这个漏洞仍然可以被利用,。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【12、有多个变体Careto吗?这些变体主要差别是什么?】</strong></span></p>
+<p>    Careto是一个高度模块化的系统,它能够支持插件和配置文件，这一特性使得它可以拥有很多功能。</p>
+<p>    从2007年开始，Careto就有不同的编译版本，不过大多数模块创建于2012年。</p>
+<p style="text-align: center;"><img title="004.png" data-original="/imgs/37a6f2fb20b8d4061fa67780267d839f.png!small" src="/imgs/4a4d323c5b8ec01aa32a52e76748073b.jpg!small"></p>
+<noscript><img title="004.png" src="/imgs/37a6f2fb20b8d4061fa67780267d839f.png!small"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>【13、Careto的C&amp;C服务器仍然活跃吗？是否能够掌握任何C&amp;C服务器 】?</strong></span></p>
+<p>    截止目前,所有已知Careto服务器都已离线。从2014年1月开始攻击者陆续使这些C&amp;C服务器离线。我们仍掌握着几台C&amp;C服务器,允许我们收集统计信息。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【14、哪些信息是攻击者的窃取目标?】</strong></span></p>
+<p>    恶意软件从受感染的系统上收集大量的文档,包括加密密钥、VPN配置,SSH密钥和RDP文件，我们还监视到几个未知功能的扩展模块，可能与定制的军事/国家级别的加密工具有关联。</p>
+<p>    我们分析到的完整的Careto收集文件格式列表如下:</p>
+<pre class="prettyprint lang-html">* .AKF,* .ASC、* .AXX * .CFD,*.CFE,* .CRT,* . doc,* docx,* .EML,* .ENC,* .GMG,* .GPG,* .HSE,* .KEY,
+* .M15,* .M2F、*.M2O * .M2R,* .MLS,* .OCFS,* .OCU,*。ods,*.ODT,* .OVPN,* .P7C,* .P7M,* .P7Z,* .PAB,* . pdf,
+* .PGP,* .PKR、*.PPK * .PSW,* .PXL,* .RDP,* . rtf,* .SDC,* .SDW,* .SKR,* . ssh,* .SXC,* .SXW,*.VSD,
+* .WAB,* .WPD、*.WPS * .WRD,* xls,* .XLSX</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>【15、这是一个政府资助的攻击吗?】</strong></span></p>
+<p>    “The mask”使用一个专门针对旧版卡巴斯基实验室产品的定制攻击，有效的提高了其隐秘性。此外,它的武器库中还包括一个rootkit,bootkit,Linux/ Mac版本，也可能存在iOS版本。复杂性超过了Duqu木马,就目前的技术水平而言，“The mask”的攻击手段相当的先进。</p>
+<p>    另外,我们观察到这种攻击背后有一个高水准的专业性操作集团,比如攻击者能有效的监视他们的基础设施,关闭操作,巧妙的穿透系统的访问限制,使用擦拭而不是删除日志文件等等。这种安全操作的级别不是寻常的网络犯罪组织能够达到的。</p>
+<p>    鉴于此以及其他一些因素，我们有理由相信这可能是由一个国家资助的活动。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【16、谁应对此攻击负责?】</strong></span></p>
+<p>    追根溯源是一项艰巨的任务。由于互联网的开放性和波动性，找出一个明确的源头是非常困难。</p>
+<p>    诸如使用到了西班牙语这类的线索是相当薄弱的证据，因为很多国家都使用西班牙语，其中包括拉丁美洲,墨西哥或美国(例如在迈阿密,就存在一个强大的西班牙语社区)。</p>
+<p>    而且在没有确凿证据之前，我们也不排斥语言只是一种障眼法的可能。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【17、攻击者活跃多久了?】</strong></span></p>
+<p>    最早的一些Careto样本可以追溯到2007年，一直活跃到2014年1月,但在我们调查期间，C&amp;C服务器被关闭。所以保守估计至少活动了5年。我们不排除攻击者在将来的某个时候重启活动的可能。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【18、攻击者使用了哪些有趣/先进技术吗?】</strong></span></p>
+<p>    Windows后门是极其复杂的,攻击者为增强攻击的隐秘性使用了多种技术。这些技术包括注入系统库、为了逃避检测而利用漏洞攻击旧版卡巴斯基实验室产品。</p>
+<p>    此外,漏洞利用覆盖了所有潜在的目标系统,包括Mac OS X和Linux。同样,不同的shellcode模块之间的利用COOKIES进行通信,这是一个相当不寻常的方法。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【19、卡巴斯基实验室能检测这个恶意软件的所有变体吗?】</strong></span></p>
+<p>    是的。我们的产品能检测并删除攻击者使用的所有已知的恶意软件的版本。名称标识为:</p>
+<p>Trojan.Win32 / Win64.Careto.*</p>
+<p>Trojan.OSX.Careto</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>【20、有没有协定的指标(IOCs)能够帮助受害者去识别入侵?</strong></span></p>
+<p>    是的，我们详细的技术研究论文中已经包含了IOC（国际标准化组织）相关的信息，如果有兴趣，可以点击下边的链接来阅读完整的报告。</p>
+<p> <a href="http://www.securelist.com/en/downloads/vlpdfs/unveilingthemask_v1.0.pdf" target="_blank" title="" data_ue_src="http://www.securelist.com/en/downloads/vlpdfs/unveilingthemask_v1.0.pdf" textvalue="http://www.securelist.com/en/downloads/vlpdfs/unveilingthemask_v1.0.pdf">http://www.securelist.com/en/downloads/vlpdfs/unveilingthemask_v1.0.pdf</a></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

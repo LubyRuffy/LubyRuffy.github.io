@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Linux下的常见错误配置</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Linux下的常见错误配置</h2>
+	<p class="meta">2014-03-10</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>    经过对大量客户的配置审计与渗透测试，我们总结出了一些Linux系统下的常见配置错误。我们相信总结、回顾这些常见错误可以在以后为我们节省更多时间与资源，更重要的是可以帮助系统管理员，使其服务器更加安全可靠。</strong></span></p>
+<p>    五个常见配置错误如下：</p>
+<pre class="prettyprint lang-html">1、用户/home目录的权限
+2、系统中的getgid与setuid程序
+3、全局可读/可写的文件/目录
+4、使用包含漏洞的服务
+5、默认的NFS挂载选项或不安全的导出选项</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>1、用户的/home目录权限</strong></span></p>
+<p>    在大部分Linux发行版中，/home目录的默认权限是755，即任何登录系统的用户都可以访问其他用户的/home目录。而某些用户如管理员或开发者，可能会在他们自己的用户目录下存放某些敏感信息，如密码、访问当前或其它网络服务器的key等。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>2、系统中的setgid与setuid程序</strong></span></p>
+<p>    文件的set uid位非常危险，因为它可能允许文件以一种特权用户的身份运行，如root用户：如果某个文件的所有者是root，并且设置了setuid位，那么在其运行时就是以root权限运行的。这意味着如果攻击者找到了该文件的漏洞，或者以一种非预期的方式运行了该程序，那他很有可能能够以root权限执行自己构造的命令，那么整个系统的权限就沦陷了。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>3、全局可读/可写的文件/目录</strong></span></p>
+<p>    全局可读与可写的文件和目录产生的问题与之前介绍的因用户主目录权限配置不当引起的问题类似，但其影响范围可能涉及到整个系统。产生全局可读的文件的主要原因是，创建文件的默认umask掩码是0022或0002，正是由于这种不当的配置，那些可能包含敏感信息的文件可能被登录系统的任何人读取到。如果文件是全局可写的，那么也可能被任何人修改，也因此可能导致攻击者有机会修改某些文件或脚本来隐藏自己，并通过修改管理员经常使用的脚本来执行某些敏感命令。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>4、配置不当的服务或设置</strong></span></p>
+<p>    应该运行那些最小化配置的服务。经常会看到有些服务配置不当或使用默认的证书与配置，使用不安全的通信渠道的现象也非常常见，加重了服务器被攻击的风险。在使用某项服务时，需要对其选项和配置进行复审，以确保部署的安全或配置恰当。但同时也经常看到有些服务被绑定到多个端口，而不是只进行本地监听或只监听某个特定端口。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>5、默认的挂载选项或不安全的导出选项</strong></span></p>
+<p>    所有挂载的默认选项都是“<strong><span style="color: rgb(38, 38, 38);">rw, suid, dev, exec, auto, nouser, async</span></strong>”。但是使用这些默认选项是不恰当的，因为它们允许如NFS协议等外部挂载的文件系统中的文件被设置suid位和guid位。当导出NFS共享时，建议不要设置no_root_squash选项。通常默认为root_squash选项，但我们经常看到其在实际使用中会被修改。如果设置了no_root_squash选项，当用户以root用户登录时，对这个共享目录来说就拥有了root权限，可以作任何事。这些不当设置如果保持默认，就会允许root用户登录服务器，但本来不应该允许这种权限的用户登录的。</p>
+<p>    这些设置在配置Linux服务器时经常会被忽视，而恰恰是这些不当配置，使攻击者或恶意用户可以非法获得大量信息，或者提升自己在服务器中的权限。掩耳盗铃和一叶障目总比老老实实地加固系统来得简单，但是如果不想在自己睡得正香的时候服务器被人XXOO，就去踏踏实实地加固你的系统吧。</p>
+<p>[via <a href="http://resources.infosecinstitute.com/linux-misconfigurations/" target="_blank" title="" data_ue_src="http://resources.infosecinstitute.com/linux-misconfigurations/" textvalue="infosecinstitute">infosecinstitute</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

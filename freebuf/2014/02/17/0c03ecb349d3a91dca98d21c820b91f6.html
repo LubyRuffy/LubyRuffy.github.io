@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>3684个中国政府站点被黑分析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>3684个中国政府站点被黑分析</h2>
+	<p class="meta">2014-02-17</p>
+
+	<div class="post">
+	        <p></p>
+<p>事件回顾：<span style="color: rgb(38, 38, 38);"><strong>3684个中国政府站点遭阿尔及利亚黑客组织Barbaros-DZ入侵，阿尔及利亚黑客组织Barbaros-DZ在被黑站点统计（Zone-h）上放出了入侵的大批中国政府站点，其中包括中央委员会、中国秘书处等站点，Barbaros-DZ是阿尔及利亚的一支黑客组织，成员包括Bb0yH4cK3r_Dz，Dz Mafia， Ked Ans，Tiger-M@te， yasMouh，黑客没有公布详细的入侵细节。</strong></span><br>GOOGLE搜索了关键字Barbaros-DZ，确实出了一大批站点，这一大批网站中，分析了一下网址：黑客组织不管其中站点的内容，教育还是政府，只管链接名里是否有GOV，从此可以得出，这个黑客组织目标明确——中国政府。从他们的攻击对象可以看出，这更像是一个外国组织，并不是国内黑客组织自娱自乐。如果是国内黑客想出名，首先应当选择名气较大的政府站。其次这一批站是挂在ZONE-H上，更加增大了是国外黑客的概率。另一方面，组织的名字叫Barbaros，我查了一下阿尔及利亚的官方语言是阿拉伯语，但也精通柏柏尔语，说明很大的可能是正确报道，并非国内黑客炒作（barbaros——柏柏尔）</p>
+<p style="text-align:center"><img data-original="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="1.png"></p>
+<noscript><img src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="1.png"></noscript>
+<p>我也顺着这些被黑的网站顺藤摸瓜看了一下，基本大多都是powereasy的模版，而动易又是国内的产品，所以他们很有可能分析过国内动易的源码，或者是搜索了动易的0DAY。 <br>而又能同时拿下这么多站，总计3000多个站， 从漏洞最有可能存在的方面来说，有上传，POST，绕过，注入。但是看他们的“黑页”的手法来说，只是简单的修改一下某一个页面的标题，内容，USERID内容，这些证据可以排除上传漏洞。<br>我看了他们的很多“黑页”，从挂“黑页的内容来说，他们都是通过手工来改，并非批量替换，因为从某两个界面看得出（如下），同样的是动易的模版，却用了不同的语言。<br></p>
+<p style="text-align:center"><img data-original="/imgs/4f0a8992eb901e9f6b063b4de966d282.png!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="2.png"></p>
+<noscript><img src="/imgs/4f0a8992eb901e9f6b063b4de966d282.png!small" title="2.png"></noscript>
+<p style="text-align:center"><img data-original="/imgs/e7fbdb2534757fdf8c16bf8bddbe5f8b.png!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="3.png"></p>
+<noscript><img src="/imgs/e7fbdb2534757fdf8c16bf8bddbe5f8b.png!small" title="3.png"></noscript>
+<pre class="prettyprint lang-html">从这些入侵来说，我搜集了他们的几个作案的时间，分别是
+2011-8-31 4:29:03
+2011-8-31 3:14:19
+2011-10-15 5:34:27</pre>
+<p>当然，这是在中国的时间，而阿尔及利亚与中国时差7个小时，所以推算过来应该是上午10点到中午12点。<br>我找取了他们攻击的日期， <br></p>
+<pre class="prettyprint lang-html">2011-09-28
+2011-9-19
+2011-8-27
+2011-8-30
+2011-9-16
+2011-11-29</pre>
+<p>这不是全部，但是基本上其他的都是在这个时间范围内。几种在2011年的8月到12月，时间经过了4个月，有可能更长。从他们对2个网站攻击的时间来看 <br></p>
+<pre class="prettyprint lang-html">2011-8-31 4:29:03
+2011-8-31 3:14:19</pre>
+<p>证明他们是拿下一个站，挂一个站，因为要是是批量拿到密码，应该是很清晰的作案链条：批量拿到密码——批量挂网站——批量上传到ZONE-H。而8月31日又是他们的开始不久的时间，说明很有可能是拿下一个站，挂一个“黑页”<br> 好好地看一下规律，在一个黑页上看见了这样的字。<br></p>
+<p style="text-align:center"><img data-original="/imgs/56c655114a9c325fefb139aa6c5a14ca.jpg!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="4.jpg"></p>
+<noscript><img src="/imgs/56c655114a9c325fefb139aa6c5a14ca.jpg!small" title="4.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>"freedom for Uyghur"</strong></span><br>Uyghur是新疆的维吾尔人，这个表明，很有可能和某一起政治事件有关。通过我查询资料，找到了一些细节。<br></p>
+<p style="text-align:center"><img data-original="/imgs/b03cbec283c4df7fb36b52035fd5924a.png!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="5.png"></p>
+<noscript><img src="/imgs/b03cbec283c4df7fb36b52035fd5924a.png!small" title="5.png"></noscript>
+<p style="text-align:center"><img data-original="/imgs/111ef657322c28da6dda5072d5a22394.png!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="6.png"></p>
+<noscript><img src="/imgs/111ef657322c28da6dda5072d5a22394.png!small" title="6.png"></noscript>
+<p>这两个证明，维吾尔族人大多信仰伊斯兰，这和黑客组织的国家相同，很有可能是某一起政治事件发生之后引起了伊斯兰教信仰的黑客发动了攻击。而黑客的动机，大多是具有即时性的，一般报复都会在短时间内进行，因为过了一段事件后，很有可能就没有了热情。所以政治事件的发生大致在2011年7-8月左右。我搜索了一下相关的新闻</p>
+<p style="text-align:center"><img data-original="/imgs/825bda82d7d64defa6bac87a9ad555f1.jpg!small" src="/imgs/701df8cf68da0d2016846afbb15cc3e2.png!small" title="7.jpg"></p>
+<noscript><img src="/imgs/825bda82d7d64defa6bac87a9ad555f1.jpg!small" title="7.jpg"></noscript>
+<p>确实是爆发过动乱。14名暴徒被击毙，这不是小数目了。<br>我猜测这次攻击与宗教信仰和政治事件有关。<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>由MtGox停止提现白话比特币交易安全</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>由MtGox停止提现白话比特币交易安全</h2>
+	<p class="meta">2014-02-21</p>
+
+	<div class="post">
+	        <p></p>
+<p>文/pnig0s|小P<br></p>
+<p>由知乎上的一个问题引出：<a href="http://www.zhihu.com/question/22787360/answer/22662598" target="_blank" title="" data_ue_src="http://www.zhihu.com/question/22787360/answer/22662598">http://www.zhihu.com/question/22787360/answer/22662598</a></p>
+<p><strong>先来回顾下这次事件的背景：</strong></p>
+<p>MtGox在2月7号发出公告，声称发现大量无效提现请求，需要分析原因，并暂停了一切提现操作。随后bitstamp等多个知名比特币交易网站均宣布暂停提现，从而引发了炒币者的恐慌，导致比特币价格一度腰斩。2月10号，MtGox再次发出公告称已查明原因，提现交易受到了“伪造交易ID攻击”，并说明将尽快恢复提现。这次事件的罪魁祸首是由于“比特币交易的可锻性（transaction malleability）”引起的，可锻性体现在“交易ID可被伪造”，而“交易ID可被伪造”的原因是签名算法不够健壮。</p>
+<p><br></p>
+<p>上面那段话如果有的朋友看着费劲的话，我来详细解释下，“可锻性”，“交易可锻性”及“交易ID伪造”究竟是怎么回事，为什么能够造成如此巨大的影响：</p>
+<p><br></p>
+<p><strong>1，关于“交易的可锻性（transaction malleability）”：</strong></p>
+<p>首先我们知道金银铜铁等金属是可以进行锻造的，《龙门镖局》中的白敬祺为了藏私房钱，将银锭打成了银夜壶，而银夜壶和银锭的价值是相当的，这就是金属“可锻性”的物理表现。</p>
+<p>在比特币的交易中，第三方交易系统会将交易发送方，接受方，交易金额，比特币钱包私钥等数据作为一个交易发送到比特币网络中，发送之前会对这条交易信息进行加密和签名，接着根据生成的签名最终获得一个哈希值，这个哈希值作为交易ID（类似我们平时网络购物的订单号）返回给提现的用户。</p>
+<p style="text-align: center;"><img data-original="/imgs/6f059f6877b6b483872c3add43781c9a.jpg!small" src="/imgs/6f059f6877b6b483872c3add43781c9a.jpg!small" title="QQ Photo20140219211623.jpg"></p>
+<noscript><img src="/imgs/6f059f6877b6b483872c3add43781c9a.jpg!small" title="QQ Photo20140219211623.jpg"></noscript>
+<p>上图是一次交易请求（如提现）后，交易系统对当前交易所做的工作，有省略部分细节，但体现了整个流程。用户接收到的仅有一个交易ID，根据这个交易ID可以查看交易是否成功。</p>
+<p style="text-align: center;"><img data-original="/imgs/92876d947893f69eff45fb83afe213be.jpg!small" src="/imgs/6f059f6877b6b483872c3add43781c9a.jpg!small" title="QQ Photo20140219212234.jpg"></p>
+<noscript><img src="/imgs/92876d947893f69eff45fb83afe213be.jpg!small" title="QQ Photo20140219212234.jpg"></noscript>
+<p>上图是知名的在线比特币钱包blockchain的其中一次交易请求。绿色箭头双方是比特币钱包地址，上方的哈希值就是交易ID（TxID）。</p>
+<p>当交易发送到比特币网络中后，网络中的各个结点会根据之前生成的签名来验证交易的真实性，这些做法都是很正确很理所当然的。而问题就出现在签名算法中，由于现在大部分使用的签名算法都是基于OpenSSL的ECDSA（椭圆曲线数字签名），这个签名算法的一个问题就是，修改签名的某个字节能够使得签名依然校验成功，这样伪造签名之后交易依然能成功进行。如果单在比特币网络中这似乎没什么大不了的，顶多可以捣捣乱，但是对于第三方交易系统就不同了，由于交易ID是根据签名生成的，而伪造之后的签名会生成一个完全不同的交易ID，第三方交易系统判断到两个ID不同便会确定当前交易失败，而事实上交易已经成功了。这时如果用户发现提款交易提示失败，可以再次发起提现交易，第三方交易系统一看之前确实失败了，那就会再进行一次提款，这时用户的比特币钱包里就会多收到一份比特币，也就造成了第三方交易平台资金损失。交易的可锻性体现在虽然签名被“锻造过”（修改伪造），但最终的交易依然有效。</p>
+<p><br></p>
+<p><strong>2，为什么这样的攻击可以奏效：</strong></p>
+<p>原理在上一部分已经说清楚了，可是会有一个疑问，我们伪造的交易请求是在正常交易请求之后发出的，如果正常交易被采纳了，那我们伪造的交易如何能够奏效呢？这里就要说到比特币网络的一个特性，发出一个比特币交易请求后不会立刻返回交易成功与否，在比特币网络中会有一个处理延时，而比特币网络由于自身的特性，所有交易请求是以网状形式随机处理的，两次交易请求并不会以队列形式依次处理。这就给攻击者提供了可乘之机，专业的讲叫做时间条件竞争，通俗的讲就是拼人品。我们伪造的交易和正常的交易都在比特币网络中，如果伪造的交易先被处理，那么攻击成功。</p>
+<p><br></p>
+<p><strong>3，如何发起攻击：</strong></p>
+<p>1，首先需要有足够多的比特币矿机接入网络，以增加伪造的请求被优先处理的可能性。</p>
+<p>2，攻击者在第三方交易平台提交一个提款请求并获得一个交易ID。</p>
+<p>3，根据交易信息伪造一个签名同时生成一个完全不同的交易ID，并将伪造的请求发出。</p>
+<p>4，若伪造的交易被优先处理，则原始交易失败。</p>
+<p>5，我们可再次提交提现请求，第三方交易平台确认之前的交易失败后会再次发送提现交易，至此攻击成功。</p>
+<p>攻击流程图如下：</p>
+<p style="text-align: center;"><img data-original="/imgs/b5f65d8fe2a21c69fc6de8fa8f336bbf.jpg!small" src="/imgs/6f059f6877b6b483872c3add43781c9a.jpg!small" title="Unnamed QQ Screenshot20140219215138.jpg"></p>
+<noscript><img src="/imgs/b5f65d8fe2a21c69fc6de8fa8f336bbf.jpg!small" title="Unnamed QQ Screenshot20140219215138.jpg"></noscript>
+<p style="text-align: left;"><strong>4，如何防范：</strong></p>
+<p>不要too young too simple的仅根据一个哈希值来判断交易的状态，使用双因素，或者多因素验证。比如可以根据用户比特币钱包的余额来判断用户能否有足够的余额进行交易。或者追踪每笔交易的信息来判断是否真正交易成功。</p>
+<p><br></p>
+<p><strong>5，其他：</strong></p>
+<p>Mt.Gox这次暂停提现也是要对之前所有异常的交易请求进行溯源，看到底哪些是由于伪造交易ID攻击造成的。由于数据量巨大，因此需要耗费不少时间来调查。</p>
+<p>其实这个问题像51%矿池攻击一样很早就已经被提出了，也有对应的防范措施，只是Mt.Gox等一些第三方平台没有重视。</p>
+<p><strong>货币的安全大致分为两类：</strong></p>
+<p>1，货币安全。</p>
+<p>2，货币交易安全</p>
+<p>这次MtGox出现的问题基本上算货币交易安全，虽然签名算法不够健壮，但并不影响整个比特币网络的安全，所以不能由此就臆断比特币脆弱，更大可不必看衰比特币。就像国内第三方支付平台如果出现漏洞，我们不能因此就看衰人民币一样。</p>
+<p><br></p>
+<p><strong>6，End Of End：</strong></p>
+<p>对比特币感兴趣想快速了解的同学可以观看FreeBuf视频组翻译的视频《比特币的运行机制和原理》，比看各种资料来的方便</p>
+<p style="text-align: center;"><embed type="application/x-shockwave-flash" class="edui-faked-video" pluginspage="http://www.macromedia.com/go/getflashplayer" src="http://player.youku.com/player.php/sid/XNjc0MzI4OTY0/v.swf" width="690" height="480" wmode="transparent" play="true" loop="false" menu="false" allowscriptaccess="never" allowfullscreen="true"></embed></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

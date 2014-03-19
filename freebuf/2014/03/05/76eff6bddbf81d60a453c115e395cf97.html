@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>隐藏在安全外衣下的不安全性</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>隐藏在安全外衣下的不安全性</h2>
+	<p class="meta">2014-03-05</p>
+
+	<div class="post">
+	        <p></p>
+<p>SQL注入在安全行业已经成为一个广为熟知的话题，每隔一段时间，就会有相关研究人员放出一些独特的注入技能，与大家共享。<span style="color: rgb(0, 176, 80);">最近我恰好也研究出一组数据：&amp;#MU4&lt;4+0，可以通过一些独特的编码技巧，使其变成一组攻击向量。所以，故事就这样发生了，让我们从头开始说起。</span></p>
+<p>如果遇到一个网站的登录框，我们可以有很多测试方法。与大多数人类似，我的测试方法也是在用户名处填写了admin，密码为‘ OR 1=1-，不如所料，返回了错误信息。</p>
+<p>不过，网站响应的方式却与平时不太一样：<span style="color: rgb(0, 176, 80);">输入密码的区域填充了( QO!.&gt;./* 字符串。</span>当时我的第一想法是：“不会是这个逗比网站直接把密码返回给我了吧？至少看起来像是随机生成的。”随后，我又提交了另一组登录数据，但换了一组字符串作为密码，这次密码框返回了一组新的值：) SL”+?+1′。再一次不出所料，这次的响应数据仍然没有正确处理HTML 标记字符，因此如果我们可以提前算出每次返回的字符串，就可以在这个登录页面构造一个反射型XSS了。所以，现在要做的就是打起精神一个字符一个字符地仔细研究，找出其中的规律。</p>
+<p style="text-align: center;"><img data-original="/imgs/89faa9956bef4b52f1e8a4121a9fdbad.jpg!small" src="/imgs/89faa9956bef4b52f1e8a4121a9fdbad.jpg!small" title="keyboard_skull.jpg"></p>
+<noscript><img src="/imgs/89faa9956bef4b52f1e8a4121a9fdbad.jpg!small" title="keyboard_skull.jpg"></noscript>
+<p>接下来的几次登录测试提交的数据都是为了找出这个规律。通过提交三次请求，分别提交字符a、b、c，看它能返回什么内容。结果是，每次返回的都是被提交的字母在字母表中的下一个字母，即三次的返回分别是b、c、d。因此，下一步要做的是尝试提交多个字母，看看它能返回什么。如果我提交aa，那么我预期的返回结果自然是bb。不过真实的返回结果并非之前所想，而是b^。那么接下来我们再看看如果提交多个相同字母能得到什么反馈：这次我提交了aaaaaaaaaaaa （即12个字母a），返回的结果居然是b^c^b^b^c^b^。至此，已经可以得到部分规律了，很明显对字符的传输有一个匹配转换的过程——看起来像是一个重复序列，因为本次响应的前6个字符与后6个字符相同。</p>
+<p>至此，我们只讨论了这些可以在键盘见到的字符，但是在计算机的世界，这些字符都有其它的表示方法。最常见的方法是将其转换为等值的ASCII值。当计算机读到一个字母，会将其转换为一个数据，例如读到字母’a’，就会转换为97。通过将这些字符编码成数字，我们更容易确定用了哪种匹配方式。这些ASCII转换表可以通过网络得到，比如我一直用的这个网站，节省了我不少时间：<a href="http://www.theasciicode.com.ar/">www.theasciicode.com.ar</a>。</p>
+<p>通过前面的测试，我们已经知道了每6个字符就会有一个重复匹配，<strong>下面我们看一看如果换算成数字，这种匹配是什么样的。比如我们提交字符串aaaaaa，得到的反馈为b^c^b^。要是换成等值的ASCII数字，会是什么样呢？</strong>在计算机的世界，我们提交的数据是 97,97,97,97,97,97，得到的反馈为98,94,99,94,98,94。可以看到每个值都有一个对应的转换数值，对两组数据做矩阵减法，得到：[97,97,97,97,97,97]- [98,94,99,94,98,94] = [-1,3,-2,3,-1,3]。这样我们就得到了一组数列，通过该数列即可将我们要反射的字符转换为注入字符。</p>
+<p>最后要做的就是构造POC来证明该XSS问题了。到目前为止，我们已经知道网站会对输入的所有字符，每6个字符做一次转换，也已经精确知道了对每个字符转换的方式。</p>
+<p>如果我们想要得到正确的注入语句，如“&gt;&lt;img/src=”h”onerror=alert(2)//，那么需要提交的数据就是!A:llj.vpf&lt;%g%mqduqrp@`odur+1,.2。提交后如果能看到弹出的警告对话框，就说明我们的猜测是正确的。</p>
+<p>构造完可用的XSS PoC，让我们再次返回到最开始时的SQL注入测试，如果要使提交的字符串与‘ OR 1=1-的作用相同，就需要提交&amp;#MU4&lt;4+0。注入代码中的空格由于执行了-1操作，变成了一个不可打印的字符，位于’U’与’4’之间。进行相应的URL编码操作之后，字符串发送给服务器时变成%26%23MU%1F4%3C4%2B0，之后就看到我已经被认证为管理员并成功登录了。</p>
+<p>回想早期的互联网，在我还没有开始学习信息安全之前，这种类型的攻击就已经非常流行了。现在，开发人员一般在登录框使用参数化查询，已经很难再见到这种问题。<strong>不幸的是这款流行的应用并不是为米国市场开发的，而且是一个新兴发展中国家的初级码农的作品。</strong>这种漏洞之所有暴露，是因为开发者对密码只进行了转码，而我们都知道这里应该对密码进行hash操作。如果这款应用在密码输入错误后没有在密码框返回任何内容，这个SQL注入漏洞对墨盒测试者来说可能还会继续隐藏下去，因为虽然可能还有不少这样的漏洞存在，但对测试应用安全性的墨盒测试人员来说其实是很难发现的。</p>
+<p>根据之前的测试结果，我实现了一部分后台代码，可以复现这个漏洞。当然也可以通过替换+与-，将注入代码进行不同的encode，使其可以按我的意愿作出反应：</p>
+<pre class="prettyprint lang-html"><p>&lt;!DOCTYPE html&gt;<br>&lt;html&gt;<br>&lt;body&gt;<br>&lt;form name="login" action="#"method="post"&gt;<br>&lt;?php<br>    $strinput = $_POST[&amp;#039;password&amp;#039;];<br>    $strarray = str_split($strinput);<br>    for ($i = 0; $i &lt; strlen($strinput); $i++) {<br>        if ($i % 6 ==0) {<br>           $strarray[$i] = chr(ord($strarray[$i]) - 1);<br>        }<br>        if ($i % 6 ==1) {<br>           $strarray[$i] = chr(ord($strarray[$i]) + 3);<br>        }<br>        if ($i % 6 ==2) {<br>           $strarray[$i] = chr(ord($strarray[$i]) - 2);<br>        }<br>        if ($i % 6 ==3) {<br>            $strarray[$i]= chr(ord($strarray[$i]) + 3);<br>        }<br>        if ($i % 6 ==4) {<br>           $strarray[$i] = chr(ord($strarray[$i]) - 1);<br>        }<br>        if ($i % 6 ==5) {<br>           $strarray[$i] = chr(ord($strarray[$i]) + 3);<br>        }<br>    }<br>    $password = implode($strarray);<br>    echo "Login:&lt;input type=\"text\"name=\"username\" value=\"" .htmlspecialchars($_POST[&amp;#039;username&amp;#039;]) . "\"&gt;&lt;br&gt;\n";<br>    echo "Password:&lt;input type=\"password\"name=\"password\" value=\"" . $password ."\"&gt;&lt;br&gt;\n";<br>    // --- CODE SNIP ---<br>    $examplesqlquery = "SELECT id FROM users WHEREusername=&amp;#039;" . addslashes($_POST[&amp;#039;username&amp;#039;]) . "&amp;#039; ANDpassword=&amp;#039;$password&amp;#039;";<br>    // --- CODE SNIP ---<br> ?&gt;<br>&lt;input type="submit"value="submit"&gt;<br>&lt;/form&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;</p></pre>
+<p>[via <a href="https://blog.whitehatsec.com/the-insecurity-of-security-through-obscurity/">whitehatsec</a>]<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

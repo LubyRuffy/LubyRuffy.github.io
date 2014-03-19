@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>BCTF Write-up：神秘系统夺Key过程</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>BCTF Write-up：神秘系统夺Key过程</h2>
+	<p class="meta">2014-03-17</p>
+
+	<div class="post">
+	        <p></p>
+<p>题目现在已经看不到了，大概意思是附件，是一个磁盘映像文件，里面有flag。</p>
+<p><strong>用虚拟机加载软盘跑下，提示输入access code，如下：</strong></p>
+<p style="text-align: center;"><img title="wps_clip_image-20399.png" data-original="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small"><br></p>
+<noscript>
+<img title="wps_clip_image-20399.png" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small"><br>
+</noscript>
+<p>上IDA，将加载地址设置为0x7C00，用16位分析。 <br></p>
+<p><strong>一，Boot程序</strong></p>
+<p>Boot 程序逻辑很清晰。</p>
+<p style="text-align: center;"><span style="font-family:宋体"><img data-original="/imgs/2aae49bc31ba4634a909ae52948f72a3.jpg!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" title="图片1.jpg"></span></p>
+<noscript><img src="/imgs/2aae49bc31ba4634a909ae52948f72a3.jpg!small" title="图片1.jpg"></noscript>
+<pre class="prettyprint lang-plain">1.显示提示语句Loading
+2.加载内核，从0面0磁道2扇区开始读10个扇区的内容到0x8000(0x800:0000)
+(PS:原代码是从磁盘读的，这里是用软盘启动的该镜像的，请修改成读软盘的。在这里吃了亏，T^T）
+3.提示输入Access code，解密内核代码
+4.转到0:8000h运行内核</pre>
+<p>看init过程是怎么解密的，从而得到Access code。</p>
+<p style="text-align: center;"><img title="wps_clip_image-21369.png" src="/imgs/f4deee302e553b8052b72f03a0277bfa.gif"><img data-original="/imgs/bc83b281cc7ea4bb30f6b8dc36714d56.jpg!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" title="图片2.jpg"><br></p>
+<noscript>
+<img title="wps_clip_image-21369.png" src="/imgs/f4deee302e553b8052b72f03a0277bfa.gif"><img src="/imgs/bc83b281cc7ea4bb30f6b8dc36714d56.jpg!small" title="图片2.jpg"><br>
+</noscript>
+<p style="text-align: center;"><img data-original="/imgs/89afdfb39fed2882d91b4008e172e978.jpg!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" title="图片3.jpg"></p>
+<noscript><img src="/imgs/89afdfb39fed2882d91b4008e172e978.jpg!small" title="图片3.jpg"></noscript>
+<p>只能输入4个数字，并用这4个数字循环对0×8000-0x87ff  异或解密，用程序进行猜想。</p>
+<pre class="prettyprint lang-python">fin = open(&amp;#039;bctfos.bin&amp;#039;, &amp;#039;rb&amp;#039;)
+fin.seek(512)
+content = fin.read(16)
+fin.close()
+ 
+base = range(48, 58)
+for ch in content:
+    print [hex(ord(ch)^x) for x in base]</pre>
+<p>输出内核的头16个byte的内容 xor [0, 9] 的结果，进行分析猜想。</p>
+<p style="text-align: center;"><img data-original="/imgs/272e0e1a92c7f8a79ccc6ca3c5a5b1c3.jpg!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" title="图片4.jpg"></p>
+<noscript><img src="/imgs/272e0e1a92c7f8a79ccc6ca3c5a5b1c3.jpg!small" title="图片4.jpg"></noscript>
+<p><span style="font-family:宋体"></span></p>
+<p>我们看到当access code为1337时，跟boot的开头一样有点像，输入后，果然可以进入。</p>
+<p style="text-align: center;"><img title="wps_clip_image-22264.png" src="/imgs/f4deee302e553b8052b72f03a0277bfa.gif"><img data-original="/imgs/f73462875bb454dac8f33fe5f3876e7d.jpg!small" src="/imgs/fecd680e748bdce0b827fb86e48e9444.png!small" title="图片5.jpg"></p>
+<noscript>
+<img title="wps_clip_image-22264.png" src="/imgs/f4deee302e553b8052b72f03a0277bfa.gif"><img src="/imgs/f73462875bb454dac8f33fe5f3876e7d.jpg!small" title="图片5.jpg">
+</noscript>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

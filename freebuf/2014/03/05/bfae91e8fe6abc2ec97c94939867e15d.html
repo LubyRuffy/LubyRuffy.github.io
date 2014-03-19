@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>简易爬虫搜索引擎 – JSearchEngine</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>简易爬虫搜索引擎 – JSearchEngine</h2>
+	<p class="meta">2014-03-05</p>
+
+	<div class="post">
+	        <p></p>
+<p>目前只实现了指定站点的收录和爬寻，只做了页面标题的收录，只实现了结果单一关键词搜索。</p>
+<p><strong>使用方法</strong><br>python JSearchEngine.py newwork www.freebuf.com  #创建一个爬寻任务,站点为www.freebuf.com<br>python JSearchEngine.py work   #继续一个爬寻任务,站点为www.freebuf.com<br>python JSearchEngine.py search www.freebuf.com 入侵     #搜索一个爬寻结果,站点为www.freebuf.com，关键词为“入侵”</p>
+<pre class="prettyprint lang-python">#!/usr/bin/python
+#-*-coding:utf-8-*-
+# JSearchEngine
+# Author: Jam &lt;810441377@qq.com&gt;
+# Git: https://github.com/codejam1024/JSearchEngine
+# -------//-------//----
+# TODO:
+#	1.线程太过粗糙,待优化
+
+import os
+import sys
+import cgi
+import time
+import gzip
+import threading
+import urllib2
+import MySQLdb
+from threading import Thread
+from bs4 import BeautifulSoup
+from cStringIO import StringIO
+from urlparse import urlparse
+
+Version = "1.0"
+reload(sys)
+sys.setdefaultencoding(&amp;#039;utf8&amp;#039;)
+
+#调试编码
+#sys.path.append(&amp;#039;/src/chardet-1.1&amp;#039;)
+#import chardet
+#print chardet.detect(htmlText)
+
+################################################################
+class DataBase(object):
+	Host = "localhost"
+	User = "root"
+	Pass = "143205"
+	DataBaseName = ""
+	DataConn = None
+	def __init__(self, dataBaseName):
+		self.DataBaseName = dataBaseName.replace(".", "_")
+
+	def Connect(self):
+		self.DataConn = MySQLdb.connect(host=self.Host, user=self.User, passwd=self.Pass, db=self.DataBaseName, charset=&amp;#039;utf8&amp;#039;, port=3306)
+
+	def Create(self):
+		self.DataConn = MySQLdb.connect(host=self.Host, user=self.User, passwd=self.Pass, charset=&amp;#039;utf8&amp;#039;, port=3306)
+		c = self.DataConn.cursor()
+		try:
+			c.execute(&amp;#039;create database if not exists %s DEFAULT CHARACTER SET utf8 COLLATE utf8_bin&amp;#039; % (self.DataBaseName))
+			self.DataConn.select_db(self.DataBaseName)
+			c.execute("create table Link(Title Text, Link Text, Date Text, Status Text);")
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;Create:%s" % (e)
+
+		c.close()
+		self.DataConn.commit()
+
+	def Remove(self):
+		self.DataConn = MySQLdb.connect(host=self.Host, user=self.User, passwd=self.Pass, charset=&amp;#039;utf8&amp;#039;, port=3306)
+		c = self.DataConn.cursor()
+		try:
+			self.DataConn.select_db(self.DataBaseName)
+			print "[I]Drop table LinkFactory, Drop table Link."
+			c.execute("drop table if exists Link")
+			#得自行删除数据库，否则某些情况MySQL会卡机
+			#c.execute(&amp;#039;drop database if exists %s&amp;#039; % (self.DataBaseName))
+		
+		except Exception, e:
+			pass
+
+		c.close()
+		self.DataConn.commit()
+
+	def LinkIsHaveWork(self):
+		c = self.DataConn.cursor()
+		try:
+			sql = "select * from Link where Status=&amp;#039;work&amp;#039;;"
+			c.execute(sql)
+			link = c.fetchone()
+			c.close()
+			if link != None:
+				return True
+			else:
+				return False
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkIsHaveWork:" + str(e)
+
+		c.close()
+
+	def LinkStatusGet(self, link):
+		c = self.DataConn.cursor()
+		try:
+			sql = "select * from Link where Link=&amp;#039;%s&amp;#039;;" % (link)
+			c.execute(sql)
+			link = c.fetchone()
+			c.close()
+			if link != None:
+				return link[3]
+			else:
+				return None
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkStatusGet:" + str(e)
+
+		c.close()
+
+	def LinkUnreadGet(self):
+		c = self.DataConn.cursor()
+		try:
+			sql = "select * from Link where Status=&amp;#039;unread&amp;#039;;"
+			c.execute(sql)
+			link = c.fetchone()
+			c.close()
+			if link != None:
+				return link[1]
+			else:
+				return None
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkUnreadGet:" + str(e)
+
+		c.close()
+
+	def LinkDel(self, link):
+		c = self.DataConn.cursor()
+		try:
+			sql = "delete from Link where Link=&amp;#039;%s&amp;#039;;" % (link)
+			c.execute(sql)
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkDel:" + str(e)
+
+		self.DataConn.commit()
+		c.close()
+
+	def LinkInsert(self, link):
+		c = self.DataConn.cursor()
+		try:
+			sql = "select * from Link where Link=&amp;#039;%s&amp;#039;;" % (link)
+			c.execute(sql)
+			if c.fetchone() == None:
+				sql = "insert into Link values(&amp;#039;&amp;#039;, &amp;#039;%s&amp;#039;, &amp;#039;&amp;#039;, &amp;#039;unread&amp;#039;);" % (link)
+				c.execute(sql)
+				c.close()
+				#print sql
+			else:
+				return False
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkInsert:" + str(e)
+			return False
+
+		self.DataConn.commit()
+		c.close()
+		return True;
+
+	def LinkUpdate(self, link, title, date, status):
+		c = self.DataConn.cursor()
+		try:
+			sql = "update Link SET Title=&amp;#039;%s&amp;#039;,Date=&amp;#039;%s&amp;#039;,Status=&amp;#039;%s&amp;#039; where Link=&amp;#039;%s&amp;#039;;" % (title, date, status, link)
+			c.execute(sql)
+			print sql
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkUpdate:" + str(e)
+
+		self.DataConn.commit()
+		c.close()
+		return;
+
+	def LinkUpdateWork(self):
+		c = self.DataConn.cursor()
+		try:
+			sql = "update Link SET Status=&amp;#039;unread&amp;#039; where Status=&amp;#039;work&amp;#039;;"
+			c.execute(sql)
+			print sql
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkUpdateWork:" + str(e)
+
+		c.close()
+		self.DataConn.commit()
+		return;
+
+	def LinkSearch(self, title):
+		c = self.DataConn.cursor()
+		try:
+			sql = "select * from Link where Title like &amp;#039;%" + title + "%&amp;#039;;"
+			c.execute(sql)
+			data = c.fetchall()
+			c.close()
+			return data
+
+		except Exception, e:
+			print "[E]-&gt;Class-&gt;DataBase-&gt;LinkSearch:" + str(e)
+
+		c.close()
+		return [];
+
+
+	def __del__(self):
+		self.DataConn.close()
+
+
+
+###############################################################
+#爬虫类，爬虫的一些操作都在这里执行
+class Crawler(object):
+	#全局变量
+	TargetHost  = ""
+	UserAgent   = ""
+
+	UserAgent  = &amp;#039;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36&amp;#039;
+	BadFilterRules  = [&amp;#039;#&amp;#039;, &amp;#039;.jpeg&amp;#039;,&amp;#039;.jpg&amp;#039;,&amp;#039;.rar&amp;#039;,&amp;#039;.png&amp;#039;,&amp;#039;.zip&amp;#039;,&amp;#039;.rar&amp;#039;,&amp;#039;.7z&amp;#039;,&amp;#039;javascript:&amp;#039;,&amp;#039;mailto:&amp;#039;]
+
+	ThreadMax   = 25 # 最大线程
+	ThreadLock  = threading.Lock()
+	ThreadTotal = 0
+	ThreadSignal = ""
+	MyDataBase   = DataBase
+
+	def AnalyzePage():return; # 预定义函数,以便在该函数前面的函数调用该函数
+
+	def __init__(self, host):
+		self.TargetHost = host
+
+	def ToUtf8(self, text):
+		try:
+			return text.decode("gbk")
+		except Exception, e:
+			return text
+
+	def GetHtmlText(self, url):
+		request  = urllib2.Request(url)
+		request.add_header(&amp;#039;Accept&amp;#039;, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp")
+		request.add_header(&amp;#039;Accept-Encoding&amp;#039;, "*")
+		request.add_header(&amp;#039;User-Agent&amp;#039;, self.UserAgent)
+		rp = urllib2.urlopen(request)
+		rpHtmlText = ""
+		contentEncoding =  rp.headers.get(&amp;#039;Content-Encoding&amp;#039;)
+		if  contentEncoding == &amp;#039;gzip&amp;#039;:
+			compresseddata = rp.read()
+			compressedstream = StringIO(compresseddata)
+			gzipper = gzip.GzipFile(fileobj=compressedstream)
+			rpHtmlText = gzipper.read()
+		else:
+			rpHtmlText = rp.read()
+		return rpHtmlText
+
+	def UrlEscape(self, url):
+		try:
+			url = urllib2.unquote(url)
+			url = urllib2.quote(url.encode(&amp;#039;utf8&amp;#039;))
+			url = url.replace("%3A", ":")
+		except Exception, e:
+			print "[E]UrlEscape-&gt;%s,Url:%s" % (e, url) 
+		
+		return url;
+
+	def UrlFilter(self, host, urls):
+		returnUrls = []
+		for url in urls:
+			url_lower = url.lower()
+			isBadUrl = False
+
+			#判断是否为其他域名
+			if url_lower.find("http:") &gt;= 0 or url_lower.find("https:") &gt;= 0:
+				urlHost = &amp;#039;&amp;#039;
+				try:
+					urlHost = str(urlparse(url).hostname) # Have Bug
+				except Exception, e:
+					print "[E]-&gt;UrlFilter: %s" % (e)
+				
+				if urlHost.find(host) == -1:
+					#print "!!! Fuck-&gt;Host:%s,Url:%s" % (urlHost, url)
+					isBadUrl = True
+
+			#链接是否超长
+			if len(url) &gt;= 200:
+				isBadUrl = True
+
+
+			#进行过滤规则筛选
+			for rule in self.BadFilterRules:
+				if url_lower.find(rule) != -1: 
+					#print url + "-" + rule
+					isBadUrl = True
+
+			if isBadUrl : continue
+
+			#网址智能补全
+			if url.find("http:") == -1 and url.find("https:") == -1:
+				if url[0] != "/" : url = "/" + url
+			if url.find("http:") == -1 and url.find("https:") == -1:
+				url = "http://" + host + url
+			
+			url = self.UrlEscape(url)
+			returnUrls.append(url)
+		
+		return returnUrls
+
+	def ThreadOpen(self, func, argv):
+		while self.ThreadTotal &gt;= self.ThreadMax:
+			time.sleep(2)
+
+		self.ThreadLock.acquire()
+		self.ThreadTotal += 1
+		self.ThreadLock.release()
+		t = threading.Thread(target=func,args=(argv,))
+		t.setDaemon(True)
+		t.start()
+		time.sleep(1)
+
+	def AddUrls(self, urls):
+		myDataBase = DataBase(self.TargetHost)
+		myDataBase.Connect()
+		for url in urls:
+			isOk = myDataBase.LinkInsert(url)
+			if isOk:
+				if self.ThreadTotal &lt; self.ThreadMax:
+					self.ThreadOpen(self.AnalyzePage, url)
+
+		return;
+
+
+	def AnalyzePage(self, link):
+		print "[I]AnalyzePage:" + link
+		myDataBase = DataBase(self.TargetHost)
+		myDataBase.Connect()
+		myDataBase.LinkUpdate(link,&amp;#039;&amp;#039;,&amp;#039;&amp;#039;,&amp;#039;work&amp;#039;)
+
+		try:
+			htmlText = self.GetHtmlText(link)
+			htmlText = self.ToUtf8(htmlText)
+			soup = BeautifulSoup(htmlText, from_encoding="utf8")
+			docTitle = &amp;#039;404 - Not Found&amp;#039;
+
+			try:
+				docTitle = soup.title.string
+
+			except Exception, e:
+				print "[E]soup.title.string:" + link
+
+			
+			
+			tags = soup.findAll(&amp;#039;a&amp;#039;)
+			urls = [];
+			for tag in tags:
+				url = tag.get(&amp;#039;href&amp;#039;,&amp;#039;&amp;#039;)
+				if url!= &amp;#039;&amp;#039; : urls.append(url)
+
+			urls = self.UrlFilter(self.TargetHost, urls)
+			print "Links length:%s" % (len(urls))
+
+			self.AddUrls(urls)
+
+			timeText = time.strftime(&amp;#039;%Y-%m-%d&amp;#039;,time.localtime(time.time()))
+			myDataBase.LinkUpdate(link, docTitle, timeText, "ok")
+
+		except urllib2.HTTPError,e:
+			myDataBase.Connect()
+			myDataBase.LinkDel(link)
+			print "[E]-&gt;HTTP Error:%s,Link:%s" % (e, link)
+
+		self.ThreadLock.acquire()
+		self.ThreadTotal -= 1
+		self.ThreadLock.release()
+		print "[I]ThreadTotal:%s" % (self.ThreadTotal)
+
+
+	def RunWork(self):
+
+		myDataBase = DataBase(self.TargetHost)
+		myDataBase.Connect()
+
+		while True:
+			myDataBase.Connect()
+			self.ThreadLock.acquire()
+			link = myDataBase.LinkUnreadGet()
+			self.ThreadLock.release()
+
+			if link == None:
+				
+				self.ThreadLock.acquire()
+				if myDataBase.LinkIsHaveWork() == False:
+					self.ThreadLock.release()
+					print "No task."
+					break
+				else:
+					self.ThreadLock.release()
+					print "Wait task. ThreadTotal:%s" % (self.ThreadTotal)
+					time.sleep(2)
+					continue
+				
+				
+			else:
+				while True:
+					myDataBase.Connect()
+					self.ThreadOpen(self.AnalyzePage, link)
+					self.ThreadLock.acquire()
+					status = myDataBase.LinkStatusGet(link)
+					self.ThreadLock.release()
+					
+					if status != &amp;#039;unread&amp;#039;:
+						print "Work Get:" + link
+						break
+
+					time.sleep(1)
+					print "Wait,status:" + status 
+		return;
+
+	def Work(self):
+		self.MyDataBase = DataBase(self.TargetHost)
+		self.MyDataBase.Connect()
+		self.MyDataBase.LinkUpdateWork()
+		self.RunWork()
+		return;
+
+	def NewWork(self):
+		self.MyDataBase = DataBase(self.TargetHost)
+		self.MyDataBase.Remove()
+		self.MyDataBase.Create()
+		self.MyDataBase.Connect()
+		self.MyDataBase.LinkUpdateWork()
+		self.MyDataBase.LinkInsert("http://" + self.TargetHost)
+		print "[I]New work:" + "http://" + self.TargetHost
+		self.RunWork()
+		return;
+
+	def Search(self, keyWord):
+		print "You KeyWord:" + keyWord
+		self.MyDataBase = DataBase(self.TargetHost)
+		self.MyDataBase.Connect()
+		data = self.MyDataBase.LinkSearch(keyWord)
+		for row in data:
+			print "Title:%s,Link:%s" % (row[0],row[1])
+
+		return;
+
+
+
+	def Stop(self):
+		self.ThreadSignal = "stop"
+		return;
+
+def ThreadWork(host):
+	newCrawler = Crawler(host)
+	newCrawler.NewWork()
+
+
+def Explain(argv):
+	if len(argv) == 2:
+		if argv[1] == "version":
+			print "JSearchEngine v" + Version
+			return;
+
+	if len(argv) == 3:
+		### Test
+		if argv[1] == "fuck" and argv[2] == "this":
+			print "Are you kidding me?"
+			return;
+
+		if(argv[1] == "newwork" and argv[2] != ""):
+			newCrawler = Crawler(argv[2])
+			newCrawler.NewWork()
+			return;
+
+		if(argv[1] == "work" and argv[2] != ""):
+			newCrawler = Crawler(argv[2])
+			newCrawler.Work()
+			return;
+
+	if len(argv) == 4:
+		if(argv[1] == "search" and argv[2] != ""):
+				newCrawler = Crawler(argv[2])
+				newCrawler.Search(argv[3])
+				return;
+
+	print "JSearchEngine v" + Version
+	print "python JSearchEngine.py newwork HOST \r\n         #Create a new work to search for HOST"
+	print "python JSearchEngine.py work HOST \r\n         #Continue a work to search for HOST"
+	print "python JSearchEngine.py search HOST title \r\n         #Search a title in DataBase"
+	return;
+
+def Main():
+	Explain(sys.argv)
+
+#___Main____
+Main()</pre>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

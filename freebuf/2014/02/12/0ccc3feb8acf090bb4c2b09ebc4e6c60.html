@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>CloudFlare公司遭遇超过400Gbps DDoS攻击</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>CloudFlare公司遭遇超过400Gbps DDoS攻击</h2>
+	<p class="meta">2014-02-12</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center"><img data-original="/imgs/48403caed870afc6715d06510be6f57a.jpg!small" src="/imgs/48403caed870afc6715d06510be6f57a.jpg!small" title="derp-ddos-white.jpg"></p>
+<noscript><img src="/imgs/48403caed870afc6715d06510be6f57a.jpg!small" title="derp-ddos-white.jpg"></noscript>
+<p><br></p>
+<p>还记得<a textvalue="blackscreen" data_ue_src="http://www.freebuf.com/author/blackscreen" title="由 blackscreen 发布" target="_blank" href="http://www.freebuf.com/author/blackscreen">blackscreen</a>的<a textvalue="一周海外安全事件回顾（2014.01.06 – 2014.01.11）" data_ue_src="http://www.freebuf.com/news/special/23307.html" title="" target="_blank" href="http://www.freebuf.com/news/special/23307.html">一周海外安全事件回顾（2014.01.06 – 2014.01.11）</a> 么？</p>
+<p>更令人震精的分析数据来自CloudFlare。CloudFlare在 1月9日的官方博客上对NTP反射放大攻击也进行了分析。NTP反射放大攻击和DNS反射放大攻击有异曲同工之妙，都是基于不需要维护状态的UDP协议。对抗D稍有研究的人都会知道，虽然UDP Flood很简单，但是不是太好防——包括Cookie和CAPTCHA在内的所有客户端验证手段均将失效。CloudFlare提到用MAC终端发出的MON_GETLIST 请求包为234字节，返回包是4460字节（分拆成10个数据包），放大了19倍。</p>
+<p>有朋友会说，19倍毛毛雨啦。事实上，CloudFlare测试的NTP服务器并非一台业务繁忙的服务器，4460字节返回的仅是55台主机的IP地址。在上文提到，一台业务繁忙的服务器会返回600台服务器IP。如果真的返回了600个IP，那么返回的数据包将是4460字节的10余倍。经放大后，将超过200倍！</p>
+<p>    OMG，200倍！这个数字你应该非常满意了。</p>
+<p>事隔不久：<br></p>
+<pre class="prettyprint lang-html">知名网络公司ClouldFlare表示遭到了超过400GbpsNTP反射式的DDoS攻击，并且在欧洲大部分地区平台上运行的服务受到了不同程度的影响，这次DDos攻击甚至使美国的一些基础设施受到了影响。</pre>
+<p>NTP反射攻击可以将攻击强度放大58.6倍，一个100Mbps的伪造NTP流量能导致攻击目标接收到5.8Gbps的恶意流量。</p>
+<p>据微博爆料：</p>
+<pre class="prettyprint lang-html">某大家熟悉的不能再熟悉的互联网巨头也遭受了NTP攻击， 不过那个可能不会上新闻</pre>
+<p><strong>欢迎知情人时继续爆料。</strong></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

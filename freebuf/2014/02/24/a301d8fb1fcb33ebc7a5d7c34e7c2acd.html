@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Linux下内存取证工具Volatility的使用</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>Linux下内存取证工具Volatility的使用</h2>
+	<p class="meta">2014-02-24</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>#01简介</strong></span><br><span style="color: rgb(38, 38, 38);"><strong>Volatility是开源的Windows，Linux，MaC，Android的内存取证分析工具，由python编写成，命令行操作，支持各种操作系统。</strong></span><br>项目地址：<br><a textvalue="https://code.google.com/p/volatility/" data_ue_src="https://code.google.com/p/volatility/" title="" target="_blank" href="https://code.google.com/p/volatility/">https://code.google.com/p/volatility/</a><br>只介绍简单的使用，详细使用方法可以看CheatSheet。在官方网站包含Linux的相关命令参考：</p>
+<p>https://code.google.com/p/volatility/wiki/LinuxCommandReference23#linux_pidhashtable，含以下内容</p>
+<pre class="prettyprint lang-html">Processes
+linux_pslist
+linux_psaux
+linux_pstree
+linux_pslist_cache
+linux_pidhashtable
+linux_psxview
+linux_lsof
+Process Memory
+linux_memmap
+linux_proc_maps
+linux_dump_map
+linux_bash
+Kernel Memory and Objects
+linux_lsmod
+linux_moddump
+linux_tmpfs
+Rootkit Detection
+linux_check_afinfo
+linux_check_tty
+linux_keyboard_notifier
+linux_check_creds
+linux_check_fop
+linux_check_idt
+linux_check_syscall
+linux_check_modules
+linux_check_creds
+Networking
+linux_arp
+linux_ifconfig
+linux_route_cache
+linux_netstat
+linux_pkt_queues
+linux_sk_buff_cache
+System Information
+linux_cpuinfo
+linux_dmesg
+linux_iomem
+linux_slabinfo
+linux_mount
+linux_mount_cache
+linux_dentry_cache
+linux_find_file
+linux_vma_cache
+Miscellaneous
+linux_volshell
+linux_yarascan</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline">#02安装</strong></span><br>源代码安装方法：<br><code style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;font-weight: inherit;line-height: inherit;vertical-align: baseline">apt-get install subversion-tools<br>svn checkout http://volatility.googlecode.com/svn/trunk/ /usr/local/src/volatility/</code><br>参考：<br><a textvalue="https://code.google.com/p/volatility/wiki/VolatilityInstallation" data_ue_src="https://code.google.com/p/volatility/wiki/VolatilityInstallation" title="" target="_blank" href="https://code.google.com/p/volatility/wiki/VolatilityInstallation">https://code.google.com/p/volatility/wiki/VolatilityInstallation</a></p>
+<p>Back Track和Kali Linux中自带此程序。<br>以Kali-Linux为例，volatility在“应用程序”-“Kali Linux”-“数字取证”-“内存取证工具集”中。<strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline"></strong></p>
+<p style="margin-top: 15px;"><strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline"><span style="font-size: 20px; color: rgb(38, 38, 38);">#03基本使用命令</span></strong><br><code style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;font-weight: inherit;line-height: inherit;vertical-align: baseline"></code></p>
+<pre class="prettyprint lang-html">./vol.py ‐f [image] ­‐profile=[profile] [plugin]</pre>
+<p>应该是一个Bug，-f后面需要跟绝对路径（Kali）。<br></p>
+<ol class=" list-paddingleft-2">
+<li>
+<p>查看扫描检查、插件、地址空间等信息</p>
+</li>
+<pre class="prettyprint lang-html">./vol.py --info</pre>
+<li>
+<p>查看帮助信息</p>
+</li>
+<pre class="prettyprint lang-html">./vol.py -h/--help</pre>
+<li>
+<p>查看指定插件的说明</p>
+</li>
+<pre class="prettyprint lang-html">./vol.py [plugin] --help</pre>
+<li>
+<p>从扩展目录加载插件</p>
+</li>
+<pre class="prettyprint lang-html">./vol.py --plugins=[path][plugin]</pre>
+<li>
+<p>检查结果输出</p>
+</li>
+<pre class="prettyprint lang-html">./vol.py --output-file=[file]</pre>
+</ol>
+<p><code style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;font-weight: inherit;line-height: inherit;vertical-align: baseline"></code></p>
+<p style="margin-top: 15px;"><span style="font-size: 20px; color: rgb(38, 38, 38);"><strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline">#04制作Linux系统的Profile</strong></span><br>Volatility自带一些windows系统的profile，Linux系统的Profile需要自己制作，制作的方法如下：<br>（实际是将module.dwarf和system.map打包成一个zip文件，接着将zip文件移动到 volatility/plugins/overlays/linux/ 中。）<br>Linux的Profile文件是一个zip的压缩包。<br>准备</p>
+<p><a data_ue_src="https://code.google.com/p/volatility/wiki/LinuxMemoryForensics" title="" target="_blank" href="https://code.google.com/p/volatility/wiki/LinuxMemoryForensics">https://code.google.com/p/volatility/wiki/LinuxMemoryForensics</a></p>
+<pre class="prettyprint lang-html">$ sudo zip volatility/volatility/plugins/overlays/linux/Ubuntu1204.zip volatility/tools/linux/module.dwarf /boot/System.map-3.2.0-23-generic</pre>
+<p>实际也可以在https://github.com/KDPryor/LinuxVolProfiles处直接下载已经做好的profile。<br>在kali下位置放在/usr/share/volatility/volatility/plugins/overlays/</p>
+<p>如果知道dump的内存是那种操作系统和操作系统版本的，可以直接制定profile;如果不知道是那种系统的内存，可以使用imageinfo选项，volatility会尝试自动判断内存的类型</p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem imageinfo</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline">#05获取内存镜像</strong></span><br>可以参考</p>
+<pre class="prettyprint lang-html">http://www.forensicswiki.org/wiki/Tools%3aMemory_Imaging#Linux
+Dd
+$ sudo dd if=/dev/mem of=/tmp/mem_dump.dd bs=1MB count=1010+0 records in10+0 records out10000000 bytes (10 MB) copied, 0.0331212 s, 302 MB/s</pre>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;line-height: inherit;vertical-align: baseline">#06使用示例</strong></span><br>检查内存进程</p>
+<p style="text-align:center"><img data-original="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2013-12-31 21:33:10的屏幕截图.png"></p>
+<noscript><img src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2013-12-31 21:33:10的屏幕截图.png"></noscript>
+<p>- 了解Linux系统常见系统进程；</p>
+<p>- 查看自动任务进程；</p>
+<p>- 如果系统没有重启过，但部分进程都是开机启动，查看进程运行时间；</p>
+<p>上面有进程号1517、27157、7334创建的时间明显与其他进程的创建时间不同，为可疑进程</p>
+<p><strong>检查进程详细信息</strong><br><code style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;font-weight: inherit;line-height: inherit;vertical-align: baseline"></code></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_psaux</pre>
+<p style="text-align:center"><img data-original="/imgs/53f7fce9158461c81264a58684d4495e.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 12:24:07的屏幕截图.png"></p>
+<noscript><img src="/imgs/53f7fce9158461c81264a58684d4495e.png!small" title="2014-01-01 12:24:07的屏幕截图.png"></noscript>
+<p>1517进程，位置在/usr/bin/httpd，另外27157进程的参数是 -B -c，通过查找rsyslogd的帮助文件发现rsyslogd并没有-B的参数。<br>通过linux_pidhashtable参数可以查找到隐藏的进程</p>
+<p>可以看到有4个rsyslogd进程与27157的进程同时建立。<br><strong>使用linux_netstat查看网络链接情况。</strong><br><code style="margin: 0px;padding: 0px;border: 0px;font-family: inherit;font-size: inherit;font-style: inherit;font-variant: inherit;font-weight: inherit;line-height: inherit;vertical-align: baseline"></code></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_netstat</pre>
+<p style="text-align:center"><img data-original="/imgs/807279fa21ed7df2a4b4966b95570b1e.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 12:29:19的屏幕截图.png"></p>
+<noscript><img src="/imgs/807279fa21ed7df2a4b4966b95570b1e.png!small" title="2014-01-01 12:29:19的屏幕截图.png"></noscript>
+<p>异常链接的地址为210.177.175.82<br><strong>可以通过linux_route_cache参数查看路由表情况。</strong><br></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_route_cache</pre>
+<p style="text-align:center"><img data-original="/imgs/730b3643f35de84370c19126f98b0dc7.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 12:42:19的屏幕截图.png"></p>
+<noscript><img src="/imgs/730b3643f35de84370c19126f98b0dc7.png!small" title="2014-01-01 12:42:19的屏幕截图.png"></noscript>
+<p><strong>使用linux_lsof命令查看1517和27157进程相关的文件</strong><br></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_lsof</pre>
+<p style="text-align:center"><img data-original="/imgs/4e66074f0032ddd9c5042cca80bccca0.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 12:44:59的屏幕截图.png"></p>
+<noscript><img src="/imgs/4e66074f0032ddd9c5042cca80bccca0.png!small" title="2014-01-01 12:44:59的屏幕截图.png"></noscript>
+<p>注意“/tmp/.ICE-unix/-log/”文件<br><strong>使用linux_proc_maps参数，可以查看进程细节包括共享库、开始和结束的位置等信息</strong><br></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_proc_maps | grep 1517</pre>
+<p><strong>查看可疑文件的位置</strong><br></p>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_find_file -F "/tmp/.ICE-unix/-log/httpds"</pre>
+<p style="text-align:center"><img data-original="/imgs/ae860922f5069c0ecddcc9101beacef0.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 13:01:52的屏幕截图.png"></p>
+<noscript><img src="/imgs/ae860922f5069c0ecddcc9101beacef0.png!small" title="2014-01-01 13:01:52的屏幕截图.png"></noscript>
+<pre class="prettyprint lang-html">vol -f /root/Downloads/pexit.vmem --profile=LinuxUbuntu1004_pae32-33x86 linux_find_file -i 0xf5a4e568 -O /root/dump</pre>
+<p style="text-align:center"><img data-original="/imgs/81e814dc39a7f33b30bd3129b432ef5b.png!small" src="/imgs/2d26f892e890e04a55b63670da039f5a.png!small" title="2014-01-01 13:13:03的屏幕截图.png"></p>
+<noscript><img src="/imgs/81e814dc39a7f33b30bd3129b432ef5b.png!small" title="2014-01-01 13:13:03的屏幕截图.png"></noscript>
+<pre class="prettyprint lang-html">strings /root/dump</pre>
+<p><strong>参考：</strong></p>
+<pre class="prettyprint lang-html">http://sempersecurus.blogspot.com/2013/12/a-forensic-overview-of-linux-perlbot.html
+
+https://code.google.com/p/volatility/wiki/LinuxCommandReference23#linux_pidhashtable</pre>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

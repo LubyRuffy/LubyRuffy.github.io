@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>虐心周末之-BCTF 百度杯网络安全大赛</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>虐心周末之-BCTF 百度杯网络安全大赛</h2>
+	<p class="meta">2014-03-10</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>BCTF“百度杯”全国网络安全技术对抗赛,是由百度公司主办,清华和北大的安全技术专家提供技术支持,紫金江宁、南京赛宁承办,面向全国范围网络安全技术实战竞赛!</strong></span></p>
+<p>BCTF 周五突然看到了，之前也看了一下，以前从来没参加过，比较感兴趣，遂注册战队加入。</p>
+<p>本人小菜，其实也就是想看看，周六看到有人推荐《天注定》于是看了一下，看完回不过神，于是顺手拿了一本书，《蛙》，真的不错，自从毕业就很少看书，居然一直看到7点。</p>
+<p>BCTF的事，好像忘，看了最强大脑，正准备睡觉，看到群里有人说了一下BCTF，于是欣欣然打开，没想到这么虐心啊……</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>MISC 初来乍到</strong></span></p>
+<p style="text-align:center"><img data-original="/imgs/58ef028fdf93dab7fffdb146600e7000.png!small" src="/imgs/58ef028fdf93dab7fffdb146600e7000.png!small" title="clipboard.png"></p>
+<noscript><img src="/imgs/58ef028fdf93dab7fffdb146600e7000.png!small" title="clipboard.png"></noscript>
+<p>看到题目完全没有思路，直接F12看了，没有任何信息，然后一看90%的战队都做了，然后一遍一遍的看题目，我X，不是真的就@的一下就行了吧，于是打开微博，@了，顺便Follow了，本来没注意，就是试一下，等了一会儿，看到微博有提示，新的朋友，下面公司一栏就是flag……我只想说，ca0……不知道其它战友是什么心情……</p>
+<h2><span style="color: rgb(38, 38, 38);"><strong>PPC &amp; CRYPTO 混沌密码锁</strong></span></h2>
+<p style="text-align:center"><img data-original="/imgs/4d65f00f6ad22b70ebc6f4356bd5baf2.png!small" src="/imgs/58ef028fdf93dab7fffdb146600e7000.png!small" title="clipboard1.png"></p>
+<noscript><img src="/imgs/4d65f00f6ad22b70ebc6f4356bd5baf2.png!small" title="clipboard1.png"></noscript>
+<p>一样没有思路，这题文字里其实没有什么关系，看了链接，down下来源码，看了两遍，不就是排列组合嘛，虽然，可以从answer的格式来判断大概是什么排列，但是才9个function,fun6,fun2已经用了，那就搞个循环，跑一遍应该非常快，事实上确实很快……</p>
+<pre class="prettyprint lang-python">import base64,binascii,zlib
+import os,random
+base = [str(x) for x in range(10)] + [ chr(x) for x in range(ord('A'),ord('A')+6)]
+def abc(str):
+    return sha.new(str).hexdigest()
+def bin2dec(string_num):
+    return str(int(string_num, 2))
+def hex2dec(string_num):
+    return str(int(string_num.upper(), 16))
+def dec2bin(string_num):
+    num = int(string_num)
+    mid = []
+    while True:
+        if num == 0: break
+        num,rem = divmod(num, 2)
+        mid.append(base[rem])
+    return ''.join([str(x) for x in mid[::-1]])
+def dec2hex(string_num):
+    num = int(string_num)
+    mid = []
+    while True:
+        if num == 0: break
+        num,rem = divmod(num, 16)
+        mid.append(base[rem])
+    return ''.join([str(x) for x in mid[::-1]])
+def hex2bin(string_num):
+    return dec2bin(hex2dec(string_num.upper()))
+def bin2hex(string_num):
+    return dec2hex(bin2dec(string_num))
+def reverse(string):
+    return string[::-1]
+def read_key():
+    os.system('cat flag')
+def gb2312(string):
+    return string.decode('gb2312')
+answer='78864179732635837913920409948348078659913609452869425042153399132863903834522365250250429645163517228356622776978637910679538418927909881502654275707069810737850807610916192563069593664094605159740448670132065615956224727012954218390602806577537456281222826375'
+func_names = ['fun1', 'fun2', 'fun3', 'fun4', 'fun5', 'fun6', 'fun7', 'fun8', 'fun9']
+f={}
+f['fun1']=reverse
+f['fun2']=base64.b64decode
+f['fun3']=zlib.decompress
+f['fun4']=dec2hex
+f['fun5']=binascii.unhexlify
+f['fun6']=gb2312
+f['fun7']=bin2dec
+f['fun8']=hex2bin
+f['fun9']=hex2dec
+def check_equal(a, b):
+    if a == b:
+        return True
+    try:
+        if int(a) == int(b):
+            return True
+    except:
+        return False
+    return False
+def main():
+    print "Welcome to Secure Passcode System"
+    print "First, please choose function combination:"
+f1 = 'fun3'
+f2 = 'fun5'
+f3 = 'fun1'
+f4 = 'fun4'
+"""
+for f1 in fun_names:
+    for f2 in fun_names:
+        for f3 in fun_names:
+            for f3 in fun_names: #循环跑出函数组合
+"""
+if f1 not in func_names or f2 not in func_names or f3 not in func_names or f4 not in func_names:
+    print 'invalid function combination'
+    #exit()
+    #continue
+try:
+    answer_hash = f['fun6'](f['fun2'](f[f1](f[f2](f[f3](f[f4](answer))))))
+   
+except:
+    print "Wrong function combination, you bad guy!"
+    #exit()
+    #continue
+if len(answer_hash) == 0:
+    print 'You must be doing some little dirty trick! Stop it!'
+    #exit()
+    #continue
+usercode = answer
+try:
+    user_hash = f['fun6'](f['fun2'](f[f1](f[f2](f[f3](f[f4](usercode))))))
+   
+    if user_hash == answer_hash:
+        if check_equal(answer, usercode):
+            print "This passcode has been locked, please use the new one\n"
+            #print f1,f2,f3,f4
+            print answer_hash
+            read_key()
+            exit()
+        else:
+            print "Welcome back! The door always open for you, your majesty! "
+            read_key()
+            exit()
+    else:
+        print "Sorry, bad passcode.\n"
+except:
+    print "Sorry, bad passcode. Please try again."
+if __name__ == '__main__':
+    main()</pre>
+<p>注释掉exit()，添加continue，但是忘了添加下面的跑出结果时的exit(),跑了还在继续啊，果然添加上，跑出来是fun3,fun5,fun1,fun4,但是很显然，结果只能是This passcode has been locked, please use the new one</p>
+<p>但是这些，TMD都不是重点，又看了一下，重点就是一个read_key()，一看代码，我那个去……在客户端跑没用……找不到线上提交的地方，还有我真不这两货是干嘛的……218.2.197.242:9991 218.2.197.243:9991</p>
+<p>一看时间，夜里2点了，还是睡吧，感冒都还没有好……</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

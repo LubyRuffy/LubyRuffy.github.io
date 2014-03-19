@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>颤抖了吗？九步逆向破解银行安全令牌</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>颤抖了吗？九步逆向破解银行安全令牌</h2>
+	<p class="meta">2014-02-25</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>写在前面</strong></span><br></p>
+<p>    作者历经千辛万苦，逆向了一个银行动态口令的APP，过程艰辛曲折。最后发现，其实生成算法也不算很复杂，其中主要使用了 android_id 系统时间戳 作为生成变量。<span style="color: rgb(0, 176, 80);">看起来高大上的动态口令，在逆向工程师抽丝剥茧的分析下，亦不过如此哇~</span><br></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>正文</strong></span></p>
+<p><span class="Apple-tab-span"></span>   <strong> <span style="color: rgb(38, 38, 38);">我这次要对全巴西最大的银行之一开刀，我也经常会使用到这家银行所提供的服务。他使用包括用户密码在内的多种途径来验证用户的身份。</span></strong>我逆向的动态口令（OPT）也是其中一种，并且我把他移植到了Arduino-compatible 平台上。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>免责声明和更多的免责声明</strong></span></p>
+<p><span class="Apple-tab-span"></span>在文章中我已经去掉了敏感的信息，以保护无辜的人的利益。而且这项研究的结果也不足以让我能够黑掉别人的银行账户。即使一个拥有root权限的第三方恶意应用，在没有足够的账户信息的前提下，都不能模拟动态口令的生成。而且，这次研究并没有发现任何代码层面的漏洞，这家银行的生成算法甚至比google的认证算法还要安全，甚至可以说这篇文章是对该银行APP安全性的一次褒奖。他的动态生成算法，完全符合TOTP规范。把数据安全做到了极致。</p>
+<p>下面就是免责声明 balabala一大堆，请原谅小编就不翻译了，想看的可以去原文地址观看</p>
+<p style="text-align: center;"><img data-original="/imgs/9623dce1c1b14bc2039b63c3aa4a99d3.gif!small" src="/imgs/9623dce1c1b14bc2039b63c3aa4a99d3.gif!small" title="cartao.gif"></p>
+<noscript><img src="/imgs/9623dce1c1b14bc2039b63c3aa4a99d3.gif!small" title="cartao.gif"></noscript>
+<p><span class="Apple-tab-span"></span>通常对于新用户，他们会得到一张密保卡，但是密保卡这东西是极其不方便的。另外一个更好的方法就是使用android app生成一个动态口令，大胆的猜测，这个口令的生成可能把手机号，或者是pin值作为参数。在我每次刷机，或者更换手机的时候，都要重新绑定一遍这个安全服务。虽然过程比较简单，但还是令我不爽。所以我决定，逆向这个android APP做一个自己的动态密码生成工具。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>Activating the application 激活应用</strong></span></p>
+<p><span class="Apple-tab-span"></span>在阅读源码之前，我还是喜欢先把应用下载下来看看他长啥样，下面是三个阶段的截图。</p>
+<p style="text-align: center;"><img src="/imgs/f7106bca66baba90ed83ca966743702b.png!small" style="float: none; width: 450px; height: 804px;" title="activation2.png" data_ue_data-original="/imgs/f7106bca66baba90ed83ca966743702b.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></p>
+<noscript><img src="/imgs/f7106bca66baba90ed83ca966743702b.png!small" style="float: none; width: 450px; height: 804px;" title="activation2.png" data_ue_src="/imgs/f7106bca66baba90ed83ca966743702b.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></noscript>
+<p style="text-align: center;"><img src="/imgs/595e599f172565eefcf4235bb039f03e.png!small" style="float: none; width: 450px; height: 804px;" title="activation3.png" data_ue_data-original="/imgs/595e599f172565eefcf4235bb039f03e.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></p>
+<noscript><img src="/imgs/595e599f172565eefcf4235bb039f03e.png!small" style="float: none; width: 450px; height: 804px;" title="activation3.png" data_ue_src="/imgs/595e599f172565eefcf4235bb039f03e.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></noscript>
+<p style="text-align: center;"><img src="/imgs/d2374069512abe9018515dfb92077197.png!small" style="float: none; width: 450px; height: 804px;" title="activation4.png" data_ue_data-original="/imgs/d2374069512abe9018515dfb92077197.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></p>
+<noscript><img src="/imgs/d2374069512abe9018515dfb92077197.png!small" style="float: none; width: 450px; height: 804px;" title="activation4.png" data_ue_src="/imgs/d2374069512abe9018515dfb92077197.png!small" width="450" height="804" border="0" hspace="0" vspace="0"></noscript>
+<p>第一张是安装时的截图，看一下他所需要的权限，这可不是开发人员为何好玩才加上去的。他们其中有些甚至有可能影响到动态口令的生成。第二张是激活界面，需要填四个数字，这四个数字只能通过给银行打电话被告知。第三幅图就是，成功激活后生成的动态口令。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>The toolset 工具相关</strong></span></p>
+<p>逆向android应用需要用到的几个小工具，在下面列出来了，其实就是网上常用的几种工具。</p>
+<pre class="prettyprint lang-html">Android SDK
+提供adb这个强大的命令行工具，提取apk文件，和获取手机信息全靠它。
+dex2jar
+这个工具可以吧dex转换成jar包的形式
+JD, JD-GUI
+这个就是··java反编译工具，直接出源码
+Eclipse
+这个就不多说了，地球人都知道。</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>Getting the APK file from the phone 第一步：取得APK文件</strong></span></p>
+<p>这个相当简单的嘛~。可以直接在play里面下，也可以使用ADB在手机中把他抓出来。</p>
+<p>查找包名</p>
+<pre class="prettyprint lang-html">$ ./adb shell pm list packages | grep mybank
+package:com.mybank</pre>
+<p>确定路径</p>
+<pre class="prettyprint lang-html">$ ./adb shell pm path com.mybank
+package:/data/app/com.mybank-1.apk</pre>
+<p>下载</p>
+<pre class="prettyprint lang-html">$ ./adb pull /data/app/com.mybank-1.apk
+2950 KB/s (15613144 bytes in 5.168s)</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>第二步：解压缩APK文件</strong></span></p>
+<p>APK直接可以被解压缩，其实他就是一个压缩包文件，只是后缀不同。解压缩以后的classes.dex文件中包含了java源代码信息。</p>
+<p>解压缩</p>
+<pre class="prettyprint lang-html">$ unzip com.mybank-1.apk
+(file list omitted for brevity)</pre>
+<p>把dex转换成jar文件</p>
+<pre class="prettyprint lang-html">$ mv classes.dex com.mybank-1.dex
+$ ./d2j-dex2jar.sh com.mybank-1.dex 
+dex2jar com.mybank-1.dex -&gt; com.mybank-1-dex2jar.jar</pre>
+<p><span style="color: rgb(38, 38, 38);"><strong>第三步：瞅代码</strong></span></p>
+<p>把jar包放进JD—GUI里面，就可以看到源代码了。</p>
+<p style="text-align: center;"><img data-original="/imgs/12f2ea6fdcac5e3bf88811c6999664e9.png!small" src="/imgs/9623dce1c1b14bc2039b63c3aa4a99d3.gif!small" title="jdgui.png"></p>
+<noscript><img src="/imgs/12f2ea6fdcac5e3bf88811c6999664e9.png!small" title="jdgui.png"></noscript>
+<p>很轻易的就可以发现几个比较特殊的包，br.com.mybank.integrador.token, br.com.othercompany.token ， com.mybank.varejo.token毫无疑问核心代码就在里面，只不过代码应该被混淆了。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>第四步：通过异常字符串反混淆</strong></span></p>
+<p>代码中经常的许多字符串名都被混淆了（其实是加密了，不过加密的秘钥在代码中能找到~，作者说是混淆就是混淆把~），这比较蛋疼。要知道，代码中的字符串会对逆向起到很大的帮助。</p>
+<pre class="prettyprint lang-html">public void trocaPINcomLogin(int paramInt, boolean paramBoolean, Perfil paramPerfil)
+{
+    if (paramPerfil == null)
+        throw new IllegalArgumentException(a.a("1p5/eEf/sl3kbeUcP509qg=="));
+    if (!this.jdField_a_of_type_U.jdField_a_of_type_JavaUtilHashtable.contains(paramPerfil))
+        throw new RuntimeException(a.a("86jcmKgr/ZshQu9aGVbuGscy2nHW4UEWqudRoUXhImQ=") + a.a("7u8KqqwqUD3a7FM339fp6pRrxUtQrHDMyqvZ6A2MurQ="));
+    if ((this.jdField_a_of_type_BrComOtherCompanyTokenParamsGerenciador.isPinObrigatorio()) &amp;&amp; (!paramBoolean))
+        throw new RuntimeException(a.a("aMsL/5kjkXKD4K1SvpTuuJZUS0U0fL19UT2GxjJ/QzQ="));
+    Configuracao localConfiguracao = paramPerfil.getConfiguracao();
+    if ((localConfiguracao.a().a()) &amp;&amp; (paramPerfil != this.jdField_a_of_type_BrComOtherCompanyTokenPerfil))
+        throw new RuntimeException(a.a("ASszutKFJW3iqDb7X/+vqAcYxTLXN2SJOIs0ne596Pu3ZoRxjiiscwhV6fT70efX"));
+    localConfiguracao.a().a(paramInt);
+    localConfiguracao.a().a(paramBoolean);
+    this.jdField_a_of_type_U.a(paramPerfil);
+    if (!paramPerfil.equals(this.jdField_a_of_type_BrComOtherCompanyTokenPerfil))
+        a(paramPerfil);
+}</pre>
+<p>不过幸运的是，在抛出异常的语句中，我们可以找到一些蛛丝马迹，我们通过观察可以发现，混淆字符串的函数是a.a。根据这些信息的提示，我们可以猜测a.a是一个解密有关的类。顺理成章，我们直接去a函数中分析解密所使用的代码。</p>
+<p>这是分析完a类之后的一些额外收获</p>
+<pre class="prettyprint lang-html">p类是一个base64解密的类。
+b类，实现了AES的功能。搜索这个类之中的一些字符串，我发现它是网络上的一个开源实现 Paulo Barreto's JAES中的内容。
+a类中的private static byte[]是混淆所使用的秘钥，可以通过一个简短的程序来反混淆。</pre>
+<p><br></p>
+<p>不过不幸的是，a.a不单单是JAES的AES加密的包装，其中也包含着自己实现的一些加密。</p>
+<p>不过这都不是事儿，我还是把a.a中的解密函数用python实现了。</p>
+<pre class="prettyprint lang-html">def decodeExceptionString(str):
+    aesKey = &lt;data from previous step&gt;
+    xorKey = &lt;data from decompiled method&gt;
+    blockSize = 16
+    
+    aes = AES(aesKey)
+    stringBytes = Base64.decode(str)
+    outputString = ""
+    
+    for blockStart in xrange(0, len(stringBytes), blockSize):
+        encryptedBlock = stringBytes[blockStart:blockStart+blockSize]
+        plaintextBlock = aes.decrypt(encryptedBlock)
+        outputString += plaintextBlock ^ xorKey
+        xorKey = encryptedBlock
+    
+    return outputString</pre>
+<p>简而言之，除了AES和混淆秘钥，这个类还实现了CBC（密码段链接）。</p>
+<p>试验一下上述代码的功能</p>
+<pre class="prettyprint lang-html">$ ./decode "ASszutKFJW3iqDb7X/+vqAcYxTLXN2SJOIs0ne596Pu3ZoRxjiiscwhV6fT70efX"
+N?o é possível alterar PIN sem estar logado.</pre>
+<p>这段葡萄牙语的意思是，it is not possible to change PIN without being logged in。看来代码运行的还不错。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>第五步：逆向核心代码–随机密码生成过程</strong></span></p>
+<p>解决了，字符串混淆的问题，接下来个就要弄清楚随机密码的生成过程了~找啊找啊找啊找~~~~找了好久，我终于发现了一个切入点，br.com.othercompany.token.dispositivo.OTP这个类。下面是它抛出的一些异常，反混淆之后我们可以看到原文。</p>
+<pre class="prettyprint lang-html">public String calculate() throws TokenException {
+    int i = (int)Math.max(Math.min((this.a.getConfiguracao().getAjusteTemporal() + Calendar.getInstance().getTime().getTime() - 1175385600000L) / 36000L, 2147483647L), -2147483648L);
+    a();
+    if (i &lt; 0)
+        throw new TokenException("Janela negativa"), i);
+    int j = (0x3 &amp; this.a.getConfiguracao().getAlgoritmos().a) &gt;&gt; 0;
+    switch (j)
+    {
+    default:
+        throw new TokenException("Algoritmo inválido:" + j, i);
+    case 0:
+        return a(i);
+    case 1:
+    }
+    return o.a(this.a.getConfiguracao().getChave().a(20), i);
+}</pre>
+<p>很容易读懂，变量i是一个时间戳，从2007年4月11日到现在的秒数除以36，36就是每个动态口令的存活时间。</p>
+<p>至于为什么是2007年4月11日，我就不知道了，大概是程序员他老婆的生日 ： ）</p>
+<p>他还引入了一个修正函数getAjusteTemporal()，为了解决各地区的时差问题。上文代码中的o.a函数是用于生成动态密码，他的两个参数一个是刚才说到的时间戳，还有一个是遗传byte数组（应该是一个密钥）。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>第六步：寻找密钥</strong></span></p>
+<p>看一下，生成语句的这段调用，this.a.getConfiguracao().getChave().a(20) this.a 是一个Perfil (profile) 对象，getConfiguracao() 返回一个Configuracao (settings) 对象getChave()返回一个z类，a(int)返回一个byte数组，这个数组就是key。</p>
+<p>z类中的字符串，也经过了混淆，但是比较简单，反混淆过程就不提了.查看一下c类中的a(int)函数，是返回一个byte数组，长度截取到参数值。Perfil (profile) 对象反而是由PersistenciaDB类创建的，这个类中也包含了很多被混淆的字符串。</p>
+<pre class="prettyprint lang-html">a = a.a("DwYyIlrWxIS9ruNMCKH/PQ==");
+b = a.a("SceoTjidi0XqlgRUo9hcDw==");
+c = a.a("yrYBlcp8nEfVKUT9WSqTqA==");
+d = a.a("jUTzBfsP/AO/Kx/1+VQ3CQ==");
+e = a.a("Y56SnU/pIKROPCLHu7oFuw==") + b + a.a("38oyp4eW3xqT3TaMfWZ5RA==") + "_id" + a.a("3Q+FCEVH2PxZ31ms4WHHwNB40EbmtWzHPhwoaB1nM7lGr+9zZzuVpx5iZ4YR+KUw") + c + a.a("bYYIl6LtqthcUCCFFb7JCRSC8zr5hKIFXe5JHFCCkZA=") + d + a.a("ENCtPBu4RtFta2XI1GsQag==") + a.a("ImPhDy43f+Nr4G5ofkZz+g==");</pre>
+<p>幸好a.a的机制我们前面研究过，翻译出的原文如下。</p>
+<pre class="prettyprint lang-html">a = "token.db";
+b = "perfis";
+c = "nome";
+d = "data";
+e = "create table perfis (_id integer primary key autoincrement, nome text not null, data blob not null);";</pre>
+<p>竟然是一条，SQL语句，真是很有趣，原来它使用数据库来存储配置信息。其中还有一个文件名token.db,很可能是一个SQLite数据库。紧接着通过研究PersistenciaDB类中的 carregar(load)函数，我们可以确定这一想法，他通过SQLiteDatabase类来访问这个数据库。</p>
+<p>不过我接下来发现数据blob(binary large object)在carragar函数中被aa.a（和上文中的a.a不是一码事）这个函数加密了，这个函数接收blob数据，和一串16个字符的密钥。</p>
+<p>在研究aa.a这个函数之前。我们先研究一下解密Blob的密钥，他作为carregar的一个参数传递进来。由PersistenciaUtils这个类产生。下面是这个类的入口。</p>
+<pre class="prettyprint lang-html">public class PersistenciaUtils {
+  public static byte[] getChave(Context paramContext, byte[] paramArrayOfByte) {
+    try {
+      byte[] arrayOfByte = MessageDigest.getInstance("SHA-1").digest(getId(paramContext).getBytes());
+      return arrayOfByte;
+    } catch (NoSuchAlgorithmException localNoSuchAlgorithmException) {
+    }
+    return new byte[20];
+  }
+  public static String getId(Context paramContext) {
+    String str = Settings.System.getString(paramContext.getContentResolver(), "android_id");
+    if (str == null)
+      str = "&lt;their default id&gt;";
+    return str;
+  }
+}</pre>
+<p>从代码可以看出，先取得android_id的SHA-1摘要，如果获取失败就是用一个默认的16进制hash字符串。</p>
+<p>使用adb看看我的android_id</p>
+<pre class="prettyprint lang-html">$ ./adb shell
+shell@hammerhead:/ $ content query --uri content://settings/secure --projection name:value --where "name='android_id'"
+Row: 0 name=android_id, value=0123456789abcdef
+shell@hammerhead:/ $ exit</pre>
+<p>a.aa把blob分成很多段，96位的头，16位的随机数，16位的标签和为加密数据预留的空间。</p>
+<p>进一步研究aa这个类，我们的到了，如下的信息。</p>
+<pre class="prettyprint lang-html">类a实现了 EAX AEAD(Authenticated Encryption with Associated Data) 
+类f实现了 CMAC (Cipher-based Message Authentication Code)
+类h实现了 CTR (counter) mode  广告计费的功能
+以上三个类的算法实现都取自JAES库
+类l实现了 SHA-1 哈希算法  ，有趣的是类PersistenciaUtil并没有使用它，而是使用了MessageDigest这个函数来替代它。
+类m实现了 HMAC (keyed-Hash Message Authentication Code) 算法
+类n，包装了l和m，提供了HMAC-SHA1接口</pre>
+<p>最重要的我发现，aa.a函数是通过CMAC标签进行加密的，写出python的解密代码。</p>
+<pre class="prettyprint lang-html">def decodeBlob(datablob, android_id):
+    header = datablob[:96]
+    nonce = datablob[96:112]
+    tag = datablob[112:128]
+    cryptotext = datablob[128:]
+    key1 = SHA1(android_id)[:16]
+    aes = AES(key1)
+    cmac = CMAC(aes)
+    cmac.update(header)
+    key2 = cmac.getTag()
+    eax = EAX(key2, aes)
+    (validTag, plaintext) = eax.checkAndDecrypt(cryptotext, tag)
+    if validTag:
+        return plaintext</pre>
+<p>如果EAX验证成功，aa.a返回解密的内容给PersistenciaDB使用。</p>
+<p>再来看PersistenciaDB这个类，其中的a方法可以解析明文数据并把它变成一个perfil对象，并反序列化之，把其变成一个包含着bool，short，byte的数组。</p>
+<p>其中以下3个，是关键的数据，根据偏移量反推出偏移。</p>
+<pre class="prettyprint lang-html">pin = int(blob[82:86])
+key = blob[38:70]
+timeOffset = long(blob[90:98])</pre>
+<p>这就是密钥所需要的三个数据，只要三个都正确，程序就可以正常运行。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>第七步：深度理解代码</strong></span></p>
+<p>上文中得到的秘钥在OPT 类中被截取到20个字节，并和时间戳一起传送到o.a方法中，这个方法引用了上文提到的很多类，所以，比较轻松的就写出了python代码~</p>
+<pre class="prettyprint lang-html">def generateToken(key, timestamp):
+    message = [0] * 8
+    for i in xrange(7, 0, -1):
+        message[i] = timestamp &amp; 0xFF
+        timestamp &gt;&gt;= 8
+    
+    hmacSha1 = HMAC_SHA1(key)
+    hmacSha1.update(message)
+    hash = hmacSha1.getHash()
+    
+    k = 0xF &amp; hash[-1]
+    m = ((0x7F &amp; hash[k]) &lt;&lt; 24 | (0xFF &amp; hash[(k + 1)]) &lt;&lt; 16 | (0xFF &amp; hash[(k + 2)]) &lt;&lt; 8 | 0xFF &amp; hash[(k + 3)]) % 1000000;
+    return "%06d" % m</pre>
+<p>基本时间戳是一个占8字节的长整形，手动把它转换成大端的byte数组，接着使用HMAC-SHA1，取得hash最后四位作为整数读取的索引。使用这个整形，mod 1000000，就是我们的随机密码了，简单的超乎我的想象~~</p>
+<p><br></p>
+<p>马上我在google的TOTP认证的实现代码中，发现了很相似的一段。</p>
+<pre class="prettyprint lang-html">public String generateResponseCode(byte[] challenge)
+        throws GeneralSecurityException {
+    byte[] hash = signer.sign(challenge);
+    // Dynamically truncate the hash
+    // OffsetBits are the low order bits of the last byte of the hash
+    int offset = hash[hash.length - 1] &amp; 0xF;
+    // Grab a positive integer value starting at the given offset.
+    int truncatedHash = hashToInt(hash, offset) &amp; 0x7FFFFFFF;
+    int pinValue = truncatedHash % (int) Math.pow(10, codeLength);
+    return padOutput(pinValue);
+}</pre>
+<p>其实他们使用了基本相同的算法。</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>第九步：克隆</strong></span></p>
+<p>现在一个德州出品的Stellaris LaunchPad正躺在我面前，我准备了如下的库~</p>
+<pre class="prettyprint lang-html">Cryptosuite
+ Arduino的加密算法库 (包括 SHA and HMAC-SHA)
+RTClib
+ JeeNodes and Arduinos所使用的轻量级时间日期库.
+2x16LCD_library
+A library for 2x16 LCD (like JDH162A or HD44780) written for Energia and Stellaris Launchpad (LM4F).</pre>
+<p>RTC有一部分需要改进。由于Stellaris LaunchPad没有板载实时时钟，内部时钟需要在每次启动时设置，而且需要一台电脑来辅助，这是很麻烦的事情。</p>
+<p>完整代码如下。</p>
+<pre class="prettyprint lang-html">#include &lt;sha1.h&gt;
+#include &lt;LCD.h&gt;
+#include &lt;RTClib.h&gt;
+RTC_Millis RTC;
+void setup() {
+    RTC.begin(DateTime(__DATE__, __TIME__));  
+    
+    LCD.init(PE_3, PE_2, PE_1, PD_3, PD_2, PD_1);
+    LCD.print("Token");
+    LCD.print("valverde.me", 2, 1);
+    delay(1000);
+    LCD.clear();
+}
+char token[6];
+uint8_t message[8];
+long timestamp = 0;
+long i = 0;
+uint8_t key[] = {&lt;your key here&gt;};
+void showToken() {
+    long now = RTC.now().get() - 228700800 + 7200;
+    i = now / 36;
+    int timeLeft = now % 36;
+    
+    for(int j = 7; j &gt;= 0; j--) {
+        message[j] = ((byte)(i &amp; 0xFF));
+        i &gt;&gt;= 8;
+    }
+    
+    Sha1.initHmac(key, 20);
+    Sha1.writebytes(message, 8);
+    
+    uint8_t * hash = Sha1.resultHmac();
+    
+    int k = 0xF &amp; hash[19];
+    int m = ((0x7F &amp; hash[k]) &lt;&lt; 24 | (0xFF &amp; hash[(k + 1)]) &lt;&lt; 16 | (0xFF &amp; hash[(k + 2)]) &lt;&lt; 8 | 0xFF &amp; hash[(k + 3)]) % 1000000;
+    LCD.print(m, 2, 1);
+    LCD.print(36 - timeLeft, 2, 15);
+}
+void loop() {
+    LCD.clear();
+    LCD.print("Current token:");
+    showToken();
+    delay(1000);
+}</pre>
+<p>最后作者还分享了一个，解决Arduino时间问题的小技巧~这里省略啦~感兴趣的同学可以去原文看。</p>
+<p>[<a href="http://blog.valverde.me/2014/01/03/reverse-engineering-my-bank%27s-security-token/#.Uwa0CGI723D" target="_blank" title="" data_ue_src="http://blog.valverde.me/2014/01/03/reverse-engineering-my-bank%27s-security-token/#.Uwa0CGI723D" textvalue="原文地址">原文地址</a>，译/FreeBuf小编wyl]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>对特斯拉公司官网的一次渗透测试</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>对特斯拉公司官网的一次渗透测试</h2>
+	<p class="meta">2014-02-27</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(0, 176, 80);"><strong>特斯拉是一家非常酷的公司，由PayPal的Elon Musk与SpaceX投资创建。该公司设计、生产并销售下一代电动汽车，以缓和全球变暖问题和提高生活质量。</strong></span></p>
+<p>我非常喜欢这家公司，因此当得知他们启动了一项“安全响应开放计划”后，我决定尝试一下。</p>
+<p>特斯拉的官网使用了应用广泛的Drupal程序，并安装了大量插件，安全性非常高。刺探了几个小时之后，只找到了一些XSS漏洞（其中两个非常难利用），而且比较容易利用的一个注入点也不是Drupal脚本引起的，而是由评论中的外链引起的。</p>
+<p style="text-align: center;"><img data-original="/imgs/ac526edadf88047fbb380adce49d5f46.png!small" src="/imgs/ac526edadf88047fbb380adce49d5f46.png!small" style="float:none" title="1.png"></p>
+<noscript><img src="/imgs/ac526edadf88047fbb380adce49d5f46.png!small" style="float:none" title="1.png"></noscript>
+<p>进入特斯拉网站的design studio。这是一个非常棒的定制工具，使用户可以在下单前定义自己想要的特斯拉的样子。同时它也给用户一个选项，为用户生成一个唯一的URL，使其可以与其它人共享自己的创作，特斯拉会将这个唯一的URL传入一个自定义的短网址生成器中。我正是在这个短网址生成器中发现了一处SQL注入漏洞，给了我进入特斯拉后台数据库的机会，包括访问所有在线用户记录以及用admin登录网站的权限。</p>
+<p><br></p>
+<p>在测试过程中，我注意到根据输入一些不同的、被引号括起来的字符串，该脚本的反应也不太一样。经过一段时间的尝试，终于成功得到一个盲注语句：<span style="color: rgb(0, 176, 80);">' + sleep(10) + '</span>，如下图所示：</p>
+<p style="text-align: center;"><img data-original="/imgs/6820f96074929b2b349cf6f1f2d03ae0.png!small" src="/imgs/ac526edadf88047fbb380adce49d5f46.png!small" title="2.png" style="float: none"><br><span style="font-family:宋体"></span></p>
+<noscript>
+<img src="/imgs/6820f96074929b2b349cf6f1f2d03ae0.png!small" title="2.png" style="float: none"><br><span style="font-family:宋体"></span>
+</noscript>
+<p>特斯拉的反应值得赞赏，他们向我索取了一些技术细节和一份利用漏洞的python脚本（我必须将sleep函数换成benchmark函数以终止被挂起的查询，但是不确定在他们那里是不是有效）。</p>
+<p><span style="color: rgb(0, 176, 80);">漏洞很快就被补上了。特斯拉负责安全的小伙伴们非常友好谦逊，我个人也很喜欢和他们一起愉快地玩耍，有机会我一定要再黑他们一次J。</span></p>
+<p>原文地址：<a href="https://bitquark.co.uk/blog/2014/02/23/tesla_motors_blind_sql_injection" target="_blank" title="" data_ue_src="https://bitquark.co.uk/blog/2014/02/23/tesla_motors_blind_sql_injection" textvalue="https://bitquark.co.uk/blog/2014/02/23/tesla_motors_blind_sql_injection">https://bitquark.co.uk/blog/2014/02/23/tesla_motors_blind_sql_injection</a></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

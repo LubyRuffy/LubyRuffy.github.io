@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>波兰遭遇大规模DNS劫持攻击</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>波兰遭遇大规模DNS劫持攻击</h2>
+	<p class="meta">2014-02-12</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>波兰计算机应急中心检测到大量家用路由器的DNS配置被修改。黑客对大量网上银行的用户实施了中间人攻击。</strong></span></p>
+<p>波兰CERT在<a textvalue="报告" data_ue_src="https://www.cert.pl/news/8019/langswitch_lang/en" title="" target="_blank" href="https://www.cert.pl/news/8019/langswitch_lang/en">报告</a>中写到: “很多家用路由器存在未授权的远程修改配置漏洞导致了这次事件。这次中间人攻击中，黑客在多个网上银行的页面中注入了恶意的javascript代码欺骗用户输入账号密码和交易确认码。最后窃取了用户银行里的钱“。攻击的流程原理可用下图表示：</p>
+<p style="text-align: center;"><img data-original="/imgs/7beeaaec5ab9df562266df5960ba9083.png!small" src="/imgs/7beeaaec5ab9df562266df5960ba9083.png!small" style="float:none;" title="dnspolar2.png"></p>
+<noscript><img src="/imgs/7beeaaec5ab9df562266df5960ba9083.png!small" style="float:none;" title="dnspolar2.png"></noscript>
+<p>为了绕过HTTPS，黑客采用了SSL剥离的技术。攻击者阻止用户和银行之间建立SSL连接，使用户和代理服务器之间使用未加密的http通信。</p>
+<p>唯一不同的是浏览器会提醒用户连接没有使用SSL加密。攻击者为了迷惑用户，重写了url，在域名前加了个“ssl-."的前缀。当然这个域名是不存在的，只能在黑客的恶意DNS才能解析。</p>
+<p style="text-align: center;"><img data-original="/imgs/3e04679b90689d9146d5395d18c4b98c.png!small" src="/imgs/7beeaaec5ab9df562266df5960ba9083.png!small" title="dnsploar.png" style="white-space: normal; float: none;"></p>
+<noscript><img src="/imgs/3e04679b90689d9146d5395d18c4b98c.png!small" title="dnsploar.png" style="white-space: normal; float: none;"></noscript>
+<p>更多关于SSL stripping的技术可以参考<a textvalue="利用sslstrip和ettercap突破ssl嗅探密码" data_ue_src="http://www.freebuf.com/articles/web/5929.html" title="" target="_blank" href="http://www.freebuf.com/articles/web/5929.html">利用sslstrip和ettercap突破ssl嗅探密码</a></p>
+<p>根据波兰IT安全组织Niebezpiecznik.pl的调查，攻击者很可能利用的是ZyNOS路由器固件的漏洞，利用这个漏洞，攻击者可以未授权的情况下下载到路由器的配置信息，从而获取路由器的登陆密码。</p>
+<p>波兰CERT的负责人Przemyslaw Jaroszewski提到，修改家用路由器的DNS记录有很多方法，有些已经存在很多年了。这次让我们吃惊的是第一次有如此大规模的，目的是窃取金钱的利用。这种针对网上银行用户的DNS劫持也许会越来越多。</p>
+<p>防御的建议是家用路由器不要开启任何的远程管理功能，不要使用默认的管理密码。去年国内也曾爆发过一次大规模的家用路由器DNS劫持攻击。相关的技术和防御方法可以参考<a textvalue="说说“史上最大规模的DNS劫持”" data_ue_src="http://www.freebuf.com/articles/web/9723.html" title="" target="_blank" href="http://www.freebuf.com/articles/web/9723.html">说说“史上最大规模的DNS劫持”</a>。</p>
+<p>via <a textvalue="securityaffairs.co" data_ue_src="http://securityaffairs.co/wordpress/22081/cyber-crime/cert-polska-detected-large-scale-dns-hacking-home-routers.html" title="" target="_blank" href="http://securityaffairs.co/wordpress/22081/cyber-crime/cert-polska-detected-large-scale-dns-hacking-home-routers.html">securityaffairs.co</a>  翻译整理by litdg@freebuf</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

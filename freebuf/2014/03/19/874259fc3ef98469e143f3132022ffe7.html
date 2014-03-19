@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>BCTF Write-up：神秘系统夺Key过程2</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>BCTF Write-up：神秘系统夺Key过程2</h2>
+	<p class="meta">2014-03-19</p>
+
+	<div class="post">
+	        <p></p>
+<p>（昨天没写完，今天继续。我明明只是保存为草稿，怎么自动发布了，这是咋回事？)</p>
+<p>二、内核程序</p>
+<p>进行一些输入操作，发现有个5个指令，但只有help/ls/wr是可以使用的。</p>
+<p style="text-align:center"><img data-original="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片6.jpg"></p>
+<noscript><img src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片6.jpg"></noscript>
+<p>继续用IDA分析，但为了方便分析，对原镜像中第2-5个扇区用1337进行异或解密，同时为了使设置加载地址为0x07C00时，第二个扇区能在0×08000地址处（字符串偏移对了就不自己再计算了）。因此我在镜像中第一个扇区后增加一个空扇区。</p>
+<p>内核程序先做了下初始化（交换了中断向量表中10h和13h内容，将0:90F0h的内容设置为0A00h),之后显示了logo，进入main过程中。（这些是异或解密后的代码）</p>
+<p style="text-align:center"><img data-original="/imgs/ad0fee314a9ed5d61b6e300a485446d5.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片7.jpg"></p>
+<noscript><img src="/imgs/ad0fee314a9ed5d61b6e300a485446d5.jpg!small" title="图片7.jpg"></noscript>
+<p>在main过程中，先显示提示输入符（<span style="color: rgb(38, 38, 38);"><strong>user@bctf#</strong></span>），之后接受输入指令，再调用cmd过程处理所输入指令。</p>
+<p style="text-align:center"><img data-original="/imgs/51b77a86dede3f41d58c6a4f481ecf55.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片8.jpg"></p>
+<noscript><img src="/imgs/51b77a86dede3f41d58c6a4f481ecf55.jpg!small" title="图片8.jpg"></noscript>
+<p>在cmd过程中，通过字节比较后执行相应的指令（help/wr/ls/rd/dl）。rd/dl只是简单回显&amp;#039;Error: Permission deny!&amp;#039;，help/ls也差不多，主要看wr的处理过程：</p>
+<p>1）验证文件名是否合理（长度小于23），</p>
+<p>2）根据时间戳生成一个[min, max)范围中的随机数（这个gen_number很重要，后面经常见到它）,这里的随机数我们记录为key，后面会用它来加密文件内容。</p>
+<p>3）显示提示信息，接受输入<br></p>
+<p style="text-align:center"><img data-original="/imgs/db20a0e339440b62eba330b737898d2e.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片9.jpg"></p>
+<noscript><img src="/imgs/db20a0e339440b62eba330b737898d2e.jpg!small" title="图片9.jpg"></noscript>
+<p>文件结束输入后，调用两个最重要的过程（create_fileheader, savefile）来保存文件到磁盘中。</p>
+<p style="text-align:center"><img data-original="/imgs/943594ea95bd8c9508ffa0f692b3fccc.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片10.jpg"></p>
+<noscript><img src="/imgs/943594ea95bd8c9508ffa0f692b3fccc.jpg!small" title="图片10.jpg"></noscript>
+<p>create_fileheader:创建文件信息头，并保存在0面1磁道1扇区（0x7e00开始,一共8个扇区），savefile保存文件内容。</p>
+<p>文件信息头，保存的文件内容结构的结构如下，这构成一条文件链，由结构里的header/cylinder/sector/index找到下一个节点的信息，依次连接起来；当header/cylinder/sector/index都为0xFF时结束。</p>
+<pre class="prettyprint lang-java">struct fileheader{
+    word isExist;    //1表示该块已经使用,否则为0
+    word filelength;
+    word key;
+    byte header;    //磁头
+    byte cylinder;  //磁道
+    byte index;     //这里将一个扇区分成16个小块，每块32个字节
+    byte sector;    //扇区
+    byte[22] encrypt_filename;    //采用异或0xCC加密
+}
+
+struct filecontent{
+    word isExist;    //1表示该块已经使用,否则为0
+    byte header;
+    byte cylinder;
+    byte index;
+    byte sector;
+    byte[26] encrypt_filecontent;    //采用异或key再异或字符下标加密
+}</pre>
+<p>简单看下，还是通过gen_number生成随机的header/cylinder/sector/index,然后调用filecheck检查该块是否已经使用。如果已经使用，通过加1调整。</p>
+<p style="text-align:center"><img data-original="/imgs/0a3facd91635479a6a640e3332dd9eb1.jpg!small" src="/imgs/bd2f03e432f73c05df90b674e95cd19e.jpg!small" title="图片11.jpg"></p>
+<noscript><img src="/imgs/0a3facd91635479a6a640e3332dd9eb1.jpg!small" title="图片11.jpg"></noscript>
+<pre class="prettyprint lang-java">class ReadFile(object):
+    def __init__(self, file):
+        self.fin = file
+
+    def read(self, offset):
+        self.filename = ''
+        self.content = []
+        self.key = 0
+        self.__getContent(offset, True)
+        return self.__decode()
+
+    def __getOffset(self, hander, cylinder, sector, index):
+        return ((hander+2*cylinder)*63+sector-1)*512+index*32
+    
+    def __getContent(self, offset, isHeader=False):
+        if isHeader:
+            self.fin.seek(offset+5)
+            self.key = ord(self.fin.read(1))
+        else:
+            self.fin.seek(offset+2)
+        header = ord(self.fin.read(1))
+        cylinder = ord(self.fin.read(1))
+        index = ord(self.fin.read(1))
+        sector = ord(self.fin.read(1))
+        if isHeader:
+            self.filename = self.fin.read(22)
+        else:
+            self.content.append(self.fin.read(26))
+        if header != 255:
+            self.__getContent(self.__getOffset(header, cylinder, sector, index))
+
+    def __decode(self):
+        name = [chr(ord(ch)^0xCC) for ch in self.filename if ord(ch) != 0]
+        content = [chr(ord(ch)^self.key^i)
+                   for i, ch in enumerate(''.join(self.content))]
+        return 'read file:%s\n%s' % (''.join(name), ''.join(content))
+
+if __name__ == '__main__':
+    fin = open('bctfos.bin', 'rb')
+    rd = ReadFile(fin)
+    print rd.read(0x7e00)
+    fin.close()</pre>
+<p>key</p>
+<pre class="prettyprint lang-java">read file:key
+Dear CTFer, if you see this message, you have completely understood my OS. 
+Congratulations!Here is what you want: BCTF{6e4636cd8bcfa93213c83f4b8314ef00}</pre>
+<p>over, thanks.<br></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>利用Google爬虫DDoS任意网站</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>利用Google爬虫DDoS任意网站</h2>
+	<p class="meta">2014-03-11</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><span style="color: rgb(0, 176, 80);"><img data-original="/imgs/91b8ddaa54d024be00ab420e33eb1363.jpg" src="/imgs/91b8ddaa54d024be00ab420e33eb1363.jpg" width="500" height="228"></span></p>
+<noscript><img src="/imgs/91b8ddaa54d024be00ab420e33eb1363.jpg" width="500" height="228"></noscript>
+<p><span style="color:#00b050"><span style="color: rgb(192, 80, 77);">提醒：以下内容仅供安全测试及教学参考，禁止任何非法用途</span></span></p>
+<p><span style="color: rgb(0, 176, 80);">Google的FeedFetcher爬虫会将spreadsheet的=image(“link”)中的任意链接缓存。</span></p>
+<p><strong>例如：</strong></p>
+<p>如果我们将<span style="color: rgb(0, 176, 80);">=image(“http://example.com/image.jpg”)</span>输入到任意一个Google spreadsheet中，Google就会“派出”FeedFetcher爬虫去抓取这个图片并保存到缓存中以将其显示出来。</p>
+<p>但是，我们可以为文件名附加上随机参数，使FeedFetcher多次抓取同一文件。也就是说，如果一个网站有一个10MB的文件，要是将以下列表输入到Google spreadsheet中，那么Google的爬虫就会抓取该文件1000次。</p>
+<pre class="prettyprint lang-html">=image("http://targetname/file.pdf?r=0")
+=image("http://targetname/file.pdf?r=1")
+=image("http://targetname/file.pdf?r=2")
+=image("http://targetname/file.pdf?r=3")
+...
+=image("http://targetname/file.pdf?r=1000")</pre>
+<p>附加上随机参数后，每个链接都被看作是不同的链接，因此Google爬虫会去抓取多次，使网站产生大量出站流量。所以任何人只需使用浏览器并打开一些标签，就可以向web服务器发动巨大流量HTTP GET洪水攻击。</p>
+<p>但是这种攻击使攻击者根本不需要有多大的带宽，只需要将“图像”地址输入进spreadsheet，Google就会从服务器上抓取这个10MB的数据，但是因为地址指向一个PDF文件（非图像文件），攻击者从Google得到的反馈为N/A。很明显这种类型的流量可以被放大多倍，引起的后果很可能是灾难性的。</p>
+<p>只需要使用一台笔记本，打开几个web标签页，仅仅拷贝一些指向10MB文件的链接，Google去抓取同一文件的流量就超过了700Mbps。而这种600-700Mbps的抓取流量大概只持续了30-45分钟，我就把服务器关闭了。如果没算错的话，45分钟内大概走了240GB的流量。</p>
+<p style="text-align: center;"><img data-original="/imgs/0a839aee038b28a49fbc31702c29c7c2.png!small" src="/imgs/91b8ddaa54d024be00ab420e33eb1363.jpg" title="1.png"></p>
+<noscript><img src="/imgs/0a839aee038b28a49fbc31702c29c7c2.png!small" title="1.png"></noscript>
+<p>我和我的小伙伴被这么高的出站流量惊呆了。如果文件再大一点的话，我想其出站流量可以轻易达到Gpbs级，而且进站流量也能达到50-100Mbps。可以想象如果多个攻击者同时用这种方法攻击某个网站的话，流量能有多少了。同时由于Google用会多个IP地址进行抓取，所以也很难阻止这种类型的GET洪水攻击，而且很容易将攻击持续数个小时，因为这种攻击实在是太容易实施了。</p>
+<p><strong>发现这个bug后，我开始搜索由其产生的真实案例，还真发现了两例：</strong></p>
+<p><a href="http://www.behind-the-enemy-lines.com/2012/04/google-attack-how-i-self-attacked.html">第一起攻击案例</a>解释了博主如何不小心攻击了自己，结果收到了巨款流量账单。另一篇文章<a href="http://blog.radware.com/security/2012/05/spreadsheets-as-ddos-weapon/">《利用Spreadsheet作为DDoS武器》</a>描述了另一个类似攻击，但指出攻击者必须先抓取整个网站并用多个帐户将链接保存在spreadsheet中。</p>
+<p>不过奇怪的是没有人尝试用附加随机请求变量的方法。尽管只是目标网站的同一个文件，但通过这种添加随机请求变量的方法是可以对同一文件请求成千上万次的，后果还是挺吓人的，而且实施过程很容易，任何人只需要动动手指头拷贝一些链接就可以做到。 </p>
+<p>我昨天将这个bug提交给了Google，今天得到了他们的反馈，表示这不属于安全漏洞，认为这是一个暴力拒绝服务攻击，不在bug奖金范围中。</p>
+<p><span style="color: rgb(0, 176, 80);">也许他们事前就知道这个问题，并且认为这不是bug？</span></p>
+<p>不过即使拿不到奖金，我仍希望他们会修复这个问题，由于实施门槛低，任何人都可以利用Google爬虫发动这种攻击。有一种简单的修复方法，就是Google只抓取没有请求参数的链接。希望Google早日修复这个bug，使站长免受其带来的威胁。</p>
+<p>原文地址：<a href="http://chr13.com/2014/03/10/using-google-to-ddos-any-website/">http://chr13.com/2014/03/10/using-google-to-ddos-any-website/</a></p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

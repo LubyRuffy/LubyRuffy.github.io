@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>一种检测ICMP反射攻击/ SMURF攻击的新的理论方法</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>一种检测ICMP反射攻击/ SMURF攻击的新的理论方法</h2>
+	<p class="meta">2014-03-19</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(0, 176, 80);"><strong>现在有很多方法追溯DoS攻击的源头，但这些技术在追踪ICMP攻击时却不怎么有效。这里所说的“反射ICMP攻击”指的就是SMURF攻击。</strong></span>本文向各位看官演示一种新的模型来追溯由ICMP数据包引起的DOS攻击，该方法非常有效，因为只需要获得很少量的攻击报文即可。以目前的技术，要想在直接攻击中检测<a textvalue="ICMP攻击" data_ue_src="http://resources.infosecinstitute.com/icmp-attacks/" title="" target="_blank" href="http://resources.infosecinstitute.com/icmp-attacks/">ICMP攻击</a>，我们需要先获取大量数据包来校订攻击源，但在本文介绍的这种模式不需要这么做。<br></p>
+<p style="margin-top: 20px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>简介</strong></span></p>
+<p>在当今这个数据时代，我们很难保证网络不会受到DOS攻击，就算是很多大公司也不能幸免，即使他们已经对其网络进行过加固。网络上服务器的任务就是与客户端或其它网络之间收发数据包进行交互，以及确认其收到的数据包的合法性。</p>
+<p>攻击类别</p>
+<p>有两种类型的攻击：</p>
+<pre class="prettyprint lang-html">1.直接攻击（Direct attacks）
+2.间接/反射攻击（Indirect/reflective attacks）</pre>
+<p> “直接攻击”由其名称就可以看出来：数据包直接发送给受害者。但是，在反射攻击中，数据包会先发送给中间网络（intermediate network），之后才被转发给受害者。中间网络可以是自定义的代理或自定义网络，SMURF攻击就是反射攻击中的一种，攻击者向中间网络发送ICMP回显数据包，该中间网络被称为放大器（amplifier）。这种攻击通过修改攻击数据包的源IP来实现，将数据包中的源IP修改为受害者的IP。最后，网络上收到ICMP回显包的机器就会向受害者的机器发送应答响应包。其过程如下图如示：</p>
+<p style="text-align:center"><img data-original="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" src="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" title="1.png"></p>
+<noscript><img src="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" title="1.png"></noscript>
+<p>受害者收到多少应答包取决于该放大网络中连接的机器数。这种攻击实现简单但难以检测，因为其很容易四两拨千斤，且只需要很少机器或资源。接下来本文为读者演示追溯这种反射ICMP洪水攻击的理论方法。</p>
+<p>要追溯ICMP反射数据包，我们必须理解以下概念：</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>1、数据包标记（Packet Marking）</strong></span></p>
+<p>这是非常基础的方法，路由器会向经过自己的数据包中添加一些信息，以定位数据流的源头。路由器会在每个包的头部添加IP地址，所以受害者可以在接收到这种被标记的数据包后构造攻击路径，该标记就是数据包在攻击者与受害者之间经过的路由地址。但在这种情况下，受害者要重构攻击路径就需要大量数据包。要完成这一过程，经过的每个路由器都需要大量数据包使用其自己的真实IP地址传输。</p>
+<p style="text-align:center"><img data-original="/imgs/d19e73e029e69cd27c360453bae7e8c7.png!small" src="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" title="2.png"></p>
+<noscript><img src="/imgs/d19e73e029e69cd27c360453bae7e8c7.png!small" title="2.png"></noscript>
+<p style="text-align: center;">图1 在IP头中标记</p>
+<p><span style="color: rgb(38, 38, 38);"><strong>2、ICMP追溯</strong></span></p>
+<p>这里，需要通过路由器往目标发送额外追溯细节来重构路径。有个名为iTrace的老方法，路由器向目标发送包含攻击路径的ICMP回显包，因此这些数据包中已经包含了标记路由器的细节。受害者可以在收集这些ICMP数据包后追溯攻击者信息，之后重建攻击路径。</p>
+<p>如果用这种方法，路由器需要向目标发送额外追溯信息的数据包才能重建攻击路径。因此Bellovin创建了iTrace。路由器沿攻击路径向另一目标发送ICMP数据包，这些ICMP数据包中包含了标记路由器的信息。受害者需要在攻击的进行过程收集足够多的ICMP数据包，提取出追溯信息，这样才有可能重建攻击路径。</p>
+<p>用这种方法，需要往目标发送数据包变少了。但以上方法都无法处理反射攻击。这些方法只能处理直接攻击。</p>
+<p>在回溯过程中需要面对的问题：</p>
+<p>1.  在记录数据包日志时，hash值经过反射后会不一样，因此之前提到的方法不管用。</p>
+<p>2.  在数据包标记的过程中，identification区域经过任意反射后，都会变得不同。最重要的是，只有在数据包被成功反射后受害者才会收到，因此这种情况下回溯也没有用。</p>
+<p>3.  受害者接收的数据包只包含放大器网络和受害者之间的路径信息，因此没有关于攻击者的合法真实的信息。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>追溯ICMP攻击者</strong></span></p>
+<p>ICMP回显数据包只回显请求与应答数据包（request-and-reply packets）。这是追溯ICMP数据包的一个比较新颖的方法，不管是直接或间接攻击都有效，是一种新的标记方法。使用该方法，数据区域可以包含所有的回溯信息。研究者注意到ICMP协议在请求和回应之后的行为是一致的，在该方法中，机器回应的数据包中的数据区域，恰好与收到的请求数据包中数据区域的数据相同。如果数据区域有任何修改，接收端和发送端就都知道了。所以数据包是以这种新的标记技术发送的，后文会有解释。</p>
+<p>如果机器收到一个ICMP回显请求，其应答包中包含的数据与请求包的数据区域相同。因此如果对数据区域做任何修改，不管是在请求包中还是应答包中，都会被目的端收到。在ICMP直接攻击中，攻击者对受害者进行洪水攻击时，不管是请求数据包还是应答数据包，每个数据包中都会有这种标记。</p>
+<p>这种技术对直接攻击或反射攻击都有效，使用该技术，标记路由器会在请求包和响应包的ICMP消息数据区域插入IP地址。根据剩余未被修改的数据区域部分，受害者可以得到中间放大网络和攻击者相关的所有回溯信息。</p>
+<p><strong>这种方法的问题：</strong>可能每个数据包都会经过15个甚至更多不同的路由器，因此需要大量空间保存所有这些路由器的标记信息。而保存回溯信息的可用空间是有限的。</p>
+<p><strong>解决方案：</strong>研究人员使用概率技术在某个合适的流中记下从攻击者到受害目标的完整路径。</p>
+<p>受害者可以在攻击中检测到各种各样的IP地址，必须重构攻击路径才能追溯到攻击源。要完成该目标，路由器将每个包的TTL区域及相应的IP地址拷贝到数据区域。为了区分回显请求与回显应答，路由器使用TTL的不同位进行标记。之后，受害者使用这些位来构建攻击路径。如下图所示：</p>
+<p style="text-align:center"><img data-original="/imgs/ea5892b497accc5eaacbf37f1bf0ca62.png!small" src="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" title="3.png"></p>
+<noscript><img src="/imgs/ea5892b497accc5eaacbf37f1bf0ca62.png!small" title="3.png"></noscript>
+<p style="text-align: center;">图2 数据区域的新标记方法</p>
+<p><br></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>方法实现</strong></span></p>
+<p>至此，我们讨论了一种新的回溯攻击者的理论技术，但在现实生活中，其实现应该按下图原理进行。研究者在虚拟环境中搭建了该实验环境，包含五个路由器，三个反射器和一个受害者、一个攻击者，如下图所示。每个数据包都会从攻击者传输到受害者，但一个必要条件是该数据包需要经过该虚拟实验室的所有路由器。</p>
+<p style="text-align:center"><img data-original="/imgs/166e89497e508308c01b11425c9297c9.png!small" src="/imgs/cc0995433507a7a90ceb3c8a11ddd0f6.png!small" title="4.png"></p>
+<noscript><img src="/imgs/166e89497e508308c01b11425c9297c9.png!small" title="4.png"></noscript>
+<p style="text-align: center;">图3 新标记技术的实现场景</p>
+<p>这里，所有的机器都使用Linux系统，并且所有路由器都开启了包转发机制，以使其标记所有的ICMP回显请求的应答包。之后就可以启动SMURF攻击了，攻击者向受害者发送数据包，所有数据包都经过所有路由器。各路由器的任务就是用每个数据包各自的TTL和IP地址对其进行标记。之后，接收者接收所有的数据包，对其进行分析，重构攻击路径中的攻击源。用这种方法，我们只需要少量数据包就可以回溯到反射ICMP攻击的攻击源。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>总结</strong></span></p>
+<p>使用该技术，我们可以追溯ICMP DoS攻击，包含直接攻击和反射攻击。反射攻击有时也被称为SMURF攻击。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

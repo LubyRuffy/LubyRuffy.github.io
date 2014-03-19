@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>利用旧版Android漏洞的E-Z-2-Use攻击代码已在Metasploit发布</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>利用旧版Android漏洞的E-Z-2-Use攻击代码已在Metasploit发布</h2>
+	<p class="meta">2014-02-23</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><span style="color: rgb(0, 176, 80);"><img src="/imgs/325e68803a4e7ffcb6729979eaa35afc.png" data_ue_data-original="http://static.freebuf.com/2014/02/metasploit.png" title="" style="width: 550px; height: 261px;" height="261" border="0" hspace="0" vspace="0" width="550"></span></p>
+<noscript><img src="/imgs/325e68803a4e7ffcb6729979eaa35afc.png" data_ue_src="http://static.freebuf.com/2014/02/metasploit.png" title="" style="width: 550px; height: 261px;" height="261" border="0" hspace="0" vspace="0" width="550"></noscript>
+<p><span style="color: rgb(0, 176, 80);">利用旧版Android漏洞的E-Z-2-Use攻击代码发布利用Android操作系统WebView编程接口漏洞的攻击代码已作为一个模块加入到开源漏洞利用框架Metasploit中。</span></p>
+<p>漏洞影响Android 4.2之前的版本，Google在Android 4.2中修正了这个漏洞，但根据官方统计，超过五成用户仍然使用存在漏洞的旧版本。</p>
+<p>WebView的漏洞允许攻击者在Android浏览器和其它应用中注入恶意 JavaScript代码，<strong>获得与目标程序相同的访问权限，攻击者可以开启一个shell窗口访问受害者的文件系统、照相机，地理位置数据、SD卡数据和地址簿。</strong>漏洞还可通过不安全网络的中间人攻击触发。漏洞存在于Android系统中，而不是私有的 GMS 应用平台，只有更新系统才能修正漏洞。</p>
+<p>安全研究人员Tod Beardsley希望，攻击代码的披露能迫使供应商尽快升级系统。</p>
+<p><strong>漏洞利用测试</strong></p>
+<pre class="prettyprint lang-bash">msf &gt; use exploit/android/browser/webview_addjavascriptinterface
+msf exploit(webview_addjavascriptinterface) &gt; show targets
+...targets...
+msf exploit(webview_addjavascriptinterface) &gt; set TARGET &lt;target-id&gt;
+msf exploit(webview_addjavascriptinterface) &gt; show options
+...show and set options...
+msf exploit(webview_addjavascriptinterface) &gt; exploit</pre>
+<p><strong>相关资料</strong></p>
+<ul style="padding: 0px; color: rgb(41, 56, 63); font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21px; white-space: normal; background-color: rgb(255, 255, 255);" class=" list-paddingleft-2">
+<li>
+<p>URL: <a href="http://blog.trustlook.com/2013/09/04/alert-android-webview-addjavascriptinterface-code-execution-vulnerability/" rel="nofollow" style="color: rgb(1, 151, 184); text-decoration: none;">http://blog.trustlook.com/2013/09/04/alert-android-webview-addjavascriptinterface-code-execution-vulnerability/</a></p>
+</li>
+<li>
+<p>URL: <a href="https://labs.mwrinfosecurity.com/blog/2012/04/23/adventures-with-android-webviews/" rel="nofollow" style="color: rgb(1, 151, 184); text-decoration: none;">https://labs.mwrinfosecurity.com/blog/2012/04/23/adventures-with-android-webviews/</a></p>
+</li>
+<li>
+<p>URL: <a href="http://50.56.33.56/blog/?p=314" rel="nofollow" style="color: rgb(1, 151, 184); text-decoration: none;">http://50.56.33.56/blog/?p=314</a></p>
+</li>
+<li>
+<p>URL: <a href="https://labs.mwrinfosecurity.com/advisories/2013/09/24/webview-addjavascriptinterface-remote-code-execution/" rel="nofollow" style="color: rgb(1, 151, 184); text-decoration: none;">https://labs.mwrinfosecurity.com/advisories/2013/09/24/webview-addjavascriptinterface-remote-code-execution/</a></p>
+</li>
+<li>
+<p>URL:<a href="https://github.com/mwrlabs/drozer/blob/bcadf5c3fd08c4becf84ed34302a41d7b5e9db63/src/drozer/modules/exploit/mitm/addJavaScriptInterface.py" rel="nofollow" style="color: rgb(1, 151, 184); text-decoration: none;">https://github.com/mwrlabs/drozer/blob/bcadf5c3fd08c4becf84ed34302a41d7b5e9db63/src/drozer/modules/exploit/mitm/addJavaScriptInterface.py</a></p>
+</li>
+</ul>
+<p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

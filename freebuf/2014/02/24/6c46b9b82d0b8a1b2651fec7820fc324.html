@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>关于yubikey对web应用的杞人之忧</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>关于yubikey对web应用的杞人之忧</h2>
+	<p class="meta">2014-02-24</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>Yubikey 是一个小型的USB设备，在电脑看来，它是一个USB键盘设备。当将Yubikey接入电脑后，其上会亮起一个绿色的圆环，代表这个USB键盘已经可以正常传输字符了。</strong></span>应用的比较多，同类的有umikey（这个有国产和销售，官网好像不大好使了~）</p>
+<p>最近看一个内容不错的网站，习惯性的看下源代码，发现了/wp-xxxxx这样的内容，然后果断习惯性的又访问了了下/wp-admin/</p>
+<p>出现了后台~当然了~只是来看看而已~但是居然有三个输入框~不科学啊~</p>
+<p style="text-align:center"><img data-original="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="1.jpg"></p>
+<noscript><img src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="1.jpg"></noscript>
+<p>随即，看到了yubikey OTP~</p>
+<p>什么是OTP?大家应该相当熟悉了~把鼠标放上去，就会显示这样一段话~</p>
+<pre class="prettyprint lang-html">“If You don'st have a Yubikey enabled for Your Wordpress account, leave this.field.empty.”</pre>
+<p>恩，是的，OTP就是One-Time-Password,这玩意就是跟各种U盾啊~游戏令牌一样的东西，根据一定算法随机产生密码的输入设备。</p>
+<p>但是呢，yubikey还有别的功能，就是存储一些复杂密码，比如超级变态的32位随机大小写+数字+符号等等.并且支持 记录验证和自动验证填写。</p>
+<p>怎么说呢，就是说我把所有要记录的密码全部存储后加密，我只需要记住这一个密码就可以了，而且这个密码又很变态，那我就把他存储在yubikey里，这样我只需要验证yubikey和保护好yubikey就行了。</p>
+<p>之前说的那个wordpress后台就是wordpress提供的一个yubikey插件，如图：</p>
+<p style="text-align:center"><img data-original="/imgs/7fe8448789dc72d353e17d3d9ad5ae9b.jpg%21small" src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="2.jpg"></p>
+<noscript><img src="/imgs/7fe8448789dc72d353e17d3d9ad5ae9b.jpg%21small" title="2.jpg"></noscript>
+<p>这是一个很不错的想法，当我输入了账户和密码以后，没有yubikey硬件也没有其生成的OTP时就没办法登陆后台了！而且密码不用你去记住，他存储后只用你轻轻触碰以下他，就可以自动填写密码。说了这么多，来看看他的样子：</p>
+<p>官网：<a href="http://www.yubico.com" target="_blank" title="" data_ue_src="http://www.yubico.com" textvalue="www.yubico.com">www.yubico.com</a></p>
+<p style="text-align:center"><img data-original="/imgs/2e07abf177e8d47a5255e3f7526981d2.jpg%21small" src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="3.jpg"></p>
+<noscript><img src="/imgs/2e07abf177e8d47a5255e3f7526981d2.jpg%21small" title="3.jpg"></noscript>
+<p>可以看到最便宜的只要25刀，相当的便宜了~</p>
+<p>——————————-分割线——————————</p>
+<p>好了，言归正传，其实这个东西最初并不被运用在web上~</p>
+<p>他其实是为了搭配其他软件而生的，相信大家见过很多密码管理器，密码管理软件等等。</p>
+<p>他们去加密你所有的密码，而你用的这个软件的master key就由yubikey保管。</p>
+<p>但是这样的软件有个问题，就是同步~我不能每个电脑都装一个软件管理密码吧？</p>
+<p>后来有了百度云，360云，还有之前freebuf上讨论过的lastpass,</p>
+<p style="text-align:center"><img data-original="/imgs/8a409629d557044ce9b732b264b57478.jpg%21small" src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="4.jpg"></p>
+<noscript><img src="/imgs/8a409629d557044ce9b732b264b57478.jpg%21small" title="4.jpg"></noscript>
+<p>反正各种云存储，是解决了同步的问题，可是如果百度云这样的账号密码忘了或者不够强大？或者被社工者猜出了？或者谁谁谁的裤子又满天飞了？怎么办？</p>
+<p>大家再次想到了硬件，yubikey因为他的廉价，又被广泛运用了。</p>
+<p>现在来看，yubikey确实是一种不错的密码管理master key存储的一个很好的解决方式。</p>
+<p>但是回到文章开头的那个画面，运用在独立网站后台，如博客，门户，论坛的后台登陆上是否真的万无一失，或者说能彻底阻断黑客入侵方式？</p>
+<p>先总结下：</p>
+<pre class="prettyprint lang-html">1.首先，yubikey，只对后台验证登录时加了一层token验证
+2.yubikey还无法做出对cookie， session，以及不同平台的权限的控制和识别
+3.Yubikey还在发展，后面可能会支持更多协议的保护和自动识别</pre>
+<p>现在相信很明显了，必须承认，在后台登陆上，yubikey比其他cms所提供的认证码要靠谱的多。但是并不能保证整个web应用的安全（老实说这么看下去，估计永远没有啥硬件能保证web应用的安全，哪怕是相对安全）。因为，你要保护的地方太多了，你要保护的协议太多了，你要识别的认证太多了，还有尼玛更多的平台不同的权限控制有木有？</p>
+<p>是的，这里我们还不谈数据库方面的验证~</p>
+<p>我们也不谈各大系统和浏览器对你验证方式的支持！</p>
+<p>更不谈高深的加密算法。</p>
+<p>仅仅是一个web应用依赖或辅助的一些服务，恐怕靠yubikey还都无法保证，比如大牛们可以搞定你的ftp，搞定你的远程桌面，或者各种漏洞上传了一个webshell，然后单手倒立撸着，就把你的yubikey认证插件给删除了~</p>
+<p>好吧，再总结下，yubikey在独立中小型网站中的后台上做验证，究竟带来了哪些安全？</p>
+<p>恩，真的有一点，sql注入没意义了，知道账号密码，没yubikey登陆不了！</p>
+<p>好吧！你赢了！</p>
+<p>附：</p>
+<p>顺便附上一个小截图，开头那个网站开放的端口</p>
+<p style="text-align:center"><img data-original="/imgs/8d8a11c6f0b77f21e84515e7bb0fad0b.jpg%21small" src="/imgs/5b60c7589db1bd710b56bbcc7d145f9f.jpg%21small" title="5.jpg"></p>
+<noscript><img src="/imgs/8d8a11c6f0b77f21e84515e7bb0fad0b.jpg%21small" title="5.jpg"></noscript>
+<p>我擦，ssh试了弱密码，第六次就进去了~</p>
+<p>Pass=域名+ftp123</p>
+<p>擦，你这安全意识，用毛的yubikey啊!</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

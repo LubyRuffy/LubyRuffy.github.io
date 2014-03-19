@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>另一种角度看《RFID Advanced Security》首部曲</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>另一种角度看《RFID Advanced Security》首部曲</h2>
+	<p class="meta">2014-03-11</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>机缘巧合，有幸看到了不少关于RFID的资料，并且有幸看到了《RFID Advanced Security》这份PDF，听说这是国内安全大会上比较早出现关于RFID的议题。</strong></span>又听说这份是乌云内部的高级教程，文章内容单薄是无可厚非，毕竟是演讲，单单时间上来说不可能什么都讲。看完了以后实在有点不(fei)知(yi)所措(si)，因为槽点实在是太多了。</p>
+<p>文章分成4大块，分别为“RFID Basic Knowledge、RFID Basic System Security、RFID Multiple System Security、Information Tags System Security” 那我也跟着那篇文章的大纲来边稍微丰富边稍微吐槽吧。（摘自《RFID Advanced Security》原文的内容用<span style="color: rgb(192, 0, 0);"><strong>红色</strong></span>标记出来）。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>RFID Basic Knowledge</strong></span></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>0×00 What’s The RFID？</strong></span></p>
+<p>射频识别即RFID (Radio Frequency IDentification)。一套RFID系统至少由两部分：应答器(Transponder)、询问器（Interrogator）or 阅读器（Reader）。Reader通常由射频模块（接受和发送）、控制单元和耦合元件组成，并且很多Reader都有附加的接口(RS 232，RS485,USB,etc)。Transponder 代表着在RFID系统中真正携带数据的设备，常见的Transponder由集成电路和耦合元件组成。</p>
+<p style="text-align:center"><img data-original="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></noscript>
+<p style="text-align: center;">图1 每个RFID系统中的Reader和Transponder存在的形式[摘自RFID handbook] </p>
+<p><span style="color: rgb(192, 0, 0);"><strong>下面这张图是《RFID Advanced Security》⾥里面介绍”RFID的距离、协议和频段”的表格，咋一看感觉还挺算回事。可是仔细一看槽点就出现了。有种牛头不对马嘴的样子。让我觉得有点不(fei)知(yi)所措(si)。 </strong></span></p>
+<p style="text-align:center"><img data-original="/imgs/3b6b8cffa9621d214410f84db1cf9d81.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="2.jpg"></p>
+<noscript><img src="/imgs/3b6b8cffa9621d214410f84db1cf9d81.jpg!small" title="2.jpg"></noscript>
+<p style="text-align: center;">原PDF图1:协议、距离、频段</p>
+<p>经过查找协议原文和搜寻论文资料。发现<span style="color: rgb(192, 0, 0);"><strong>ISO/IEC 14443</strong></span>和<span style="color: rgb(192, 0, 0);"><strong>ISO/IEC 15693</strong></span>所规定无线接口的载波频率<span style="color: rgb(192, 0, 0);"><strong>都为13.56MHz</strong></span>。<span style="color: rgb(192, 0, 0);"><strong>这两个协议不存在低频载波频率，所以表上所写的125-135.2kHz与125-135kHz是错误的</strong></span>，所以。而ISO/IEC 18000主要适用于射频识别技术在单片管理中的应用。该协议主要定义了RFID空中接口协议标准。摘选上述提到的协议介绍。</p>
+<p style="text-align:center"><img data-original="/imgs/352f976199d248f818747f5b25ccef08.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/352f976199d248f818747f5b25ccef08.jpg!small" title="1.jpg"></noscript>
+<p style="text-align:center"><img data-original="/imgs/18ff78c1049f394141e852eb42d8f310.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="2.jpg"></p>
+<noscript><img src="/imgs/18ff78c1049f394141e852eb42d8f310.jpg!small" title="2.jpg"></noscript>
+<p>相信看到这边即使没有深入去看协议的内容单看红色标记与原文表格对比都会感觉到一股莫名的违和感。</p>
+<p style="text-align: center;">按无线电波频谱分类及对应的协议</p>
+<p style="text-align:center"><img data-original="/imgs/5dc16cfbac3bdfb2efdfb79874a3000b.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="3.jpg"></p>
+<noscript><img src="/imgs/5dc16cfbac3bdfb2efdfb79874a3000b.jpg!small" title="3.jpg"></noscript>
+<p>表4:按频谱分类</p>
+<p>表1、2、3、4都摘于<a href="http://rfid.net/basics/186-iso-rfid-standards-a-complete-list" target="_blank" title="" data_ue_src="http://rfid.net/basics/186-iso-rfid-standards-a-complete-list" textvalue="《ISO RFID Standards: A Complete List》">《ISO RFID Standards: A Complete List》</a>更多协议请到<a href="http://rfid.net/" target="_blank" title="" data_ue_src="http://rfid.net/" textvalue="rfid.net">rfid.net</a>查看。</p>
+<p>单单从协议上来吐槽那个表格已经有太多槽点了。文章第一部分的RFID基础知识的“What’s the RFID”就这样完了。</p>
+<p>业内现在不区分Tag和Transponder，Tag（标签）= Transponder 。（在这篇文章，为了表述一致，“数据获取设备”被称为Reader。eg:读卡器）</p>
+<p>Tag（标签）按照有无<span style="color: rgb(38, 38, 38);"><strong>电池</strong></span>分为<span style="color: rgb(38, 38, 38);"><strong>主动式和被动式</strong></span>两种。Tag和线圈或天线结合后再经封装，能制造许多造型，应用于许多领域上。常见的造型：卡片型、贴纸型、钥匙圈型、注射圆筒型、手环型、硬币型。</p>
+<p style="text-align:center"><img data-original="/imgs/0c58f968a230d5308c8648f40b3784d3.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="4.jpg"></p>
+<noscript><img src="/imgs/0c58f968a230d5308c8648f40b3784d3.jpg!small" title="4.jpg"></noscript>
+<p style="text-align:center"><img data-original="/imgs/6bde051bca4226187bb8262bca2700d9.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="5.jpg"></p>
+<noscript><img src="/imgs/6bde051bca4226187bb8262bca2700d9.jpg!small" title="5.jpg"></noscript>
+<p style="text-align:center"><img data-original="/imgs/cbb074804f7bdafe6f708c4eda2ea830.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="6.jpg"></p>
+<noscript><img src="/imgs/cbb074804f7bdafe6f708c4eda2ea830.jpg!small" title="6.jpg"></noscript>
+<p>Reader 按照使用需求可以分为两类：</p>
+<pre class="prettyprint lang-html">1、固定式：固定式的Reader可置于卖场出口、卖场货架、仓库出入口、机场、图书馆出口或用于门禁系统。</pre>
+<p style="text-align:center"><img data-original="/imgs/8a63117b9679048f125b40ec66f260df.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="6.jpg"></p>
+<noscript><img src="/imgs/8a63117b9679048f125b40ec66f260df.jpg!small" title="6.jpg"></noscript>
+<p style="text-align:center"><img data-original="/imgs/d0d105652ad584de4ded794cf8e8c073.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="7.jpg"></p>
+<noscript><img src="/imgs/d0d105652ad584de4ded794cf8e8c073.jpg!small" title="7.jpg"></noscript>
+<pre class="prettyprint lang-html">2、手持式：便于携带。</pre>
+<p style="text-align:center"><img data-original="/imgs/184a5b0003bd5cf9d215d9467cfb9173.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/184a5b0003bd5cf9d215d9467cfb9173.jpg!small" title="1.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>0×01 Some RFID Tags </strong></span></p>
+<p>说实在的我不知道这个部分独立出来表述有什么重要的地方，特别是他介绍Tag时只列举了2个类型的卡，先抛开单薄的知识展示不说，第一个竟然是一种类型叫做“<span style="color: rgb(192, 0, 0);"><strong>Mifare Ultra Card</strong></span>”这又让我觉得不(fei)知(yi)所措(si)。MIFARE Ultralight产品线有”MIFARE Ultralight EV1、MIFARE Ultralight、MIFARE Ultralight C”严谨一点的话应该指出是MIFARE Ultralight还是MIFARE Ultralight Production Family中的某一个产品。我犹豫了一下想理所当然的把它以为成是最接近下面参数的MIFARE Ultralight Card，可是那文章应该是大会上议题的演讲稿，不应该出现这么不负责的措辞。后面查阅完NXP Semiconductors的资料，姑且就把它先当成Ultralight吧。对于Ultralight Production Family右图8第二行的“ No key”，是不适合MIFARE Ultralight C Card根据NXP Semiconductors“MIFARE Ultralight C Product short data sheet”里说明了这货是支持”3DE算法”。根据“MIFARE Ultralight EV1 - contactless ticket IC Productdata sheet”里说明MIFARE Ultralight EV1是可选密码的。</p>
+<p style="text-align:center"><img data-original="/imgs/2fdae7f1939fdce87928e4f03bc8252b.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/2fdae7f1939fdce87928e4f03bc8252b.jpg!small" title="1.jpg"></noscript>
+<p>虽然我没有机会听到原作者在大会上的演讲，不过我看着第九张图的前两行应该是在讲述MIFAREClassic Card的存取控制，但这个存取控制绝对没有图上那么简单。MIFAREClassic Card的块分为厂商块（Manufacturer block）（UID可改写的MIFARE Classic Card就是这个块可被改写）和数据块（Datablocks）。而数据块又可以分为可以读/写的块和值块。<span style="color: rgb(192, 0, 0);"><strong>值块除了读/写还可以进行加值、减值、传输、储存的动作。</strong></span>而这些操作都和每一个扇区的尾块（Sectortrailer）有关系。尾块包含了KeyA，存取控制位（AccessBits），KeyB（可选）。更详细的MIFAREClassic Card的扇区结构和存取控制请查阅MIFARE Classic Card Datasheet里面“Memoryorganization”这一节和《射频识别技术漫谈》的第13和14篇。<span style="color: rgb(192, 0, 0);"><strong>Block的操作没有原文写的那么单纯。</strong></span> </p>
+<p style="text-align:center"><img data-original="/imgs/911d44c5c94b1fddfc28f28cf7e61288.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="2.jpg"></p>
+<noscript><img src="/imgs/911d44c5c94b1fddfc28f28cf7e61288.jpg!small" title="2.jpg"></noscript>
+<p style="text-align: center;">图13 MIFARE 系列芯片部分产品的特性概览</p>
+<p>想要查阅官方更完整的NXP  MIFARE Smart Card  ICs 产品特性请搜索<span style="color: rgb(38, 38, 38);"><strong>MIFARE_ICs_939775017001_v9_HR.pdf</strong></span></p>
+<p>在说完这仅仅两个类型的卡存在容易让人误解的地方之后。我很不(fei)知(yi)所措(si) ，因为再往下翻就是下一部分“<span style="color: rgb(192, 0, 0);"><strong>RFID Basic System</strong></span>”的内容了。心里想（裤子都脱了你只给我看这个？）Tag那么多类型，这边就只列出了MIFARE系列中的两种。既然这个是演讲稿就不强求了。</p>
+<p style="text-align:center"><img data-original="/imgs/8c7e7ef3071c5b014f765ce022047146.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/8c7e7ef3071c5b014f765ce022047146.jpg!small" title="1.jpg"></noscript>
+<p><span style="color: rgb(38, 38, 38);"><strong>RFID Basic System Security&amp;RFID Multiple SystemSecurity</strong></span></p>
+<p>接下来我们看看第二部分。我们跳到原文所指的，也就是下图所示的读卡器和数据接收反馈中间件中间件中间的这个红色“数据传输渠道”</p>
+<p style="text-align:center"><img data-original="/imgs/4a09e70be428aedbbd5dde2662d0787c.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/4a09e70be428aedbbd5dde2662d0787c.jpg!small" title="1.jpg"></noscript>
+<p>原文在这边提到“Data Transmission” 里分为<span style="color: rgb(192, 0, 0);"><strong>有线网络（搭线攻击）和无线网络（计算机无线网络安全攻击）</strong></span>如果我在没有进一步了解这些概念之前，我也可能也会被蒙蔽，觉得可能真的是可能在“RFID System” 里出现的问题。但是他说的这两部分都不能算在RFID System里面。如果像这样强加进去，这在混淆概念就好像“一台公司的服务器到用户之间线路如果被人一锄头挖断了，我就要说这是你公司这边没有做好安全措施，所以出现了安全隐患。”当然了这时候ISP有话说。</p>
+<p>而接下来这样混淆概念的问题占据了剩下文章的大部分。比如把后端的数据库安全硬塞进来。后端不安全关RFID System什么关系？让我再次不(fei)知(yi)所措(si)。实在想不通，我只能偷偷的猜测作者还没有理解概念吧。再往下看觉得这句挺牛逼的，觉得“攻破”这词太酷炫了。攻破S70卡就能攻破一卡通系统。据我所知一卡通系统都会有一些针对异常数据的防御，这个“攻破”的逻辑比较难理解。</p>
+<p style="text-align:center"><img data-original="/imgs/1e784102b50271719c8b28bad42cbce9.jpg!small" src="/imgs/2491080e6334ffdf0d3e7614b6751bbd.jpg!small" title="1.jpg"></p>
+<noscript><img src="/imgs/1e784102b50271719c8b28bad42cbce9.jpg!small" title="1.jpg"></noscript>
+<p>而接下来更让我不(fei)知(yi)所措(si)了。作者提到了“<span style="color: rgb(192, 0, 0);"><strong>卡与卡之间的数据库共用”</strong></span>。举了校园卡和银行卡的绑定。这样的绑定大部分只是为了方便校园卡的充值。而数据库共用大家肯定都匪夷所思了。</p>
+<p>后面又提到了“<span style="color: rgb(192, 0, 0);"><strong>业务功能共用</strong></span>”这又和上面一样，后端应用系统的问题又要赖到RFID 系统上了。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>Information Tags System Security</strong></span></p>
+<p>进入最后一部分了。这部分是觉得最不(fei)知(yi)所措(si)的是OWASP 2011 亚洲峰会会议的演讲上的”RFID Security” 竟然如此明目张胆的出现这么不专业凑字数的情况。看到最后一部分我已经不知道作者到底知不知道RFID是啥了。”RFID Security“ 里 ”Information Tags System Security “里讲的Tag竟然出现了一维码、二维码、接触式卡。这就好像我们在介绍”天上可以飞的有：小鸟，大象，猪，乌龟“（当然了，我这不是在侮辱猪、大象和乌龟，因为他们几个真的飞不起来。）</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>写在后面：</strong></span></p>
+<p>写这篇文章的时候也在作者博客得知了作者说了当时在大会上的演讲的版本可能是不完整的。但我相信不完整和混淆概念是两码事。对于我自己来说的话，如果我有机会去到那样的地方去演讲，我肯定会不只准备”一个月“。文章已经吐槽很多地方了，就不对这篇文章标题的”Advanced”这个单词进行吐槽了。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

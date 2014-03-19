@@ -17,18 +17,25 @@
     </head>
     <body>
 
-        <div class="site">
-          <div class="header">
-            <h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1>
-            <a class="extra" href="/">首页</a>
-            <a class="extra" href="/category.html">分类列表</a>
-          </div>
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
 
-          <h2>Linux下由于子进程继承引起的安全问题分析</h2>
-<p class="meta">2014-03-17</p>
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
 
-<div class="post">
-        <p></p>
+            <div id="page">
+	<h2>Linux下由于子进程继承引起的安全问题分析</h2>
+	<p class="meta">2014-03-17</p>
+
+	<div class="post">
+	        <p></p>
 <p><span style="color: rgb(38, 38, 38);"><strong>最近我在Linux上利用</strong></span><a href="http://www.cert.org/vuls/discovery/bff.html" target="_blank" title="" data_ue_src="http://www.cert.org/vuls/discovery/bff.html" textvalue="CERT BFF" style="color: rgb(38, 38, 38); text-decoration: underline;"><span style="color: rgb(38, 38, 38);"><strong>CERT BFF</strong></span></a><span style="color: rgb(38, 38, 38);"><strong>研究一个PoC。我之前有大量在Windows上写PoC的经验，所以认为将这种技能扩展到不同平台上是个不错的想法。可是，当我获得指令指针的控制权后，却发现几乎可以毫无障碍地使代码执行。</strong></span></p>
 <p>除了对<a href="https://www.cert.org/blogs/certcc/2013/09/one_weird_trick_for_finding_mo.html" target="_blank" title="" data_ue_src="https://www.cert.org/blogs/certcc/2013/09/one_weird_trick_for_finding_mo.html" textvalue="Metasploit字符串做一个BFF最小化">Metasploit字符串做一个BFF最小化</a>之外，不需要额外的工作，就可以很容易知道哪些字节在我的控制之下，以及怎么执行到那里：</p>
 <p style="text-align:center"><img data-original="/imgs/df8f5ded7a65973cda8e5a49b8c72071.png!small" src="/imgs/df8f5ded7a65973cda8e5a49b8c72071.png!small" title="1.png"></p>
@@ -49,24 +56,21 @@
 
         <p class="statement">
 
+	</div>
 </div>
 
 
-          <div class="footer">
-            <div class="contact">
-              <p>
-                Your Name<br />
-                What You Are<br />
-                LubyRuffy@gmail.com
-              </p>
-            </div>
-            <div class="contact">
-              <p>
-                <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
-                <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
-              </p>
-            </div>
           </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
         </div>
 
     </body>

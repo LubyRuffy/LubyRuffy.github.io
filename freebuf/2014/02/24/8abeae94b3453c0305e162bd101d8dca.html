@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>雪人行动：利用IE10 0day漏洞的APT攻击剑指美国军方情报</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>雪人行动：利用IE10 0day漏洞的APT攻击剑指美国军方情报</h2>
+	<p class="meta">2014-02-24</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align: center;"><img data-original="/imgs/351972615a061512afbbbf968779889e.jpg" src="/imgs/351972615a061512afbbbf968779889e.jpg" height="324" width="550"></p>
+<noscript><img src="/imgs/351972615a061512afbbbf968779889e.jpg" height="324" width="550"></noscript>
+<p><span style="color: rgb(0, 176, 80);"><strong>二月十一日，FireEye捕获了一次基于0day漏洞的攻击，这次攻击针对美国的一个退伍兵网站(bfw.org)。</strong></span><br></p>
+<p><strong>我们确信这次攻击是针对美国高层军方人员的一次预谋已久的APT攻击，因为在这一天美国国会正巧因为暴风雪放假一天。</strong>因为攻击手法的相似性，我们认为它与不久之前的两次APT攻击有着一定的联系，这两次攻击是<a textvalue="Operation DeputyDog" data_ue_src="http://www.fireeye.com/blog/technical/cyber-exploits/2013/09/operation-deputydog-zero-day-cve-2013-3893-attack-against-japanese-targets.html" title="" target="_blank" href="http://www.fireeye.com/blog/technical/cyber-exploits/2013/09/operation-deputydog-zero-day-cve-2013-3893-attack-against-japanese-targets.html">Operation DeputyDog</a> 和 <a textvalue="Operation Ephemeral Hydra" data_ue_src="http://www.fireeye.com/blog/technical/cyber-exploits/2013/11/operation-ephemeral-hydra-ie-zero-day-linked-to-deputydog-uses-diskless-method.html" title="" target="_blank" href="http://www.fireeye.com/blog/technical/cyber-exploits/2013/11/operation-ephemeral-hydra-ie-zero-day-linked-to-deputydog-uses-diskless-method.html">Operation Ephemeral Hydra</a>.</p>
+<p><span style="color: rgb(0, 176, 80);">这篇文章介绍了这次攻击所利用的漏洞和相关的攻击手法，并赋予了这次攻击一个代号“雪人行动”(Operation SnowMan)</span></p>
+<p><strong>Exploit/Delivery analysis（<strong>Exploit/Delivery 分析</strong>）</strong></p>
+<p>在入侵了 VFW 这个站点之后，攻击者网站的HTML代码开头插入了一个iframe，这个iframe会秘密的加载攻击者的页面。这个页面中包含的JS代码会运行一个Flash object，这个object会触发一个精心编排的remainder(Heap溢出需要用到的一种数据结构)。这个漏洞由一个定义在JS代码中的IE 10的回调函数触发。值得一提的是，VFW中的iframe所包含的网址是 www.REDACTED.com/Data/img/img.html</p>
+<p><strong>Mitigation（预防措施）</strong></p>
+<p>这是一个利用Adobe Flash针对IE 10的攻击。如果他发现浏览不是IE 10，或者是用户安装了 Experience Mitigation Toolkit (EMET) (微软的一种预防漏洞的工具，会使用一些随机地址之类的技术防止溢出)那么攻击不会被触发。所以安装这款软件或者升级浏览器都可以避免被攻击。</p>
+<p><strong>Vulnerability analysis （<strong>Vulnerability 分析</strong>）</strong></p>
+<p>这个漏洞依旧是因为 IE 10 的 use-after-free 问题引起的。这个漏洞允许攻击者修改内存中的任意一个字节。(应该就是比较典型的堆溢出)。攻击者使用如下的方法利用该漏洞</p>
+<pre class="prettyprint lang-html">通过Flash ActionScript访问内存，从而绕过地址随机化(ASLR)
+使用ROP技术，从而绕过数据执行保护(DEP)</pre>
+<p><strong>EMET detection（EMET 检查）</strong></p>
+<p>攻击者使用  Microsoft.XMLDOM ActiveX 加载一个单行的XML文件，这个文件包含了一个指向EMET DLL的路径。漏洞利用代码会解析这行XML语句，并记录返回结果。根据返回的结果判断EMET DLL是否存在。EMET DLL不存在，利用代码才会执行。</p>
+<p><strong>ASLR bypass （ASLR 绕过）</strong></p>
+<p>因为这个漏洞给予攻击者随意修改任意内存的权限，所以攻击者可以借此绕过ASLR。举个例子说，攻击者可以</p>
+<p>破坏一个Vector object 然后通过 Flash 访问内存的方法再次访问到这个object。我在<a href="http://www.fireeye.com/blog/technical/cyber-exploits/2013/10/aslr-bypass-apocalypse-in-lately-zero-day-exploits.html" target="_self" title="">blog</a>中讨论过类似的技术，不过在这次利用中对喷射的地址变为了0x1a1b2000 </p>
+<p><strong>Code execution （代码执行）</strong></p>
+<p>一旦攻击者通过 Vector object 取得了全部的内存访问权限。便会加载一个，机器码搜索的插件。攻击者还会覆盖flash.Media.Sound() object  vftable指针，并开始ROP。利用代码执行之后，会修复Vector object 和flash.Media.Sound()</p>
+<p><strong>Shellcode analysis （Shellcode 分析）</strong></p>
+<p>恶意代码执行之后，会下载一个包含恶意程序下载的payload，文件的开始是一个JPG图片，文件的末尾是payload(offset 36321)payload使用XOR 0×95 进行编码。攻击者把这段payload附加到shellcode之中。shellcode执行之后会创建“sqlrenew.txt” 和 “stream.exe”这两个文件。之后JPG文件的尾部被解码并写入这些文件，然后调用 LoadLibraryA 中的 Windows API 执行他们。</p>
+<p><strong>ZxShell payload analysis （ZxShell payload 分析）</strong></p>
+<p>上文提到的那个payload同时也运行了一个后门程序ZxShell backdoor (MD5: 8455bbb9a210ce603a1b646b0d951bce)程序中的编译日期是 2014-02-11，同时利用代码的最后修改日期也是 2014-02-11。这表明，这个实例是最近开发的，而且带有很强的战略目的。雪人攻击的主要目标，很有可能是军方从业人员，最终目的很可能是窃取军方情报。除了退休人员，有很多在职人员也是用VFW。攻击在2月17日很美国国会因为暴雪而放假的时候展开，这不是一场巧合。</p>
+<p><br></p>
+<p><strong>Infrastructure analysis （基础设施分析）</strong></p>
+<p><br></p>
+<p>info.flnet.org，icybin.flnet.org和book.flnet.org域名解析有些许重叠，解析到的IP地址如下：</p>
+<p style="text-align:center"><img data-original="/imgs/35f6f56d4e681a7e506bd3a061e3e74a.jpg!small" src="/imgs/351972615a061512afbbbf968779889e.jpg" title="QQ图片20140223223042.jpg"></p>
+<noscript><img src="/imgs/35f6f56d4e681a7e506bd3a061e3e74a.jpg!small" title="QQ图片20140223223042.jpg"></noscript>
+<p>我们以前观察到的Gh0stRat样本的自定义数据包通过“HTTPS”叫回book.flnet.org和icybin. flnet.org。</p>
+<p>DeputyDog的策划者也用“HTTPS”版本的<a href="http://www.emc.com/collateral/hardware/solution-overview/h11146-the-voho-campaign-so.pdf" target="_self" title="">GH0ST</a>的。我们还观察到另一个“HTTPS”GH0ST变种连接到一个主控服务器 me.scieron.com</p>
+<p style="text-align:center"><img data-original="/imgs/568bbba3c06d00373271678c0751c9a6.jpg!small" src="/imgs/351972615a061512afbbbf968779889e.jpg" title="QQ图片20140223223055.jpg"></p>
+<noscript><img src="/imgs/568bbba3c06d00373271678c0751c9a6.jpg!small" title="QQ图片20140223223055.jpg"></noscript>
+<p> me.scieron.com解析到 58.64.199.22 book.flnet.org 也被解析到了相同子网下 58.64.199.0/24。值得一提的是，book.flnet.org被解析到了58.64.199.27</p>
+<p> </p>
+<p style="text-align:center"><img data-original="/imgs/76dbdc17a674abc2d93a61d62392ac77.jpg!small" src="/imgs/351972615a061512afbbbf968779889e.jpg" title="QQ图片20140223223115.jpg"></p>
+<noscript><img src="/imgs/76dbdc17a674abc2d93a61d62392ac77.jpg!small" title="QQ图片20140223223115.jpg"></noscript>
+<p> 其他的被解析到同子网的域有，dll.freshdns.org, ali.blankchair.com, 和 cht.blankchair.com</p>
+<p> dll.freshdns.org被解析到了58.64.199.25。另外两个被解析到了58.64.199.22</p>
+<p> </p>
+<p> 其他的一些相关的域名，也都被解析到了这个子网之中。不过我们还是把重点放在DeputyDog 和 Ephemeral Hydra campaigns这两个事件上.</p>
+<p> 你可能还记得dll.freshdns.org, ali.blankchair.com and cht.blankchair.com 都与这两个事件有关。下图展示了这两个事件，和本次VFW被攻击，所使用的网络基础设备之间的关联。</p>
+<p> </p>
+<p style="text-align:center"><img data-original="/imgs/aaa33f142a22b29a34a93f958efab2d8.png!small" src="/imgs/351972615a061512afbbbf968779889e.jpg" title="snowman-graph_thumb.png"></p>
+<noscript><img src="/imgs/aaa33f142a22b29a34a93f958efab2d8.png!small" title="snowman-graph_thumb.png"></noscript>
+<p><strong> Links to DeputyDog and Ephemeral Hydra（DeputyDog and Ephemeral Hydra之间的联系）</strong></p>
+<pre class="prettyprint lang-html"> 使用了同一款远控软件（RAT）
+ 通过入侵web页面的方式来传播木马。
+ 使用简单的Xor加密，和jpg图片的后缀来进行伪装。
+ Gh0stRat使用HTTPS进行回传
+ 所使用的相似的CnC主机</pre>
+<p><strong> Conclusion（结论）</strong></p>
+<p> 攻击者所攻击的不同的目标。</p>
+<pre class="prettyprint lang-html">US政府部门
+日本公司
+国防工业基础（DIB）公司 
+律师事务所 
+信息技术（IT）公司 
+矿业公司 
+非政府组织（NGO）</pre>
+<p>事实证明这些攻击者有能力在以后的更长的时间中，使用0day扩散木马，从而攻击一些更高级的目标。</p>
+<p>[<a href="http://www.fireeye.com/blog/uncategorized/2014/02/operation-snowman-deputydog-actor-compromises-us-veterans-of-foreign-wars-website.html" target="_blank" title="">原文地址</a>，译/FreeBuf小编wyl]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

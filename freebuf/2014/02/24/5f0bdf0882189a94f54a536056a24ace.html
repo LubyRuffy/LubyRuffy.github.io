@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>手动web应用程序渗透测试-模糊测试中的后缀与前缀</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>手动web应用程序渗透测试-模糊测试中的后缀与前缀</h2>
+	<p class="meta">2014-02-24</p>
+
+	<div class="post">
+	        <p></p>
+<p style="text-align:center"><img title="001222.jpg" data-original="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></p>
+<noscript><img title="001222.jpg" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></noscript>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>介绍</strong></span></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>本文重点讲述采用模糊测试的方法测试目标Web应用程序时，可利用的前缀和后缀语法。</strong></span></p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>句法</strong></span></p>
+<p>后缀语法- 字母字符<span style="color: rgb(192, 0, 0);"><strong>+特殊字符</strong></span>（Suffix Syntax – Alphabetics<span style="color: rgb(192, 0, 0);"><strong>Specialcharacters</strong></span>）指字母字符后加特殊字符。因其以特殊字符结尾，故而称之为后缀。</p>
+<p>例如：jonnybravo' （此处jonnybravo是一个字符串，而'是一个特殊字符。）</p>
+<p>前缀语法-<span style="color: rgb(192, 0, 0);"><strong>特殊字符+</strong></span> 字母字符（Prefix Syntax – SpecialcharactersAlphabetics）指特殊字符后跟字母字符。因其把特殊字符放在开始，故而称之为前缀。</p>
+<p>例如：‘jonnybravo （此处‘是一个特殊字符，而jonnybravo是一个字符串）</p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>分析</strong></span></p>
+<p>此处以一个后缀的例子做演示，验证并观察其结果。下图显示了在用户名处输入后缀语法的字符串jonnybravo'的结果。</p>
+<p style="text-align:center"><img title="001.jpg" data-original="/imgs/8756b1ff984df670a972b2033e2ddc6c.jpg!small" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></p>
+<noscript><img title="001.jpg" src="/imgs/8756b1ff984df670a972b2033e2ddc6c.jpg!small"></noscript>
+<p>输入字符串jonnybravo’</p>
+<pre class="prettyprint lang-html">GET /chintan/index.php?page=user-info.php&amp;username=jonnybravo%27&amp;password=&amp;user-info-php-submit-button=View+Account+Details HTTP/1.1
+Host: localhostUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:27.0) Gecko/20100101 Firefox/27.0Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8Accept-Language: en-US,en;q=0.5Accept-Encoding: gzip, deflateReferer: http://localhost/chintan/index.php?page=user-info.phpCookie: showhints=0; PHPSESSID=39hb01vtdib9sov8rmmfok7kn2Connection: keep-alive</pre>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>URL中特殊字符的编码</strong></span></p>
+<p>输入该字符串后，截取该请求，可知浏览器将此输入作为URL的特定格式进行编码解析。所以特殊字符“'”转义为“％27”，然后通过浏览器发送到服务器。</p>
+<p>以下列出了URL中特殊符号及对应的十六进制编码(编码的格式为：%加字符的ASCII码，即一个百分号%，后面跟对应字符的ASCII（16进制）码值):</p>
+<pre class="prettyprint lang-html">！ - 21％ 
+@ - 40％ 
+＃ - 23％ 
+$ - 24％ 
+^ - ％5E 
+＆ - ％26 
+* - ％2A 
+（ - 28％ 
+） - 29％ 
+{ - ％7B 
+} - ％7D 
+- 2D％ 
++ - 2B 
+[ - ％5B 
+】 - 5D％ 
+; - ％3B 
+： - ％3A 
+- ％5C 
+| - ％7C 
+， - ％2C 
+&lt; - ％3C 
+。 - ％2E 
+&gt; - ％3E 
+/ - ％2F 
+？ - ％3F</pre>
+<p>转发以上的GET请求，得到一个错误页面，提示用户名是不合法的，如下图所示：</p>
+<p style="text-align:center"><img title="002222.jpg" data-original="/imgs/cd8d02e8a59d1902cf71abbf44229781.jpg!small" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></p>
+<noscript><img title="002222.jpg" src="/imgs/cd8d02e8a59d1902cf71abbf44229781.jpg!small"></noscript>
+<p>首先从上面的错误页面可以看出在消息框中的jonnybravo'是我们输入的字符串。然后分析显示在消息框中的SQL查询语句。该查询如下所示：</p>
+<pre class="prettyprint lang-html">Query: SELECT username FROM accountsWHERE username=’jonnybravo”;</pre>
+<p>通过查看这个SQL查询语句，会立刻知道需要一个后缀和前缀以完成查询语句本身。通过以下这个格式的查询语句来说明这个问题：</p>
+<pre class="prettyprint lang-html">Query: SELECTusername FROM accounts WHERE username=’jonnybravo”;</pre>
+<p>这里后缀'结尾该SQL语句，故而一旦输入jonnybravo'，那么该语法中的后缀'和jonnybravo之前的 ‘组合起来已经完成了查询语法。可以清楚地看到在开始和结束的特殊字符'是由服务器查询语法提供的，但此处输入字符中增加的一个'完成了该语句查询，在执行查询时剩余的一个‘导致产出错误。因为有一个未用的'字符，这不符合SQL查询语法的规则。简而言之，输入字符中jonnybravo的后缀和服务器提供的前缀配对完成了查询语句，而服务器提供的后缀未被采用故而导致了SQL语法错误。</p>
+<p>“如果不能正常关闭，那么无论什么输入，它永远不会正常完成，你会得到一个错误页面。”</p>
+<p>这是唯一的用户名查询页面，所以可能会尝试通过后台运行去提交该查询。继续到认证页面进行测试，可能会看到查询语句中的“用户名”和“密码”字段。此处将jonnybravo’作为用户名并以momma作为密码，在用户名输入字符串后添加了后缀’，并以简单字符作为密码。有时需要将两者同时提交作为查询语句。查询语法如下所示。</p>
+<pre class="prettyprint lang-html">Query: SELECT * FROM accounts WHERE username=’jonnybravo”AND password=’momma’</pre>
+<p>假设我们想要忽略执行上面查询语句中的AND password=’momma’。那么需要如何才能做到呢？ 这里将使用'作为前缀并以（空格）-作为后缀。之所以用（空格）-是因为假设这是一个MYSQL服务器，所以当输入（空格） -时，它被解读为一个注释符号。在这种情况下无论这之后是什么内容都将被视为注释语句，注释部分在服务器执行查询语句时会被忽略。</p>
+<p>注入 – ' -</p>
+<p>然后，在输入字段中添加诸如 or 1 = 1' 这样的载荷，如此一来，最终注入语句类似如下所示：</p>
+<p>注入 – ' or 1 = 1' -</p>
+<p>一旦将此语句注入到用户名字段，会产生如下图所示的错误。</p>
+<p style="text-align:center"><img title="003222.jpg" data-original="/imgs/2922ea79db49fa55f4da145b27d5adef.jpg!small" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></p>
+<noscript><img title="003222.jpg" src="/imgs/2922ea79db49fa55f4da145b27d5adef.jpg!small"></noscript>
+<p>分析上述的注入语句，由提交字符串中的'来完成“username”用户名字段，用户名字段包括了来自服务器的‘ ‘字符，但因为其中加入了注入语句，使其成为‘ ‘ or 1=1′ — ‘。进一步分析查询语句：</p>
+<pre class="prettyprint lang-html">Username=’ ‘ or 1=1′ — ‘ AND password=’ ‘.</pre>
+<p>之前已经提到，已假定这是MySQL服务器，所以（空格）–后的任何语句都将作为注释语句来解读。 那么重新分析这个查询语句，可以看出，这个查询语句中唯一执行了的部分只剩下了1=1′。 因此，这是如何使用一个后缀和后缀进行SQL注入的方法 。 由于在1=1后添加一个'可以产出一个在页面上产出一个错误，那么如果删除了多余的'，那么这个注入将正常完成，服务器不会拒绝1 = 1这种正确的逻辑，所以服务器将执行该查询。 故而最终的注入语句变成了 'or 1 = 1 -，把这串字符提交给用户名字段，将会看到如下图所示的查询结果：</p>
+<p style="text-align:center"><img title="004222.jpg" data-original="/imgs/56223390632c01f5b95913c98b0519d5.jpg!small" src="/imgs/1ad8b6b9c386cc6fb61906c5db31c250.jpg!small"></p>
+<noscript><img title="004222.jpg" src="/imgs/56223390632c01f5b95913c98b0519d5.jpg!small"></noscript>
+<p>由显示结果可知，服务器成功被注入，页面上显示出了数据库整个表中存储的所有结果，包括用户名、密码及其他字段的信息详情。</p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>结论:</strong></span></p>
+<p>在这篇文章中，简单介绍了后缀和前缀，以及如何使用它们进行web程序的模糊测试，文中以MySQL服务器为例，但这种方法和思路同样适用于其他服务器。</p>
+<p><span style="color: rgb(38, 38, 38); font-size: 18px;"><strong>附注：</strong></span></p>
+<p>同作者曾发表了一系列关于手动web应用程序渗透测试的文章，其中与模糊测试方法相关的文章列表如下，如有兴趣可点击以下链接进行阅读：</p>
+<p>1手动web应用程序渗透测试：模糊测试  </p>
+<p><a href="http://resources.infosecinstitute.com/manually-web-application-penetration-testing-fuzzing/" target="_blank" title="" data_ue_src="http://resources.infosecinstitute.com/manually-web-application-penetration-testing-fuzzing/" textvalue="http://resources.infosecinstitute.com/manually-web-application-penetration-testing-fuzzing/">http://resources.infosecinstitute.com/manually-web-application-penetration-testing-fuzzing/</a></p>
+<p>2手动web应用程序渗透测试：使用Burp工具时的模糊测试参数  </p>
+<p><a href="http://resources.infosecinstitute.com/web-services-penetration-testing-part-6-fuzzing-parameters-burp/" target="_blank" title="" data_ue_src="http://resources.infosecinstitute.com/web-services-penetration-testing-part-6-fuzzing-parameters-burp/" textvalue="http://resources.infosecinstitute.com/web-services-penetration-testing-part-6-fuzzing-parameters-burp/">http://resources.infosecinstitute.com/web-services-penetration-testing-part-6-fuzzing-parameters-burp/</a></p>
+<p>3手动web应用程序渗透测试：更多与Burp工具相关的模糊测试   </p>
+<p><a href="http://resources.infosecinstitute.com/web-services-penetration-testing-part-7-fuzzing-burp/" target="_blank" title="" data_ue_src="http://resources.infosecinstitute.com/web-services-penetration-testing-part-7-fuzzing-burp/" textvalue="http://resources.infosecinstitute.com/web-services-penetration-testing-part-7-fuzzing-burp/">http://resources.infosecinstitute.com/web-services-penetration-testing-part-7-fuzzing-burp/</a> </p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>
