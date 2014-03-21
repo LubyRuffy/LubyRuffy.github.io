@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>射频技术（RFID）的安全协议</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>射频技术（RFID）的安全协议</h2>
+	<p class="meta">2014-03-21</p>
+
+	<div class="post">
+	        <p></p>
+<p>    现基于阅读器与电子标签之间的安全方案主要有两大类，认证机制和加密机制。<br></p>
+<p>    认证机制:在阅读器与电子标签进行通信是进行安全认证机制，确认身份后才能进行正常通信，这样可以防止非授权或非法阅读器对标签信息的读取与标签数据信息的篡改，还能防止欺骗攻击和假冒攻击。</p>
+<p>    加密机制:对二者之间传输的数据信息加密后再进行传输，这样就算攻击者获取数据后也不能得到需求的信息。</p>
+<p style="text-align:center"><img data-original="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照2.png"></p>
+<noscript><img src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照2.png"></noscript>
+<p><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>基本的RFID安全协议</strong></span></p>
+
+<p>基于Hash函数的安全协议</p>
+<p>由于安全问题愈发突出，针对这些安全问题的安全协议也相继而出，这些安全协议主要针对应用层的安全问题。多安全协议都是基于密码学中的hash函数来展开的，hash函数通过相应算法的可以将任意长度的消息或者明文映射成一个固定长度的输出摘要。因为hash函数的特性，常常被应用于消息认证和数字签名中，最常用的hash函数有MD5与SHA-1。</p>
+
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>1.Hash-Lock协议</strong></span></p>
+<p>为了防止数据信息泄露和被追踪，Sarma等人提出了基于不可逆hash函数加密的安全协议hash-lock。RFID系统中的电子标签内存储了两个标签ID，metaID 与真实标签ID，metaID与真实ID一一对应，由hash函数计算标签的密钥key而来，即metaID=hash（key），后台应用系统中的数据库也对应存储了标签的（metaID、真实ID、key）。当阅读器向标签发送认证请求时，标签先用metaID代替真实ID发送给阅读器，然后标签进入锁定状态，当阅读器收到metaID后发送给后台应用系统，后台应用系统查找相应的key和真实ID最后返还给标签，标签将接收到key值进行hash函数取值，然后与自身存储的meta值是否一致。如果一致标签就将真实ID发送给阅读器开始认证，如果不一致认证失败。</p>
+<p style="text-align:center"><img data-original="/imgs/1931be78f53ca4b6de59d1a3f4f68ad7.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照3.png"></p>
+<noscript><img src="/imgs/1931be78f53ca4b6de59d1a3f4f68ad7.png!small" title="快照3.png"></noscript>
+<p>1）当电子标签进入阅读器的识别范围内阅读器向其发送query消息请求认证。</p>
+<p>2）电子标签接收到阅读器的请求命令后，将metaID代替真实的标签ID发送给阅读器，metaID是hash函数映射标签密钥key得来，metaID=hash（key），跟真实ID对应存储在标签中。</p>
+<p>3）当阅读器收到metaID后通过计算机网络传输给后台应用系统。</p>
+<p>4）因为后台应用系统的数据库存储了合法标签的ID、metaID、key，metaID也是由hash（key）得来。当后台应用系统收到阅读器传输过来的metaID，查询数据库有没有与之对应的标签ID和key，如果有就将对应的标签ID和key发给阅读器，如果没有就发送认证失败的消息给</p>
+<p>5）阅读器收到后台应用系统发送过来的标签ID与key后，自己保留标签ID然后将key发送给电子标签。</p>
+<p>6）电子标签收到阅读器发送过来的key后利用hash函数进行运算该值，hash（key），对比是否与自身存储的metaID值相同，如果相同就将标签ID发送给阅读器，如果不同就认证失败。</p>
+<p>7）阅读器收到标签发送过来的ID与后台应用系统传输过来的ID进行对比，相同则认证成功，否则认证失败。</p>
+<p>通过对Hash-Lock协议过程的分析，不难看出该协议没有实现对标签ID和metaID的动态刷新，并且标签ID是以明文的形式进行发送传输，还是不能防止假冒攻击和重放攻击以及跟踪攻击，以及此协议在数据库中搜索的复杂度是成O(n)线性增长的，还需要0(n)次的加密操作，在大规模RFID系统中应用不理想，所以Hash-Lock并没有达到预想的安全效果，但是提供了一种很好的安全思想。</p>
+
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>2.随机化的Hash-Lock协议</strong></span></p>
+<p>由于Hash-Lock协议的缺陷导致其没有达到预想的安全目标，所以Weiss等人对Hash-Lock协议进行了改进，提出了基于随机数的询问-应答方式。电子标签内存储了标签ID与一个随机数产生程序，电子标签接到阅读器的认证请求后将（hash（IDi||R）,R）一起发给阅读器，R由随机数程序生成。在收到电子发送过来的数据后阅读器请求获得数据库所有的标签IDj（1&lt;=j&lt;=n）,阅读器计算是否有一个IDj满足hash（IDj||R）=hash（IDi||R），如果有将IDj发给电子标签，电子标签收到IDj与自身存储的IDi进行对比做出判断。</p>
+<p style="text-align:center"><img data-original="/imgs/4348beb973f3609daf8784c3f10bf11e.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照4.png"></p>
+<noscript><img src="/imgs/4348beb973f3609daf8784c3f10bf11e.png!small" title="快照4.png"></noscript>
+<p>1）当电子标签进入阅读器的识别范围内阅读器向其发送query消息请求认证。</p>
+<p>2）电子标签接收到阅读器的信息后将，利用随机数程序产生一个随机数R，然后利用hash函数对（R||IDi）进行映射求值，IDi是标签自身存储的标识，得到hash（R||IDi），然后标签将（R，hash（R||IDi））整体发送给阅读器。</p>
+<p>3）阅读器向后台应用系统数据库发送获得存储的所有标签IDj的请求。</p>
+<p>4）后台应用系统接收到阅读器的请求后将数据库中存储的所有标签ID（all IDj）都传输给阅读器。</p>
+<p>5）此时阅读器收到的数据有电子标签发送过来的（R，hash（R||IDi））与后台应用系统传输过来的（all IDj），阅读器进行运算求值是否能在（（all IDj））中找到一个IDj满足hash（R||IDj）=hash（R||IDi），若有则将IDj发送给电子标签，没有则认证失败。</p>
+<p>6）电子标签收到阅读器发送过来的IDj是否满足与自身存储的IDi相等，若相等则认证成功，否则认证失败。</p>
+<p>从上述认证过程中我们可以看到想比于Hash-Lock协议有所改进，但是标签IDi与IDj仍然是以明文的方式传输，依然不能预防重放攻击和记录跟踪，当攻击者获取标签的ID后还能进行假冒攻击，在数据库中搜索的复杂度是呈O(n)线性增长的，也需要0(n)次的加密操作，在大规模RFID系统中应用不理想，所以随机化的Hash-Lock协议也没有达到预想的安全效果，但是促使RFID的安全协议越来越趋于成熟。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>3.Hash链协议</strong></span></p>
+<p>由于以上两种协议的不安全性，okubo等人又提出了基于密钥共享的询问一应答安全协议-Hash链协议，该协议具有完美的前向安全性。与上两个协议不同的是该协议通过两个hash函数H与G来实现，H的作用是更新密钥和产生秘密值链，G用来产生响应。每次认证时，标签会自动更新密钥；并且电子标签和后台应用系统预想共享一个初始密钥kt，1。图第j次认证图以及详细的步骤:</p>
+<p style="text-align:center"><img data-original="/imgs/6b0028b8891f89169dbfedcd28336d97.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照5.png"></p>
+<noscript><img src="/imgs/6b0028b8891f89169dbfedcd28336d97.png!small" title="快照5.png"></noscript>
+<p>1)当电子标签进入阅读器的识别范围内阅读器向其发送query消息请求认证。</p>
+<p>2）电子标签利用H函数加密密钥kt，j(即H（kt，j）)发送给阅读器，同时更新当前的密码值kt，j+1=H（kt，j）。</p>
+<p>3）阅读器收到电子标签发送来的H（kt，1）继而转发给后台应用系统。</p>
+<p>4）后台应用系统查找数据库搜存储的所有标签，计算是否有某个标签的IDt使得H（kt，1）=G（Hj-1（kt，1）），若有，认证通过，并把IDt发送给电子标签。否则认证失败。</p>
+<p>从上述分析可以看到每一次标签认证时，都要对标签的ID进行更新，增加了安全性，但是这样也增加了协议的计算量，成本也相应的增加。同时Hash链协议是一个单向认证协议，还是不能避免重放和假冒的攻击。例如攻击者截获H（kt，1）后就可以进行重放攻击。所以Hash链协议也不算一个完美的安全协议。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>4.基于Hash的ID变化协议</strong></span></p>
+<p>   Hash的ID变化协议的原理跟Hash链协议有相似的地方，每次认证时RFID系统利用随机数生成程序生成一个随机数R对电子标签ID进行动态的更新，并且对TID（最后一次回话号）和LST（最后一次成功的回话号）的信息进行更新,该协议可以抗重放攻击。</p>
+<p style="text-align:center"><img data-original="/imgs/3fced3a4a0ed8d6b24263145a18c3701.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照6.png"></p>
+<noscript><img src="/imgs/3fced3a4a0ed8d6b24263145a18c3701.png!small" title="快照6.png"></noscript>
+<p>1）当电子标签进入阅读器的识别范围内阅读器向其发送query消息请求认证。</p>
+<p>2)电子标签收到阅读器的请求后，将当前的回话号加1，并标签ID和TID*ID分别求hash值，得到H(ID），H（TID*ID），然后标签将H（ID），H（TID*ID）、△TID三者同时发送给阅读器；其中H(ID）作用是帮助后台应用系统还原出对应电子标签的ID，而△TID的作用是还原出TID，进而计算出H（TID*ID）。</p>
+<p>3）阅读器接到电子标签发送过来的H（ID），H（TID*ID）、△TID，继而发送给后台应用系统。</p>
+<p>4）后台应用系统接到阅读器发送来的H（ID），H（TID*ID）、△TID，还原出ID与TID*ID跟自己数据库存储的电子标签信息进行对比，如果有效，产生一个秘密的随机数R，然后将（R，H（R*TID*ID））发送给阅读器，并且后台应用系统将电子标签的ID更新为ID⊕R存储起来，并且对TID和LST也进行刷新。</p>
+<p>5）阅读器将收到的（R，H（R*TID*ID））发送给电子标签，电子标签收到后对数据进行验证，如果有效则认证成功，并对标签ID和LST进行刷新，否则失败。</p>
+<p>通过以上步骤的分析可以看的该协议有一个弊端就是后台应用系统更新标签ID、LST与标签更新的时间不同步，后台应用系统更新是在第4步，而标签的跟新是在第五步，而此刻后台应用系统已经更新完毕，此刻如果攻击者在第5部进行数据阻塞或者干扰，导致电子标签收不到（R，H（R*TID*ID）），就会造成后台存储标签数据与电子标签数据不同步，导致下次认证的失败，所以该协议不适用于分布式RFID系统环境。</p>
+
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>5.David的数字图书馆RFID协议</strong></span></p>
+<p>David的数字图书馆RFID协议是由David等人提出基于预共享秘密的伪随机数来实现的，是一个双向认证协议。在RFID系统应用之前，电子标签和后台应用系统需要预先共享一个秘密值k。</p>
+<p style="text-align:center"><img data-original="/imgs/e37169fcf0c2103440576fb2cffc9d88.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照7.png"></p>
+<noscript><img src="/imgs/e37169fcf0c2103440576fb2cffc9d88.png!small" title="快照7.png"></noscript>
+<p>1）当电子标签进入阅读器的识别范围内阅读器向其发送query消息以及阅读器产生的秘密随机数RR，请求认证。</p>
+<p>2）电子标签接到阅读器发送过来的请求消息后，自身生成一个随机数RT，结合标签自身的ID和秘密值k计算出a=IDi⊕Hk（0，RR，RT），完成后电子标签将（RT，a）一起发送给阅读器。</p>
+<p>3）阅读器电子标签发送过来的数据（RT，a）转发给后台应用系统。</p>
+<p>4）后台应用系统查找数据库存储的所有标签ID是否有一个存在IDj（1&lt;=j&lt;=n）满足IDj=a⊕Hk（0，RR，RT）成立，若有则认证通过，同时计算b=IDi⊕Hk（1，RR，RT）传输给阅读器。</p>
+<p>5）阅读器将b发送给电子标签，电子标签对收到的b进行验证，是否满足ID=b⊕IDi⊕Hk（1，RR，RT），若满足则认证成功。</p>
+<p>截至目前为止，David的数字图书馆RFID协议还没有出现比较明显的安全漏洞，唯一不足的是为了实现该协议，电子标签内必须内嵌伪随机数生成程序和加解密程序，增加了标签设计的复杂度，故而设计成本也相应的提高，不适合小成本的RFID系统。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>6.分布式RFID询问-应答认证协议</strong></span></p>
+<p>该协议是Rhee等人基于分布式数据库环境提出的询问-应答的双向认证RFID系统协议。</p>
+<p style="text-align:center"><img data-original="/imgs/36b0e83332436d434fa56e6a66ce1292.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照8.png"></p>
+<noscript><img src="/imgs/36b0e83332436d434fa56e6a66ce1292.png!small" title="快照8.png"></noscript>
+<p>1)当电子标签进入阅读器的识别范围内阅读器向其发送query消息以及阅读器产生的秘密随机数RR，请求认证。</p>
+<p>2）电子标签接到阅读器发送过来的请求后，生成一个随机数RT，并且计算出H（ID||RR||RT）,ID是电子标签ID，H为电子标签和后台应用系统共享的hash函数。然后电子标签将（H（ID||RR||RT），RT）发送给阅读器。</p>
+<p>3）阅读器收到电子标签发送过来后，添加之前自己生成的随机数RR一同发给后台应用系统（H（ID||RR||RT），RT，RR）。</p>
+<p>4）后台应用系统收到阅读器发送来的数据后，检查数据库存储的标签ID是否一个IDj（1&lt;=j&lt;=n）满足H（IDj||（RR||RT）=H（ID||RR||RT），若有，则认证通过，并且后台应用系统把H（IDj||RT）发送给阅读器。</p>
+<p>5）阅读器把H（IDj||RT）发送给电子标签进行验证，若H（IDj||RT）= H（ID||RT），则认证通过，否则认证失败。</p>
+<p>该协议跟上一协议一样目前为止还没有发现明显的安全缺陷和漏洞，不足之处一样在于成本太高，因为一次认证过程需要两次hash运算，阅读器和电子标签都需要内嵌随机数生成函数和模块，不适合小成本RFID系统。</p>
+
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>7.LCAP</strong></span></p>
+<p>LCAP（LowCost Authenticcation Protocol）即低成本鉴析协议，基于标签ID动态刷新的询问-应答双向认证协议</p>
+<p style="text-align:center"><img data-original="/imgs/fd77909e994506ff3b0bb6193955a32b.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照9.png"></p>
+<noscript><img src="/imgs/fd77909e994506ff3b0bb6193955a32b.png!small" title="快照9.png"></noscript>
+<p>1）当电子标签进入阅读器的识别范围内阅读器向其发送query消息以及阅读器产生的秘密随机数R，请求认证。</p>
+<p>2）电子标签收到阅读器发送过来的数据后，利用hash计算出haID=H(ID)以及HL（ID||R），这其中ID为电子标签的ID，HL表示的hash函数映射值的的左半部分，即H（ID||R）的左半部分，之后电子标签将（haID(ID)，HL（ID||R））一起发送给阅读器。</p>
+<p>3）阅读器收到（haID，HL（ID||R））后添加之前发送给电子标签的随机数R，整理后将（haID，HL（ID||R），R）发送给后台应用系统。</p>
+<p>4）后台应用系统收到阅读器发送过来的数据后，检查数据库存储的存储的haID是否与阅读器发送过来的一致，若一致，利用hash函数计算R和数据库存储的haID的到HR（ID||R），HR表示的是hash函数映射值的右半部分，即H(ID||R)的右半部分，同时后台应用系统跟新haID为H（ID⊕R），ID为ID⊕R，之前存储的数据中的TD数据域设置为haID= H（ID⊕R），然后将HR（ID||R）发送给阅读器。</p>
+<p>5）阅读器收到HR（ID||R）后转发给电子标签。</p>
+<p>6）电子标签收到HR（ID||R）后，验证其的有效性，若有效，则认证成功。</p>
+<p>通过以上流程的分析，不难看出LCAP存在与基于Hash的ID变化协议一样的通病，就是标签ID更新不同步，后台应用系统完成更新在第4步，而电子标签更新是在其更新之后的第5步，如果攻击者攻击导致第5步不能成功，就会造成标签数据不一致，导致认证失败以及下一次认证的失败，不适用于分布式数据库RFID系统。</p>
+<p>以上几种安全协议可分为两种，单项认证和双向认证。单项认证只对标签的合法性进行认证，假设阅读器和后台应用系统是觉得安全的，主要代表有Hash-Lock协议和随机化Hash-Lock协议,认证速度快，成本低，但是安全性也低。双向认证是对阅读器、后台应用系统对标签验证的同时，标签也要对阅读器、后台应用系统进行验证，这类协议成本高，安全性强。</p>
+
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>改进型hash安全认证协议</strong></span></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>1.协议的认证过程</strong></span></p>
+<p>   以上的七种安全协议，不是以明文形式传输数据或是计算量复杂，有的不能抵御窃听攻击、或者重放攻击、或者中间人攻击。基于以上七种协议的优点结合，给出一种改进型的安全协议，在初始状态下，因为标签存储量有限，只存放标签标识ID号IDT，阅读器存放自身的标识ID号IDR，后台应用系统的数据库中则存放所有标签和阅读器的(IDT，h(IDT))、(IDR，h(IDR))数据对应值，h为RFID系统共享的hash加密函数。</p>
+<p><br></p>
+<p style="text-align:center"><img data-original="/imgs/05ef9ee0e2ceda0f1ee625e93b384422.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照10.png"></p>
+<noscript><img src="/imgs/05ef9ee0e2ceda0f1ee625e93b384422.png!small" title="快照10.png"></noscript>
+<p>1)当电子标签进入阅读器的识别范围内阅读器向其发送query消息以及阅读器产生的秘密随机数R，请求认证。</p>
+<p>2)电子标签收到请求消息query和阅读器产生的随机数R后，利用hash函数对IDT||R和IDT分别加密，得到h（IDT||R）、h（IDT），然后将这两个加密结果发给阅读器。</p>
+<p>3）阅读器收到电子标签发送过来的数据后，利用hash函数对自身的标识IDR进行加密，得到h（IDR），然后再将这个值与h（IDT||R）进行异或，得到h（IDT||R）⊕h（IDR），之后将h（IDT），R，h（IDT||R）⊕h（IDR）这三项数据打包传给后台应用系统。</p>
+<p>4)后台应用系统收到阅读器传输过来的数据后，将h（IDT）与自身数据库存储的h（IDT）进行对比看标签是否合法。接着利用，h（IDT||R）⊕h（IDR）与R计算出h（IDR），然后查找数据库查找到IDR，随后后台应用系统将IDT⊕IDR⊕R传给阅读器。</p>
+<p>5)阅读器收到后IDT⊕IDR⊕R利用hash函数得到h（IDT⊕R）。然后传给电子标签。</p>
+<p>6）电子标签收到h（IDT⊕R），利用hash计算（IDT⊕R）是否与收到的h（IDT⊕R）相等，相等的话则认证通过，否则失败。</p>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>2.安全性分析</strong></span></p>
+<p>    改进型的hash安全协议，具有多项优势，可以防止非法读取，因为先进行身份验证才能进行数据交换，所以可以有效的防止非法读取；可以防止窃听攻击，电子标签和阅读器之间传输的数据是经由hash加密的，并且再第5、6步中传输的数据是异或之后在进行加密的；可以防止推理攻击，因为每次认证过程产生的随机数R都不相同，截取这次的信息也没法推理出上次的信息；防止欺骗攻击和重放攻击，因为每次认证过程产生的随机数R都不相同，欺骗或者重放都会被识别到；可以防位置跟踪，因每次的随机数R都不同，所以标签在每次通信中所传输的消息都是不同的，因此非法者无法根据固定输出来进行位置跟踪，此协议可有效防止因固定输出而引发的位置跟踪问题。可以防止拒绝服务攻击，电子标签在收到阅读器的请求信息时，不需要为它们存储随机数作为一次性密钥，并且标签也没有设置读取标签的上限值，因此本协议可以有效防止标签被大量阅读器访问而造成标签停止工作。</p>
+<p style="text-align:center"><img data-original="/imgs/ca5bfaa84e664dd34121b01a6caeccf4.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照11.png"></p>
+<noscript><img src="/imgs/ca5bfaa84e664dd34121b01a6caeccf4.png!small" title="快照11.png"></noscript>
+<p style="margin-top: 15px;"><span style="color: rgb(38, 38, 38);"><strong>3.性能分析</strong></span></p>
+
+<p>    安全协议不仅要能解决RFID系统所面临的安全问题，还要考虑安全协议所带来的成本和计算量问题，如果安全成本和计算量太大，已经超过了RFID系统承受的范围，那么这个安全协议也就没有多大的意义。因为电子标签存储容量小计算量不能太复杂，所以必须选取综合性能最好的安全协议应用于RFID系统中。RFID安全协议性能一般由计算标签，阅读器和后台应用系统在完成整个的认证过程中所需计算时间和存储空间来进行评估。</p>
+<p>    加入标签数量为n，L为128bit，因为hash函数映射值至少128bit才能抵制攻击，电子标签和阅读器的标识也是128bit，用TH表示进行hash运算的次数，TXOR表示认证过程中异或次数，TR为产生随机数的次数，接下来以改进型的hash安全协议为例计算时间复杂度和空间复杂度。</p>
+<p>    我们先计算时间复杂度，从流程图和详细步骤我们可以看出，电子标签涉及的运算主要最初的是一次h（IDT||R）和一次h（IDT）还有最后一步的异或运算h（IDT⊕R），可以看出电子标签进行了两次异或运算和三次hash运算；而阅读器主要是最初的一次产生随机数R，之后一次h（IDR）一次h（IDT||R）⊕h（IDR），还有后面为了计算IDT⊕R的一次IDT⊕IDR⊕R⊕IDR，所以阅读器进行了一次随机数运算，一次hash函数运算两次异或运算；而后台应用系统主要为了对比阅读传输过来的数据进行了一次h（ID|T|R），为了取得IDR的值进行了两次异或运算h（IDT||R）⊕h(IDR)⊕h(IDT||R)，还有最后发送给阅读器的IDT⊕IDR⊕R两次异或运算，所以后台应用系统总的进行了三次异或运算和一次hash运算。</p>
+<p>    接着计算空间复杂度，即各个部分所需的存储空间容量，电子标签只存储自身的标签ID号IDT，空间复杂度即为1L，阅读器只存储自身标识ID号IDR，空间复杂度为1L，而后台应用系统需要存储一对(IDT，h(IDT))，如果标签数量为n，空间复杂度为2nL，另外还需存储一对(IDR，h(IDR))，所以后台应用系统的空间复杂度为（2n+2）L。</p>
+<p>    同上原理，我们就可以得到以上八种hash安全协议的性能分析值</p>
+<p style="text-align:center"><img data-original="/imgs/a85a7b9bc8e6c3dac48668a5fcb3c46d.png!small" src="/imgs/86caa9dfa7effcdd70a27634545c09c2.png!small" title="快照12.png"></p>
+<noscript><img src="/imgs/a85a7b9bc8e6c3dac48668a5fcb3c46d.png!small" title="快照12.png"></noscript>
+<p>    由上表格不难看出从时间复杂度空间复杂各个综合因素的原因，改进型hash安全协议比其他七个安全协议更具优势，改进型协议的标签只需1L的存储空间容量，而其他安全协议需要几倍或者更高的存储容量大大降低了成本，也减少了后台应用系统存储的容量，适用于标签数量巨大的RFID系统中，在抵御安全攻击方面也比其他安全协议更具优势，综上三方面改进型hash安全协议拥有更好的综合性能。</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>移动APP安全在渗透测试中的应用</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>移动APP安全在渗透测试中的应用</h2>
+	<p class="meta">2014-03-21</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(0, 176, 80);">这篇文章从去年很早就想写，一直没时间，刚好过段时间有沙龙是讲这方面的东西，整理了下就有了下文。</span></p>
+<p><span style="color: rgb(0, 176, 80);">以往安全爱好者研究的往往是app的本地安全，比如远控、应用破解、信息窃取等等，大多人还没有关注到app服务端的安全问题，于是在这块的安全漏洞非常多。</span></p>
+<p>移动app大多通过web api服务的方式跟服务端交互，这种模式把移动安全跟web安全绑在一起。移动app以web服务的方式跟服务端交互，服务器端也是一个展示信息的网站，常见的web漏洞在这也存在,比如说SQL注入、文件上传、中间件/server漏洞等，但是由于部分app不是直接嵌入网页在app中，而是使用的api接口返回josn数据，导致扫描器爬虫无法爬取链接。</p>
+<p><strong>下图是抓的糗事百科糗事列表，contet字段内容与我无关 -_-|||</strong></p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/3.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/6382a586399a83a8a0c6434ad4305a96.jpg" alt="3" class="alignnone size-full wp-image-3765" style="border: 0px; width: 650px; height: 357px;" data_ue_data-original="http://static.freebuf.com/images/ue/78081395314237.jpg" title="" height="357" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/6382a586399a83a8a0c6434ad4305a96.jpg" alt="3" class="alignnone size-full wp-image-3765" style="border: 0px; width: 650px; height: 357px;" data_ue_src="http://static.freebuf.com/images/ue/78081395314237.jpg" title="" height="357" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p>那么我尝试去找app服务端的漏洞，目前想到的两种方法：</p>
+<pre class="prettyprint lang-html">1.反编译APP
+2.http[s]代理抓包</pre>
+<p>那么有人应该会提出问题，这两种方式拿到的链接都是零零散散的，也不好找漏洞啊，我这边的利用方式是把所有抓取的链接直接提交任务到多引擎web漏洞扫描器，扫描器可以批量扫SQL注入等等，其实除了这些漏洞，还有很多可以利用的信息。</p>
+<p><strong>一、反编译APP</strong></p>
+<p>有两种反编译方式，dex2jar和apktool，两个工具反编译的效果是不一样的，dex2jar反编译出java源代码，apktool反编译出来的是java汇编代码。</p>
+<p><strong> 1.  </strong><strong>dex2jar</strong><strong>反编译</strong></p>
+<p>工具：dex2jar+jdgui</p>
+<p>方法：</p>
+<p>a.  修改apk为zip扩展名</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/71.jpg" class="highslide-image" onclick="return hs.expand(this);"><img data-original="/imgs/05d16a9cc08d94b8ea6bb2b918e362c1.jpg" src="/imgs/05d16a9cc08d94b8ea6bb2b918e362c1.jpg" alt="7" class="alignnone size-full wp-image-3766" style="border: 0px" height="397" width="640"></a></p>
+<noscript><img src="/imgs/05d16a9cc08d94b8ea6bb2b918e362c1.jpg" alt="7" class="alignnone size-full wp-image-3766" style="border: 0px" height="397" width="640"></noscript>
+<p><span style="line-height: 1.5">    b. 解压出classes.dex文件</span></p>
+<p><span style="line-height: 1.5">    c.使用dex2jar反编译（dex2jar.bat classes.dex）</span></p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/10.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/0847cd5b42739e2680b1bbbfc4739bc6.jpg" alt="10" class="alignnone size-full wp-image-3776" style="border: 0px; width: 650px; height: 156px;" data_ue_data-original="http://static.freebuf.com/images/ue/94531395385844.jpg" title="" height="156" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/0847cd5b42739e2680b1bbbfc4739bc6.jpg" alt="10" class="alignnone size-full wp-image-3776" style="border: 0px; width: 650px; height: 156px;" data_ue_src="http://static.freebuf.com/images/ue/94531395385844.jpg" title="" height="156" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p>最后反编译出来的源码如下图。虽然部分类被配置proguard.cfg 混淆了，但是还是可以利用的。</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/1.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/e5112087815cde9a37bd9413e1845558.jpg" alt="1" class="alignnone size-full wp-image-3767" style="border: 0px; width: 650px; height: 428px;" data_ue_data-original="http://static.freebuf.com/images/ue/42511395385847.jpg" title="" height="428" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/e5112087815cde9a37bd9413e1845558.jpg" alt="1" class="alignnone size-full wp-image-3767" style="border: 0px; width: 650px; height: 428px;" data_ue_src="http://static.freebuf.com/images/ue/42511395385847.jpg" title="" height="428" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p><strong>2.  </strong><strong>apktool</strong><strong>反编译</strong></p>
+<p>工具：apktool</p>
+<p>这个工具比较简单，直接（apktool d apkfile）就可以反编译apk文件，反编译出来的东西为smali反汇编代码、res资源文件、assets配置文件、lib库文件，我们可以直接搜索smali文件和资源文件来查找链接等。</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/8.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/51272a8f9278a9eb471805bca07cb387.jpg" alt="8" class="alignnone size-full wp-image-3774" style="border: 0px; width: 650px; height: 232px;" data_ue_data-original="http://static.freebuf.com/images/ue/15831395385848.jpg" title="" height="232" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/51272a8f9278a9eb471805bca07cb387.jpg" alt="8" class="alignnone size-full wp-image-3774" style="border: 0px; width: 650px; height: 232px;" data_ue_src="http://static.freebuf.com/images/ue/15831395385848.jpg" title="" height="232" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p><strong>利用app</strong><strong>查找网站真实IP</strong></p>
+<p>除了app服务端的漏洞，还有一个比较好玩的利用方式，通过收集app里面的子域名ip来寻找目标网站的真实IP，根据经验，大多app的接口都没有使用cdn等服务。</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/2.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/ac9fd47ed5c372eb7261ac3f8111b294.jpg" alt="2" class="alignnone size-full wp-image-3768" style="border: 0px; width: 650px; height: 327px;" data_ue_data-original="http://static.freebuf.com/images/ue/8401395385848.jpg" title="" height="327" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/ac9fd47ed5c372eb7261ac3f8111b294.jpg" alt="2" class="alignnone size-full wp-image-3768" style="border: 0px; width: 650px; height: 327px;" data_ue_src="http://static.freebuf.com/images/ue/8401395385848.jpg" title="" height="327" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p>糗事百科真实IP</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/6.jpg" class="highslide-image" onclick="return hs.expand(this);"><img data-original="/imgs/d2c90ea731ed1e2ebce91ea13eb90b99.jpg" src="/imgs/05d16a9cc08d94b8ea6bb2b918e362c1.jpg" alt="6" class="alignnone size-full wp-image-3772" style="border: 0px" height="131" width="577"></a></p>
+<noscript><img src="/imgs/d2c90ea731ed1e2ebce91ea13eb90b99.jpg" alt="6" class="alignnone size-full wp-image-3772" style="border: 0px" height="131" width="577"></noscript>
+<p><strong>方法二、http[s]</strong><strong>代理抓包</strong></p>
+<p>  这个方法利用在移动设备上设置代理，通过人工操作使app与服务端交互，</p>
+<p>  步骤：</p>
+<p>a. 在抓包机器上开启代理，测试可以用burp，需要自动化提交扫描任务可以自己写一个代理程序，移动设备设置代理服务器。</p>
+<p><br></p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/5.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/74debccba1fc4c313e0465fc26d5aef7.jpg" alt="5" class="alignnone size-full wp-image-3771" style="border: 0px; width: 650px; height: 533px;" data_ue_data-original="http://static.freebuf.com/images/ue/73771395385903.jpg" title="" height="533" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/74debccba1fc4c313e0465fc26d5aef7.jpg" alt="5" class="alignnone size-full wp-image-3771" style="border: 0px; width: 650px; height: 533px;" data_ue_src="http://static.freebuf.com/images/ue/73771395385903.jpg" title="" height="533" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p>b.  在移动设备上操作app，代理端抓取如下。</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/4.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/f61d42f7385d3005d374be0ebeb981b1.jpg" alt="4" class="alignnone size-full wp-image-3770" style="border: 0px; width: 650px; height: 380px;" data_ue_data-original="http://static.freebuf.com/images/ue/94331395385904.jpg" title="" height="380" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/f61d42f7385d3005d374be0ebeb981b1.jpg" alt="4" class="alignnone size-full wp-image-3770" style="border: 0px; width: 650px; height: 380px;" data_ue_src="http://static.freebuf.com/images/ue/94331395385904.jpg" title="" height="380" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p><br></p>
+<p><strong>总结：</strong></p>
+<p>  整个思路已经很清晰，那么其实要做的就是让这个过程自动化，反编译之后有一个问题，url不一定完整，很多URL都是拼接起来的，我尝试写一套分析引擎，自动化反编译，然后通过对源码的分析，拼接完整的api url，再进行漏洞扫描。</p>
+<p>  下图是一个dome，后面准备用python来写，放到服务器上。</p>
+<p style="text-align: center;"><a href="http://seayfile.b0.upaiyun.com/2014/03/9.jpg" class="highslide-image" onclick="return hs.expand(this);"><img src="/imgs/e2770ce7202ca1df8a23cbe5ebd14dae.jpg" alt="9" class="alignnone size-full wp-image-3775" style="border: 0px; width: 650px; height: 396px;" data_ue_data-original="http://static.freebuf.com/images/ue/45221395385945.jpg" title="" height="396" border="0" hspace="0" vspace="0" width="650"></a></p>
+<noscript><img src="/imgs/e2770ce7202ca1df8a23cbe5ebd14dae.jpg" alt="9" class="alignnone size-full wp-image-3775" style="border: 0px; width: 650px; height: 396px;" data_ue_src="http://static.freebuf.com/images/ue/45221395385945.jpg" title="" height="396" border="0" hspace="0" vspace="0" width="650"></noscript>
+<p>更多的玩法大家可以自己头脑风暴，还有一些好玩的东西过段时间搞好了会分享出来</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

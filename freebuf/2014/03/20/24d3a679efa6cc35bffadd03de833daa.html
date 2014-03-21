@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>基于RDP的SSL中间人攻击</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>基于RDP的SSL中间人攻击</h2>
+	<p class="meta">2014-03-20</p>
+
+	<div class="post">
+	        <p></p>
+<p><span style="color: rgb(38, 38, 38);"><strong>本文通过演示在RDP会话期间劫持的按键发送信息，向读者演示了为什么用户忽略那些基于SSL的RDP连接的证书警告可能导致中间人(MiTM)攻击，并总结了一些关于如何避免成为这种攻击的受害者的建议。</strong></span></p>
+<h2 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>RDP连接的类型</strong></span></h2>
+<p>在开始之前，首先明确本文讨论了三种类型的RDP连接，包括：</p>
+<pre class="prettyprint lang-html">- RDP安全层（RDPSecurity Layer）
+- SSL(TLS 1.0)
+-  CredSSP (SSL with NLA)</pre>
+<p>本文要演示的是中间的那个类型，即SSL（TLS 1.0）。在终端服务器上，SSL一般会如下配置（不选中任意NLA复选框）：</p>
+<p style="text-align:center"><img data-original="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" src="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" title="1.png"></p>
+<noscript><img src="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" title="1.png"></noscript>
+<p>RDP使用的配置</p>
+<p>如果服务器被设置“Negotiate”，某些连接可能包含比较容易受到攻击，因为其安全层可能使用SSL。</p>
+<h2 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>SSL证书警告</strong></span></h2>
+<p>如果有用户在每次连接时经常不重视类型如下的警告提示，本文恰好就是针对这些用户的：</p>
+<p style="text-align:center"><img data-original="/imgs/aad61b9d9e1b93106f1ae07aa11ceb18.png!small" src="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" title="2.png"></p>
+<noscript><img src="/imgs/aad61b9d9e1b93106f1ae07aa11ceb18.png!small" title="2.png"></noscript>
+<p>经常被习惯性忽视的SSL警告</p>
+<h2 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 20px;"><strong>攻击简介</strong></span></h2>
+<p>在较高的层面，攻击与其它的SSL中间人攻击类似：</p>
+<p>1. 想办法使受害者连接到我们系统上的PoC工具（rdp-ssl-mitm.py），而不是其要连接的RDP服务器。</p>
+<p>2. 该工具使用RDP协议，通过协商使其在交互过程中使用SSL。</p>
+<p>3. 一旦连接被协商使用SSL，我们的工具就会用其自己（不可信的）SSL证书与RDP客户端协商一次SSL连接。这样就使欺骗工具有机会访问RDP客户端发送的信息明文。</p>
+<p>4. 该工具也需要与正常的RDP服务器创建SSL连接，将RDP客户端的数据发送到该服务器。</p>
+<p>这种攻击的唯一缺点是在创建所需的SSL连接之前，我们的欺骗工具必须通过RDP协议与客户端有一个简短的交互。<br></p>
+<h3 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 16px;"><strong>1、使受害者连接到我们这里</strong></span></h3>
+<p>在真实的攻击过程中，我们需要使RDP客户端连接到我们的系统，而不是其目标服务器。因此会用到ARP欺骗、DNS欺骗或一些其它方法，为简便起见，本文不再演示这些细节，假设已经成功欺骗受害者的RDP客户端使其连接攻击者的系统。</p>
+<p>在我们的攻击系统上（192.168.190.170），启动PoC工具，告诉它与正常的RDP服务器192.168.2.96连接：</p>
+<pre class="prettyprint lang-html">$ ./rdp-ssl-mitm.py -r192.168.2.96:3389
+[+] Listening forconnections on 0.0.0.0:3389</pre>
+<p>这里我们只需要简单地将攻击系统的IP地址输入到RDP客户端（客户端从192.168.190.1连接）：</p>
+<p style="text-align:center"><img data-original="/imgs/6aa75cf831176e09075873fb7e0f597d.jpg!small" src="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" title="3.jpg"></p>
+<noscript><img src="/imgs/6aa75cf831176e09075873fb7e0f597d.jpg!small" title="3.jpg"></noscript>
+<p style="text-align: center;">直接输入攻击者的IP，略过ARP欺骗步骤</p>
+<h3 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 16px;"><strong>2、与RDP客户端交互协商使用SSL</strong></span></h3>
+<p>SSL的协商在RDP协议内非常短：</p>
+<pre class="prettyprint lang-html">Message #1: Client &gt;MiTM &gt; Server
+03 00 00 13 0e e0 00 00 00 00 00 01 00 0800 *03*
+00 00 00</pre>
+<p>这段消息是静态不变的，我们的欺骗工具直接将其传递给服务器，不做修改。*03*表示客户端支持RDP安全层、SSL与CredSSP。</p>
+<pre class="prettyprint lang-html">Message #2: Server &gt;MiTM &gt; Client
+03 00 00 13 0e d0 00 00 12 34 00 02 00 0800 *01*
+00 00 00</pre>
+<p>接下来的消息表示服务器选择使用的协议，*01*表示服务器已经选择使用SSL（*02*表示CredSSP）。我们也将这条消息不加修改地传递给客户端。</p>
+<p>注意如果服务器如果选择了CredSSP（*02*），本次演示会失败，因为这里只是攻击SSL，不是CredSSP。</p>
+<h3 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 16px;"><strong>3、与RDP客户端创建SSL连接</strong></span></h3>
+<pre class="prettyprint lang-html">Message #3: Client &gt;MiTM</pre>
+<p>第三条消息用来开始创建一条SSL连接。这里SSL客户端的消息从*16 0301*开始（03 01表示SSL使用的版本：SSL 3.1AKA TLS 1.0）</p>
+<pre class="prettyprint lang-html">*16 03 01* 00 5a 01 00 00 56 03 01 52 21 acbe 63
+20 ce de 4b a5 90 18 f0 66 97 ee 9d 54 14e3 1c
+... snip ...</pre>
+<p>欺骗工具不会将这些数据直接发给服务器，而是直接向服务器发送创建连接的请求，同时与客户端完成SSL连接的建立。</p>
+<p>这里我们使用的SSL证书会被RDP客户端认为非法，并在mstsc中向用户显示SSL警告：</p>
+<p style="text-align:center"><img data-original="/imgs/53b354b6cbca176b6dabca8cfd93b881.jpg!small" src="/imgs/d96322b0f7b3eef12252088cf7214f9a.png!small" title="4.jpg"></p>
+<noscript><img src="/imgs/53b354b6cbca176b6dabca8cfd93b881.jpg!small" title="4.jpg"></noscript>
+<p style="text-align: center;">因PoC工具使用的证书产生的安全警告</p>
+<p>如果用户仔细检查就会发现，这里使用的SSL证书与正常证书是存在区别的。要改进攻击的质量，我们需要不断改进证书使其无限接近真实的证书，但我们永远无法得到与正常证书相同的签名，因此总会有些不同。</p>
+<h3 style="margin-top: 15px;"><span style="color: rgb(38, 38, 38); font-size: 16px;"><strong>4、与RDP服务器创建SSL连接</strong></span></h3>
+<p>同时，我们的工具也向RDP服务器发起创建连接的消息，并与其创建第二条SSL连接。</p>
+<h2 style="margin-top: 15px;"><span style="font-size: 20px;"><strong><span style="color: rgb(38, 38, 38);">显示按键信息</span></strong></span></h2>
+<p>至些，我们的欺骗工具就可以明文显示RDP客户端发给服务器所有按键操作了。很容易确定发送的是哪种类型的消息，以下两个4字节的消息就是按‘p’键时发送的。</p>
+<pre class="prettyprint lang-html">44 04 00 19
+44 04 01 19</pre>
+<p>第三个字节表示按键的方向（00表示键被按下，01表示键弹起）。第四个字节是键的扫描码（scancode），通过<a href="http://msdn.microsoft.com/en-us/library/aa299374%28v=vs.60%29.aspx" target="_blank" title="" data_ue_src="http://msdn.microsoft.com/en-us/library/aa299374%28v=vs.60%29.aspx" textvalue="查询">查询</a>可以发现0×19恰好对应字母“p”键。</p>
+<p>通常情况下，与字符对应的扫描码取决于所使用的键盘。我所使用的PoC工具中，已经实现了对QWERTY键盘的映射，所以如果读者使用的是UK/US键盘，该工具可以直接将大部分扫描码转换成对应的字符。注意我们无法知道字符是大写的还是小写的，需要根据CAPSLock键和SHIFT键的状态的状态确定。</p>
+<p>话不多说，直接上例子。以下是PoC工具的一些输出，显示了记录的按键，同时也记录下了登录的用户名为Administrator，密码为Password：</p>
+<pre class="prettyprint lang-html">$ ./rdp-ssl-mitm.py -r 192.168.2.96:3389
+[+] Listening for connections on0.0.0.0:3389
+[+] Incoming connection from192.168.190.1:60370
+[+] New outgoing request to192.168.2.96:3389 (SSL: 0)
+[+] Connected
+[+] Detected incoming SSL connection.Turning self into SSL socket
+[+] Incoming connection from192.168.190.1:60374
+[+] New outgoing request to192.168.2.96:3389 (SSL: 0)
+[+] Connected
+[+] Detected incoming SSL connection.Turning self into SSL socket
+&lt;LShift-down&gt;A&lt;LShift-up&gt;DMINISTRATOR&lt;Tab&gt;&lt;LShift-down&gt;P&lt;LShift-up&gt;ASSWORD&lt;Enter&gt;</pre>
+<h2 style="margin-top: 15px;"><span style="font-size: 20px;"><strong><span style="color: rgb(38, 38, 38);">总结</span></strong></span></h2>
+<p>习惯性忽略RDP连接中的SSL认证警告提示可能造成与忽视HTTPS网站的证书同样的后果：用户可以轻而易举受到中间人攻击。这种攻击可以截获到用户的用户名、密码、按键信息及其它敏感信息。</p>
+<p>使用RDP客户端可信的、由认证授权机构签名的SSL证书，正常情况下是没有警告提示的，因此本文也强烈推荐用户注意这一点。</p>
+<p>如果服务器授权了NLA，这种攻击也会失效，所以我们也强烈推荐使用NLA。</p>
+<p>不过需要知道的是，这并不是RDP客户端或服务器软件的漏洞，这种利用方法也不是新发现。这只是RDP使用过程中的一些脆弱特性，在用户忽略安全警告时可能产生，在技术层面只是一个普通的SSL中间人攻击。</p>
+<p>这种攻击中一个比较有趣的扩展就是可以记录屏幕画面，也有机会攻击任意RDP客户端映射的驱动器，更多细节可以参考<a href="http://tombstone-bbs.co.uk/reverse-rdp/reverse-rdp.html" target="_blank" title="" data_ue_src="http://tombstone-bbs.co.uk/reverse-rdp/reverse-rdp.html" textvalue="《Attacking the RDP Clients》">《Attacking the RDP Clients》</a>，不过这种攻击需要攻击有一定的编码基础。</p>
+<p>[via p<a href="https://labs.portcullis.co.uk/blog/ssl-man-in-the-middle-attacks-on-rdp/" target="_blank" title="" data_ue_src="https://labs.portcullis.co.uk/blog/ssl-man-in-the-middle-attacks-on-rdp/">ortcullis</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>

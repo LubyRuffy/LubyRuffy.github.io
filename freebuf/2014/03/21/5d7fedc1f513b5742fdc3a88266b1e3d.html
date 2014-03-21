@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>ASLR在Windows与Linux系统之间的差别</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+        <link href="/css/prettify.css" rel="stylesheet" type="text/css" media="all">
+
+    </head>
+    <body>
+
+        <div id="header" alog-group="log-header">
+          <div class="header-content">
+                
+                <div id="menu"><a href="/">首页</a></div>
+                <div id="usrbar"><a href="http://news.baidu.com">百度新闻</a>|<a href="http://www.baidu.com">百度首页</a></div>
+                <div class="top-main"><h1 class="title"><a href="/">LubyRuffy的天上人间</a></h1></div>
+          </div>  
+        </div>
+
+        <div class="clearfix" id="body">
+          <div class="l-main-col">
+            
+
+            <div id="page">
+	<h2>ASLR在Windows与Linux系统之间的差别</h2>
+	<p class="meta">2014-03-21</p>
+
+	<div class="post">
+	        <p></p>
+<p><strong>    Hi 基友们，我在</strong><a href="http://www.freebuf.com/articles/system/28803.html" target="_blank" title="" data_ue_src="http://www.freebuf.com/articles/system/28803.html" textvalue="上篇文章"><strong>上篇文章</strong></a><strong>中讨论了Linux平台上NX的特性。我们已经知道一般情况下NX（Windows平台上称其为DEP）和地址空间分布随机化（ASLR）会同时工作，所以也值得看一下ASLR在Linux平台是如何工作的。</strong>事实证明，Linux上ASLR的实现与Windows上的有些显著的差异。</p>
+<p>    在Windows平台，ASLR不会影响运行时的性能，只是会拖慢模块加载的速度。根据文档《<a href="http://msdn.microsoft.com/en-us/library/bb430720.aspx#aslr" target="_blank" title="" data_ue_src="http://msdn.microsoft.com/en-us/library/bb430720.aspx#aslr" textvalue="Windows ISVSoftware Security Defenses">Windows ISVSoftware Security Defenses</a>》的描述，要使Windows上的程序或库兼容ASLR特性，只需要在链接时添加了/DYNAMICBASE选项。</p>
+<p>    通常情况下，ASLR不会影响性能，在某些运行32位系统的场景中甚至会有一些性能提高。但是在运行比较慢的系统中，当有很多图片需要加载到随机地址时，可能会产生卡顿现象。因为要考虑图像的数据和大小等因素，我们很难量化ASLR对性能的影响。但是其对堆或栈随机化的性能影响可以说是微乎其微的。</p>
+<p>    因此，我们当然没有理由在链接时不使用/DYNAMICBASE选项来启用ASLR了。启用/DYNAMICBASE后，模块的加载地址是随机的，也就没那么容易受到ROP（<a href="http://en.wikipedia.org/wiki/Return-oriented_programming" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Return-oriented_programming" textvalue="ReturnOriented Programming">ReturnOriented Programming</a>）攻击了。所以我们建议所有Windows应用程序在编译时都启用DEP和ASLR，以及其它在文档《Windows ISV Software Security Defenses》中指出的所有安全属性。如果程序在编译时没有使用/DYNAMICBASE选项，用户也可以通过使用<a href="http://support.microsoft.com/kb/2458544" target="_blank" title="" data_ue_src="http://support.microsoft.com/kb/2458544" textvalue="微软的EMET">微软的EMET</a>强制其启用ASLR。</p>
+<p>    在Linux平台，ASLR会给系统带来性能损耗，这种损耗在x86架构上尤其大，也最容易被感知。要使Linux程序在运行时兼容ASLR，其在编译时必须指定PIE（<a href="http://en.wikipedia.org/wiki/Position-independent_code" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Position-independent_code" textvalue="PositionIndependent">PositionIndependent</a> Executable）选项。根据论文《<a href="http://nebelwelt.net/publications/12TRpie/gccPIE-TR120614.pdf" target="_blank" title="" data_ue_src="http://nebelwelt.net/publications/12TRpie/gccPIE-TR120614.pdf" textvalue="Toomuch PIE is bad for performance">Toomuch PIE is bad for performance</a>》[PDF]，“我们的分析显示，32位的x86系统上过量的PIE会带来高于基准26%的性能开销，而一般平均开销（统计数据）为10%左右。</p>
+<p>大概是由于这种潜在的性能损失，Linux发行版并没有对所有可执行文件启用PIE特性。例如，在<a href="https://wiki.ubuntu.com/Security/Features#Built_as_PIE" target="_blank" title="" data_ue_src="https://wiki.ubuntu.com/Security/Features#Built_as_PIE" textvalue="Ubuntu系统">Ubuntu系统</a>上，“在拥有少量寄存器的架构上（如x86）PIE有较大（5%-10%）性能损耗，所以这种特性只用于<a href="https://wiki.ubuntu.com/SecurityTeam/KnowledgeBase/BuiltPIE" target="_blank" title="" data_ue_src="https://wiki.ubuntu.com/SecurityTeam/KnowledgeBase/BuiltPIE" textvalue="那些事关安全的重要的软件包">那些事关安全的重要的软件包</a>……”</p>
+<p><strong>RedHat系统也持</strong><a href="https://securityblog.redhat.com/2012/11/28/position-independent-executables-pie/" target="_blank" title="" data_ue_src="https://securityblog.redhat.com/2012/11/28/position-independent-executables-pie/" textvalue="类似观点"><strong>类似观点</strong></a><strong>：</strong></p>
+<p>    Fedora工程指导委员会（The Fedora Engineering Steering Committee）维护着一个保守的软件包列表，这个列表中的软件在编译时必须使用GCC的<a href="https://fedoraproject.org/wiki/Hardened_Packages" target="_blank" title="" data_ue_src="https://fedoraproject.org/wiki/Hardened_Packages" textvalue="安全">安全</a>特性。不在这个列表中的软件，其安全特性在软件包的描述中启用。目前对哪些二进制程序需要使用这些安全增强特性还没有达成一个共识，因此这种程序的使用也就成了一个有争议的话题。大多数争论可以简单概括为使用这些安全特性带来的性能损耗是否值得。</p>
+<p>    既然ASLR的目标是使可执行程序在执行时位于一个不可预知的地址，为什么Windows上与Linux上的实现会有这么大的差别呢？很重要的一点是Windows上的ASLR是一个链接时（link-time）选项，而在Linux上是一个编译时（compile-time）选项。</p>
+<p>在Windows上，代码在运行时因<a href="http://en.wikipedia.org/wiki/Relocation_%28computer_science%29" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Relocation_%28computer_science%29" textvalue="重定位">重定位</a>才被patch。但在Linux与Unix的世界，该技术被称为text重定位。在Linux上，ASLR用不同的方式实现，除了在代码运行时patch，其在编译时就用某种方式使其<a href="http://en.wikipedia.org/wiki/Position-independent_code" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Position-independent_code" textvalue="地址无关">地址无关</a>。也就是说，可以将其加载到内存地址的任意位置，都可以正常运行。</p>
+<p>    至少在x86平台，这种地址无关功能是通过一个通用寄存器实现的，而程序少用一个寄存器就无法正常运行了。这种限制在寄存器少的架构上最明显，如x86平台。</p>
+<p>    为什么Linux开发者选择使用这种技术实现ASLR？在大多数情况下，安全其实就是一种权衡。由于text重定位涉及到patching，加载这种模块会触发“写时拷贝（<a href="http://en.wikipedia.org/wiki/Copy-on-write" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Copy-on-write" textvalue="copy-on-write">copy-on-write</a>）”，因此增加了系统的内存占用。地址无关代码不需要patching，因此不会触发“写时拷贝”。要了解Linux上地址无关代码的实现细节，以及其与加载时（load-time）重定位的比较，可以参考Eli Bendersky的博文：《<a href="http://eli.thegreenplace.net/2011/11/03/position-independent-code-pic-in-shared-libraries/" target="_blank" title="" data_ue_src="http://eli.thegreenplace.net/2011/11/03/position-independent-code-pic-in-shared-libraries/" textvalue="PositionIndependent Code (PIC) in shared libraries">PositionIndependent Code (PIC) in shared libraries</a>》。</p>
+<p>对大多数Linux用户来说这意味着什么？</p>
+<pre class="prettyprint lang-html">1.在大部分Linux发行版上，ASLR并不像在Windows系统上那么普遍。
+2.在Linux系统上没办法强制启用ASLR特性，但在Windows上用EMET可以做到。</pre>
+<p>    读者需要了解的是，随着时间的推移，该特性在x86架构上正变得没那么重要了。因为地址无关代码不会使x86_64架构产生明显性能损耗，因为x86_64几乎有两倍于x86架构的寄存器，而且与x86架构不同，x86_64架构支持<a href="http://en.wikipedia.org/wiki/Addressing_mode#PC-relative_2" target="_blank" title="" data_ue_src="http://en.wikipedia.org/wiki/Addressing_mode#PC-relative_2" textvalue="PC相关的地址策略">PC相关的地址策略</a>，可以使系统对ASLR的使用几乎变得无处不在。</p>
+<p>感谢<a href="https://pax.grsecurity.net/" target="_blank" title="" data_ue_src="https://pax.grsecurity.net/" textvalue="The Pax Team">The Pax Team</a>对本文提供的信息。</p>
+<p>[via <a href="https://www.cert.org/blogs/certcc/post.cfm?EntryID=191" target="_blank" title="" data_ue_src="https://www.cert.org/blogs/certcc/post.cfm?EntryID=191">cert</a>]</p>
+
+        <p class="statement">
+
+	</div>
+</div>
+
+
+          </div>
+
+          <div class="l-right-col">
+          </div>
+        </div>
+
+        <div id="footer" alog-group="log-footer">
+          <p class="site-info">
+            <a href="https://github.com/LubyRuffy">github.com/LubyRuffy</a><br />
+            <a href="https://twitter.com/LubyRuffy">twitter.com/LubyRuffy</a><br />
+          </p>
+        </div>
+
+    </body>
+</html>
